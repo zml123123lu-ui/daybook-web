@@ -768,6 +768,14 @@
       background: #f5e9eb;
     }
 
+    .axis-block[data-category="工作"] { border-left-color: #8b4b5b; }
+    .axis-block[data-category="学习"] { border-left-color: #526f91; background: #edf2f7; }
+    .axis-block[data-category="生活"] { border-left-color: #7c8e78; background: #f0f3ed; }
+    .axis-block[data-category="健康"] { border-left-color: #b07857; background: #f7f0eb; }
+    .axis-block[data-category="社交"] { border-left-color: #9a6f91; background: #f5eef4; }
+    .axis-block[data-category="娱乐"] { border-left-color: #b09245; background: #f7f3e7; }
+    .axis-block[data-category="休息"] { border-left-color: #6f8290; background: #eef2f4; }
+
     .axis-block strong {
       display: block;
       overflow-wrap: anywhere;
@@ -778,6 +786,60 @@
       margin-top: 0.15rem;
       color: #806f72;
       font-size: 0.75rem;
+    }
+
+    .block-category {
+      display: inline-flex;
+      margin: 0 0.35rem 0 0;
+      color: #695d5f;
+      font-weight: 750;
+    }
+
+    .time-category-chart {
+      display: grid;
+      gap: 0.7rem;
+    }
+
+    .category-bar-row {
+      display: grid;
+      grid-template-columns: 3.25rem minmax(0, 1fr) auto;
+      gap: 0.55rem;
+      align-items: center;
+      font-size: 0.8rem;
+    }
+
+    .category-bar-label {
+      color: #5b5052;
+      font-weight: 750;
+    }
+
+    .category-bar-track {
+      height: 0.55rem;
+      overflow: hidden;
+      border-radius: 999px;
+      background: #eee6e4;
+    }
+
+    .category-bar-fill {
+      display: block;
+      width: var(--bar-share, 0%);
+      min-width: 0.3rem;
+      height: 100%;
+      border-radius: inherit;
+      background: #8b4b5b;
+    }
+
+    .category-bar-row[data-category="学习"] .category-bar-fill { background: #526f91; }
+    .category-bar-row[data-category="生活"] .category-bar-fill { background: #7c8e78; }
+    .category-bar-row[data-category="健康"] .category-bar-fill { background: #b07857; }
+    .category-bar-row[data-category="社交"] .category-bar-fill { background: #9a6f91; }
+    .category-bar-row[data-category="娱乐"] .category-bar-fill { background: #b09245; }
+    .category-bar-row[data-category="休息"] .category-bar-fill { background: #6f8290; }
+
+    .category-bar-time {
+      color: #7d6f72;
+      font-variant-numeric: tabular-nums;
+      white-space: nowrap;
     }
 
     .axis-block .btn {
@@ -3063,6 +3125,18 @@
               </div>
             </section>
 
+            <section class="panel" id="timeCategoryPanel">
+              <header class="panel-header">
+                <div>
+                  <h2>今日时间分布</h2>
+                  <p class="muted">按时间轴分类查看今天的投入。</p>
+                </div>
+              </header>
+              <div class="panel-body">
+                <div class="time-category-chart" id="timeCategoryChart" aria-label="今日各分类用时柱状图"></div>
+              </div>
+            </section>
+
             <section class="panel" id="daySummaryTimeline">
               <header class="panel-header">
                 <div>
@@ -3849,6 +3923,7 @@
   <script>
     (() => {
       const AREAS = ["工作", "健康", "家庭", "财务", "成长", "社交", "生活"];
+      const TIME_CATEGORIES = ["工作", "学习", "生活", "健康", "社交", "娱乐", "休息"];
       const STORAGE_KEY = "life-workbench-state-v2";
       const SYNC_META_KEY = "life-workbench-sync-meta-v1";
       const SUPABASE_URL = "https://fqisquljcylklapvctys.supabase.co";
@@ -3938,7 +4013,12 @@
           ...clean,
           ...source,
           tasks: Array.isArray(source.tasks) ? source.tasks : [],
-          timeBlocks: Array.isArray(source.timeBlocks) ? source.timeBlocks : [],
+          timeBlocks: Array.isArray(source.timeBlocks)
+            ? source.timeBlocks.map((block) => ({
+              ...block,
+              category: TIME_CATEGORIES.includes(block?.category) ? block.category : "生活"
+            }))
+            : [],
           habits: Array.isArray(source.habits)
             ? source.habits.map((habit) => ({
               ...habit,
@@ -4251,6 +4331,10 @@
         return AREAS.map((area) => `<option value="${area}"${area === selected ? " selected" : ""}>${area}</option>`).join("");
       }
 
+      function timeCategoryOptions(selected = "生活") {
+        return TIME_CATEGORIES.map((category) => `<option value="${category}"${category === selected ? " selected" : ""}>${category}</option>`).join("");
+      }
+
       function fillSelects() {
         $("#taskDate").value = todayKey();
         $("#wellbeingDate").value = todayKey();
@@ -4288,6 +4372,7 @@
         renderFilters();
         renderTasks();
         renderTimeline();
+        renderTimeCategoryChart();
         renderAiSummary();
         syncTimelineHeight();
         renderHabits();
@@ -4346,6 +4431,7 @@
         const tasks = state.tasks.filter((task) => dates.includes(task.date));
         const doneTasks = tasks.filter((task) => task.done);
         const pendingTasks = tasks.filter((task) => !task.done);
+        const blocks = state.timeBlocks.filter((block) => dates.includes(block.date || todayKey()));
         const habitCompletions = state.habits.flatMap((habit) => dates
           .filter((date) => habit.completions?.[date])
           .map((date) => `${date} ${habit.title}`));
@@ -4369,6 +4455,7 @@
           tasks,
           doneTasks,
           pendingTasks,
+          blocks,
           habitCompletions,
           notes,
           wellbeingEntries,
@@ -4379,6 +4466,7 @@
           text: [
             `周期：${periodName}，${dates[0]} 至 ${dates.at(-1)}`,
             `计划：共 ${tasks.length} 项，完成 ${doneTasks.length} 项，未完成 ${pendingTasks.length} 项。`,
+            `分类用时：${categoryDurationText(blocks)}`,
             `习惯打卡：${habitCompletions.join("；") || "无"}`,
             `身心记录：${wellbeingEntries.map((entry) => `${entry.date} 心情${entry.mood}/5 精力${entry.energy}/5 睡眠${entry.sleep || "-"}小时 身体${entry.body || "无"} 开心${entry.highlight || "无"} 消耗${entry.drain || "无"}`).join("\n") || "无"}`,
             `每日记录：${notes.join("\n") || "无"}`,
@@ -4388,14 +4476,15 @@
       }
 
       function localPeriodSummary(context) {
-        if (!context.tasks.length && !context.habitCompletions.length && !context.notes.length && !context.wellbeingEntries.length && !context.gratitudeEntries.length) {
+        if (!context.tasks.length && !context.blocks.length && !context.habitCompletions.length && !context.notes.length && !context.wellbeingEntries.length && !context.gratitudeEntries.length) {
           return "这个周期还没有足够的记录。先从一天的计划、习惯打卡或一句复盘开始，下一次这里就会有可回看的内容。";
         }
         const completion = context.tasks.length ? Math.round((context.doneTasks.length / context.tasks.length) * 100) : 0;
         const doneNames = context.doneTasks.slice(0, 3).map((task) => task.title).join("、");
         const pendingNames = context.pendingTasks.slice(0, 3).map((task) => task.title).join("、");
         const lines = [
-          `这段时间共完成 ${context.doneTasks.length}/${context.tasks.length} 项计划，完成率 ${completion}%，习惯打卡 ${context.habitCompletions.length} 次，留下 ${context.notes.length} 天文字记录、${context.wellbeingEntries.length} 天身心记录和 ${context.gratitudeEntries.length} 天感恩记录。`
+          `这段时间共完成 ${context.doneTasks.length}/${context.tasks.length} 项计划，完成率 ${completion}%，习惯打卡 ${context.habitCompletions.length} 次，留下 ${context.notes.length} 天文字记录、${context.wellbeingEntries.length} 天身心记录和 ${context.gratitudeEntries.length} 天感恩记录。`,
+          `分类用时：${categoryDurationText(context.blocks)}。`
         ];
         if (doneNames) lines.push(`值得保留的推进：${doneNames}。`);
         if (pendingNames) lines.push(`可以带入下个周期：${pendingNames}。`);
@@ -4564,11 +4653,12 @@
           const blockHtml = blocks.map((block) => {
             const start = block.start || block.time || time;
             const end = normalizedBlockEnd(block);
+            const category = TIME_CATEGORIES.includes(block.category) ? block.category : "生活";
             return `
-              <article class="axis-block">
+              <article class="axis-block" data-category="${escapeHtml(category)}">
                 <div>
                   <strong>${escapeHtml(block.title)}</strong>
-                  <span>${escapeHtml(start)}–${escapeHtml(end)}${block.detail ? ` · ${escapeHtml(block.detail)}` : ""}</span>
+                  <span><b class="block-category">${escapeHtml(category)}</b>${escapeHtml(start)}–${escapeHtml(end)}${block.detail ? ` · ${escapeHtml(block.detail)}` : ""}</span>
                 </div>
                 <div class="task-actions">
                   <button class="btn secondary small" type="button" data-action="edit-block" data-id="${block.id}">编辑时间</button>
@@ -4620,6 +4710,53 @@
         if (raw > 0) return raw;
         if (raw < 0) return raw + 1440;
         return 60;
+      }
+
+      function categoryDurationsForBlocks(blocks) {
+        const totals = new Map(TIME_CATEGORIES.map((category) => [category, 0]));
+        blocks.forEach((block) => {
+          const category = TIME_CATEGORIES.includes(block.category) ? block.category : "生活";
+          totals.set(category, totals.get(category) + blockDurationMinutes(block));
+        });
+        return TIME_CATEGORIES
+          .map((category) => ({ category, minutes: totals.get(category) }))
+          .filter((item) => item.minutes > 0)
+          .sort((a, b) => b.minutes - a.minutes);
+      }
+
+      function formatDuration(minutes) {
+        const value = Math.max(0, Math.round(Number(minutes) || 0));
+        const hours = Math.floor(value / 60);
+        const rest = value % 60;
+        if (!hours) return `${rest} 分钟`;
+        return rest ? `${hours} 小时 ${rest} 分钟` : `${hours} 小时`;
+      }
+
+      function categoryDurationText(blocks) {
+        const durations = categoryDurationsForBlocks(blocks);
+        return durations.length
+          ? durations.map((item) => `${item.category} ${formatDuration(item.minutes)}`).join("，")
+          : "无";
+      }
+
+      function renderTimeCategoryChart() {
+        const blocks = state.timeBlocks.filter((block) => (block.date || todayKey()) === todayKey());
+        const durations = categoryDurationsForBlocks(blocks);
+        if (!durations.length) {
+          $("#timeCategoryChart").innerHTML = `<div class="empty" role="status">记录时间轴后，这里会显示各分类用时。</div>`;
+          return;
+        }
+        const total = durations.reduce((sum, item) => sum + item.minutes, 0);
+        $("#timeCategoryChart").innerHTML = durations.map((item) => {
+          const share = total ? Math.max(4, Math.round((item.minutes / total) * 100)) : 0;
+          return `
+            <div class="category-bar-row" data-category="${escapeHtml(item.category)}">
+              <span class="category-bar-label">${escapeHtml(item.category)}</span>
+              <span class="category-bar-track" aria-hidden="true"><i class="category-bar-fill" style="--bar-share:${share}%"></i></span>
+              <span class="category-bar-time">${formatDuration(item.minutes)}</span>
+            </div>
+          `;
+        }).join("");
       }
 
       function timelineSlotsForBlock(block) {
@@ -4685,7 +4822,8 @@
           text: [
             `日期：${date}`,
             `今日任务：${tasks.map((task) => `${task.done ? "已完成" : "未完成"}-${task.title}`).join("；") || "无"}`,
-            `今日时间轴：${blocks.map((block) => `${block.start || block.time}-${block.end || ""} ${block.title}`).join("；") || "无"}`,
+            `今日时间轴：${blocks.map((block) => `${block.start || block.time}-${block.end || ""} [${block.category || "生活"}] ${block.title}`).join("；") || "无"}`,
+            `分类用时：${categoryDurationText(blocks)}`,
             `完成习惯：${completedHabits.map((habit) => habit.title).join("；") || "无"}`,
             `身心状态：${wellbeing ? `心情${wellbeing.mood}/5，精力${wellbeing.energy}/5，睡眠${wellbeing.sleep || "-"}小时，身体${wellbeing.body || "无"}，开心${wellbeing.highlight || "无"}，消耗${wellbeing.drain || "无"}，下一步${wellbeing.nextStep || "无"}` : "未记录"}`,
             `感恩日记：${gratitude || "未记录"}`
@@ -4699,13 +4837,9 @@
         }
         const completedNames = context.doneTasks.slice(0, 3).map((task) => task.title).join("、");
         const pendingNames = context.pendingTasks.slice(0, 3).map((task) => task.title).join("、");
-        const scheduledMinutes = context.blocks.reduce((sum, block) => {
-          const start = timeToMinutes(block.start || block.time);
-          const end = timeToMinutes(block.end || addMinutes(block.start || block.time, block.duration || 30));
-          return sum + Math.max(0, end - start);
-        }, 0);
         const lines = [
-          `今天安排了 ${context.tasks.length} 项计划，完成 ${context.doneTasks.length} 项；时间轴共安排 ${context.blocks.length} 个事项，约 ${scheduledMinutes} 分钟。`
+          `今天安排了 ${context.tasks.length} 项计划，完成 ${context.doneTasks.length} 项。`,
+          `时间分类：${categoryDurationText(context.blocks)}。`
         ];
         if (completedNames) lines.push(`主要完成：${completedNames}。`);
         if (pendingNames) lines.push(`仍需继续：${pendingNames}。`);
@@ -4734,7 +4868,7 @@
                 length: "medium"
               });
               text = await summarizer.summarize(context.text, {
-                context: "请用温和、具体、不过度评价的中文，总结今天的完成情况、时间安排和明日建议。"
+                context: "请用温和、具体、不过度评价的中文，按工作、学习、生活、健康、社交、娱乐和休息等分类分析今天的时间投入，再总结完成情况和明日建议。不要给出任务总时间。"
               });
               mode = "浏览器本地 AI";
               summarizer.destroy?.();
@@ -4780,7 +4914,7 @@
                 length: context.period === "year" ? "long" : "medium"
               });
               text = await summarizer.summarize(context.text, {
-                context: `请用温和、具体的中文，完成${context.period === "week" ? "每周" : context.period === "month" ? "每月" : "每年"}复盘。总结完成与未完成的模式、习惯和情绪记录中反复出现的信号，并给出下个周期 1-3 个可执行建议。不要编造数据。`
+                context: `请用温和、具体的中文，完成${context.period === "week" ? "每周" : context.period === "month" ? "每月" : "每年"}复盘。总结完成与未完成的模式、分类时间分配、习惯和情绪记录中反复出现的信号，并给出下个周期 1-3 个可执行建议。不要编造数据，也不要给出任务总时间。`
               });
               mode = "浏览器本地 AI";
               summarizer.destroy?.();
@@ -4990,6 +5124,7 @@
             title: seed.id ? "编辑时间轴事项" : "添加时间轴事项",
             fields: `
               <div class="field"><label for="editorName">时间块名称</label><input id="editorName" name="name" value="${escapeHtml(seed.name || "")}" required autocomplete="off"></div>
+              <div class="field"><label for="editorCategory">时间分类</label><select id="editorCategory" name="category">${timeCategoryOptions(seed.category || "生活")}</select></div>
               <div class="field"><label for="editorDate">日期</label><input id="editorDate" name="date" type="date" value="${escapeHtml(seed.date || todayKey())}" required></div>
               <div class="dual"><div class="field"><label for="editorStart">开始时间</label><input id="editorStart" name="start" type="time" step="60" value="${escapeHtml(defaultStart)}" required></div><div class="field"><label for="editorEnd">结束时间</label><input id="editorEnd" name="end" type="time" step="60" value="${escapeHtml(defaultEnd)}" required></div></div>
               <div class="field"><label for="editorDetail">备注</label><input id="editorDetail" name="detail" value="${escapeHtml(seed.detail || "")}" autocomplete="off"></div>
@@ -5237,6 +5372,7 @@
               end,
               duration,
               title: String(form.get("name")).trim(),
+              category: TIME_CATEGORIES.includes(String(form.get("category"))) ? String(form.get("category")) : "生活",
               detail: String(form.get("detail") || "").trim()
             };
             if (block) Object.assign(block, nextBlock);
@@ -5345,6 +5481,7 @@
               end: addMinutes(time, duration),
               duration,
               title: task.title,
+              category: TIME_CATEGORIES.includes(task.area) ? task.area : "生活",
               detail: "来自近期计划",
               taskId: task.id
             });
