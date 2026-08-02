@@ -4641,7 +4641,12 @@
           timeblocks.style.removeProperty("height");
           return;
         }
-        const targetHeight = Math.ceil(summaryPanel.getBoundingClientRect().height);
+        // Align the full left panel's bottom edge with the AI summary card.
+        // The summary sits below the gratitude card, so its own height is not
+        // the distance from the timeline panel's top edge.
+        const summaryRect = summaryPanel.getBoundingClientRect();
+        const timelineRect = timeblocks.getBoundingClientRect();
+        const targetHeight = Math.ceil(summaryRect.bottom - timelineRect.top);
         if (targetHeight > 0) timeblocks.style.height = `${targetHeight}px`;
       }
 
