@@ -900,10 +900,17 @@
     }
 
     .task-link-field legend {
+      display: block;
+      width: max-content;
+      max-width: 100%;
       padding: 0 0.3rem;
       color: var(--muted);
       font-size: 0.78rem;
       font-weight: 700;
+      line-height: 1.35;
+      white-space: nowrap;
+      writing-mode: horizontal-tb;
+      word-break: keep-all;
     }
 
     .task-link-field label {
