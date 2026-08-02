@@ -348,6 +348,15 @@
 
     #timeblocks {
       grid-column: 1;
+      display: flex;
+      flex-direction: column;
+      align-self: stretch;
+    }
+
+    #timeblocks .panel-body {
+      display: flex;
+      flex: 1;
+      min-height: 0;
     }
 
     .today-side-rail {
@@ -666,7 +675,8 @@
 
     #timeline.timeline-axis {
       display: block;
-      max-height: 36rem;
+      flex: 1;
+      min-height: 36rem;
       padding: 0;
       overflow-y: auto;
       border: 1px solid #e4d8d5;
