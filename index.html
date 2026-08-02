@@ -4634,15 +4634,17 @@
       }
 
       function syncTimelineHeight() {
+        const timeline = $("#timeline");
         const timeblocks = $("#timeblocks");
+        const summaryCard = $("#aiSummaryCard");
         const summaryPanel = $("#daySummaryTimeline");
-        if (!timeblocks || !summaryPanel) return;
+        if (!timeline || !timeblocks || !summaryCard || !summaryPanel) return;
         if (!window.matchMedia("(min-width: 1121px)").matches || timeblocks.hidden || summaryPanel.hidden) {
-          timeblocks.style.removeProperty("height");
+          timeline.style.removeProperty("height");
           return;
         }
-        const targetHeight = Math.ceil(summaryPanel.getBoundingClientRect().height);
-        if (targetHeight > 0) timeblocks.style.height = `${targetHeight}px`;
+        const targetHeight = Math.ceil(summaryCard.getBoundingClientRect().height);
+        if (targetHeight > 0) timeline.style.height = `${targetHeight}px`;
       }
 
       function renderAiSummary() {
@@ -5596,10 +5598,10 @@
       });
 
       fillSelects();
-      const summaryPanel = $("#daySummaryTimeline");
-      if (typeof ResizeObserver !== "undefined" && summaryPanel) {
+      const summaryCard = $("#aiSummaryCard");
+      if (typeof ResizeObserver !== "undefined" && summaryCard) {
         timelineHeightObserver = new ResizeObserver(syncTimelineHeight);
-        timelineHeightObserver.observe(summaryPanel);
+        timelineHeightObserver.observe(summaryCard);
       }
       window.addEventListener("resize", syncTimelineHeight);
       render();
