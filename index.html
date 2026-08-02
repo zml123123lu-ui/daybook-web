@@ -1092,6 +1092,102 @@
       align-items: center;
     }
 
+    .habit-chart-card {
+      display: grid;
+      gap: 0.8rem;
+      margin-bottom: 1rem;
+      padding: 1rem;
+      border: 1px solid #e3d8d5;
+      border-radius: var(--radius);
+      background: rgba(255, 255, 255, 0.62);
+    }
+
+    .habit-chart-header {
+      display: flex;
+      align-items: start;
+      justify-content: space-between;
+      gap: 0.75rem;
+    }
+
+    .habit-chart-title {
+      margin-bottom: 0.2rem;
+      font-family: "Songti SC", "STSong", serif;
+      font-size: 1rem;
+      font-weight: 700;
+    }
+
+    .habit-chart-summary {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 0.55rem;
+    }
+
+    .habit-chart-stat {
+      padding: 0.65rem;
+      border: 1px solid var(--line);
+      border-radius: 7px;
+      background: rgba(255, 253, 252, 0.6);
+    }
+
+    .habit-chart-stat span {
+      display: block;
+      color: var(--muted);
+      font-size: 0.72rem;
+    }
+
+    .habit-chart-stat strong {
+      display: block;
+      margin-top: 0.2rem;
+      font-family: "Songti SC", "STSong", serif;
+      font-size: 1.1rem;
+    }
+
+    .habit-chart-bars {
+      display: grid;
+      grid-template-columns: repeat(var(--habit-bars, 7), minmax(0.45rem, 1fr));
+      align-items: end;
+      gap: 0.28rem;
+      min-height: 8.5rem;
+      padding-top: 0.3rem;
+      overflow-x: auto;
+    }
+
+    .habit-bar {
+      display: grid;
+      grid-template-rows: minmax(5rem, 1fr) auto;
+      gap: 0.4rem;
+      min-width: 0.55rem;
+      color: var(--muted);
+      font-size: 0.66rem;
+      text-align: center;
+    }
+
+    .habit-bar-track {
+      position: relative;
+      overflow: hidden;
+      align-self: stretch;
+      min-height: 5rem;
+      border-radius: 999px;
+      background: #eee7e5;
+    }
+
+    .habit-bar-fill {
+      position: absolute;
+      right: 0;
+      bottom: 0;
+      left: 0;
+      height: var(--habit-rate, 0%);
+      min-height: 0.22rem;
+      border-radius: inherit;
+      background: #9a4f5f;
+    }
+
+    .habit-bar-label {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
     .mini-meter {
       width: 4.75rem;
       text-align: right;
@@ -2941,9 +3037,23 @@
       .guide-card,
       .budget-card,
       .finance-stat,
+      .habit-chart-card,
       .period-day {
         border-color: var(--line);
         background: #262122;
+      }
+
+      .habit-chart-stat {
+        border-color: var(--line);
+        background: #211d1e;
+      }
+
+      .habit-bar-track {
+        background: #3b3335;
+      }
+
+      .habit-bar-fill {
+        background: #d18a99;
       }
 
       .finance-chart-card {
@@ -3382,6 +3492,21 @@
               <button class="btn secondary small" id="addHabitBtn" type="button">新增习惯</button>
             </header>
             <div class="panel-body">
+              <section class="habit-chart-card" aria-labelledby="habitChartTitle">
+                <div class="habit-chart-header">
+                  <div>
+                    <h3 class="habit-chart-title" id="habitChartTitle">打卡情况</h3>
+                    <p class="muted">按周、月、年查看习惯完成节律。</p>
+                  </div>
+                  <div class="period-tabs" id="habitPeriodTabs" role="tablist" aria-label="习惯打卡周期">
+                    <button class="period-tab active" type="button" data-habit-period="week" role="tab">周</button>
+                    <button class="period-tab" type="button" data-habit-period="month" role="tab">月</button>
+                    <button class="period-tab" type="button" data-habit-period="year" role="tab">年</button>
+                  </div>
+                </div>
+                <div class="habit-chart-summary" id="habitChartSummary"></div>
+                <div class="habit-chart-bars" id="habitChartBars" aria-label="习惯打卡完成率图示"></div>
+              </section>
               <div class="habit-list" id="habitList"></div>
             </div>
           </section>
@@ -4245,6 +4370,7 @@
       let reviewDate = todayKey();
       let calendarCursor = new Date();
       let reviewPeriod = "week";
+      let habitPeriod = "week";
       const syncApi = window.WorkbenchSync || null;
       const syncClient = syncApi
         ? syncApi.createSyncClient({ projectUrl: SUPABASE_URL, publishableKey: SUPABASE_PUBLISHABLE_KEY })
@@ -5159,7 +5285,91 @@
         showToast(`${context.label} 的 AI 复盘已生成`);
       }
 
+      function daysInMonth(year, monthIndex) {
+        return new Date(year, monthIndex + 1, 0).getDate();
+      }
+
+      function habitChartSeries(habits, period = "week", anchorDate = new Date()) {
+        const anchor = new Date(anchorDate.getFullYear(), anchorDate.getMonth(), anchorDate.getDate());
+        const habitCount = habits.length;
+        if (period === "year") {
+          return Array.from({ length: 12 }, (_, monthIndex) => {
+            const year = anchor.getFullYear();
+            const monthDays = daysInMonth(year, monthIndex);
+            const days = monthIndex < anchor.getMonth()
+              ? monthDays
+              : monthIndex === anchor.getMonth()
+                ? anchor.getDate()
+                : 0;
+            let completed = 0;
+            habits.forEach((habit) => {
+              for (let day = 1; day <= days; day += 1) {
+                const key = todayKey(new Date(year, monthIndex, day));
+                if (habit.completions?.[key]) completed += 1;
+              }
+            });
+            const possible = habitCount * days;
+            return {
+              key: year + "-" + String(monthIndex + 1).padStart(2, "0"),
+              label: (monthIndex + 1) + "月",
+              completed,
+              possible,
+              rate: possible ? Math.round((completed / possible) * 100) : 0
+            };
+          });
+        }
+        const dates = [];
+        if (period === "month") {
+          const year = anchor.getFullYear();
+          const monthIndex = anchor.getMonth();
+          for (let day = 1; day <= anchor.getDate(); day += 1) {
+            dates.push(new Date(year, monthIndex, day));
+          }
+        } else {
+          for (let offset = 6; offset >= 0; offset -= 1) {
+            const date = new Date(anchor);
+            date.setDate(anchor.getDate() - offset);
+            dates.push(date);
+          }
+        }
+        return dates.map((date) => {
+          const key = todayKey(date);
+          const completed = habits.filter((habit) => habit.completions?.[key]).length;
+          const possible = habitCount;
+          return {
+            key,
+            label: (date.getMonth() + 1) + "/" + date.getDate(),
+            completed,
+            possible,
+            rate: possible ? Math.round((completed / possible) * 100) : 0
+          };
+        });
+      }
+
+      function renderHabitChart() {
+        document.querySelectorAll("[data-habit-period]").forEach((tab) => {
+          const active = tab.dataset.habitPeriod === habitPeriod;
+          tab.classList.toggle("active", active);
+          tab.setAttribute("aria-selected", String(active));
+        });
+        if (!state.habits.length) {
+          $("#habitChartSummary").innerHTML = '<div class="habit-chart-stat"><span>完成率</span><strong>暂无</strong></div><div class="habit-chart-stat"><span>打卡次数</span><strong>0</strong></div><div class="habit-chart-stat"><span>习惯数</span><strong>0</strong></div>';
+          $("#habitChartBars").style.setProperty("--habit-bars", "1");
+          $("#habitChartBars").innerHTML = '<div class="empty" role="status">添加习惯后，这里会显示周、月、年的打卡情况。</div>';
+          return;
+        }
+        const series = habitChartSeries(state.habits, habitPeriod);
+        const completed = series.reduce((sum, item) => sum + item.completed, 0);
+        const possible = series.reduce((sum, item) => sum + item.possible, 0);
+        const rate = possible ? Math.round((completed / possible) * 100) : 0;
+        const periodLabel = { week: "本周", month: "本月", year: "本年" }[habitPeriod] || "本周";
+        $("#habitChartSummary").innerHTML = '<div class="habit-chart-stat"><span>' + periodLabel + '完成率</span><strong>' + rate + '%</strong></div><div class="habit-chart-stat"><span>打卡次数</span><strong>' + completed + '</strong></div><div class="habit-chart-stat"><span>可打卡次数</span><strong>' + possible + '</strong></div>';
+        $("#habitChartBars").style.setProperty("--habit-bars", String(series.length));
+        $("#habitChartBars").innerHTML = series.map((item) => '<div class="habit-bar" title="' + escapeHtml(item.label) + '：' + item.completed + '/' + item.possible + '，完成率 ' + item.rate + '%"><span class="habit-bar-track" aria-hidden="true"><i class="habit-bar-fill" style="--habit-rate:' + item.rate + '%"></i></span><span class="habit-bar-label">' + escapeHtml(item.label) + '</span></div>').join("");
+      }
+
       function renderHabits() {
+        renderHabitChart();
         const today = todayKey();
         if (!state.habits.length) {
           $("#habitList").innerHTML = `<div class="empty" role="status">还没有设置习惯。</div>`;
@@ -5675,11 +5885,16 @@
       });
 
       document.addEventListener("click", (event) => {
-        const target = event.target.closest("[data-action], [data-filter], [data-period]");
+        const target = event.target.closest("[data-action], [data-filter], [data-period], [data-habit-period]");
         if (!target) return;
         if (target.dataset.period) {
           reviewPeriod = target.dataset.period;
           renderReview();
+          return;
+        }
+        if (target.dataset.habitPeriod) {
+          habitPeriod = target.dataset.habitPeriod;
+          renderHabitChart();
           return;
         }
         if (target.dataset.filter) {
