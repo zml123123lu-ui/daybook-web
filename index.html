@@ -4600,7 +4600,7 @@
 
       function timelineSlotsForBlock(block) {
         const startMinutes = timeToMinutes(block.start || block.time || "00:00");
-        const duration = Math.max(60, blockDurationMinutes(block));
+        const duration = blockDurationMinutes(block);
         const firstSlot = Math.floor(startMinutes / 60) * 60;
         const lastTouched = Math.min(startMinutes + duration - 1, 1439);
         const lastSlot = Math.floor(lastTouched / 60) * 60;
