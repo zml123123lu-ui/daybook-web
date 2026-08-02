@@ -4777,13 +4777,35 @@
       }
 
       function categoryDurationsForBlocks(blocks) {
-        const totals = new Map(TIME_CATEGORIES.map((category) => [category, 0]));
+        const intervalsByCategory = new Map(TIME_CATEGORIES.map((category) => [category, []]));
         blocks.forEach((block) => {
           const category = TIME_CATEGORIES.includes(block.category) ? block.category : "生活";
-          totals.set(category, totals.get(category) + blockDurationMinutes(block));
+          const start = timeToMinutes(block.start || block.time || "00:00");
+          const duration = Math.min(1440, Math.max(0, blockDurationMinutes(block)));
+          const end = start + duration;
+          const intervals = intervalsByCategory.get(category);
+          if (end <= 1440) {
+            intervals.push([start, end]);
+          } else {
+            intervals.push([start, 1440], [0, end - 1440]);
+          }
         });
         return TIME_CATEGORIES
-          .map((category) => ({ category, minutes: totals.get(category) }))
+          .map((category) => {
+            const intervals = intervalsByCategory.get(category).sort((a, b) => a[0] - b[0]);
+            let minutes = 0;
+            let mergedEnd = -1;
+            intervals.forEach(([start, end]) => {
+              if (start > mergedEnd) {
+                minutes += end - start;
+                mergedEnd = end;
+              } else if (end > mergedEnd) {
+                minutes += end - mergedEnd;
+                mergedEnd = end;
+              }
+            });
+            return { category, minutes };
+          })
           .filter((item) => item.minutes > 0)
           .sort((a, b) => b.minutes - a.minutes);
       }
