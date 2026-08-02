@@ -3772,13 +3772,7 @@
     });
 
     $("#addBlockBtn").addEventListener("click", () => {
-      const time = prompt("开始时间，例如 18:30", "18:30");
-      const title = prompt("时间块标题", "个人安排");
-      if (!time || !title) return;
-      const detail = prompt("备注", "保持单任务处理") || "";
-      state.timeBlocks.push({ id: uid(), time, title, detail });
-      render();
-      showToast("时间块已新增");
+      openEditor("block", { start: currentTimeValue(), end: addMinutes(currentTimeValue(), 60) });
     });
 
     $("#exportBtn").addEventListener("click", () => {
@@ -4526,27 +4520,26 @@
         const todayBlocks = state.timeBlocks.filter((block) => (block.date || todayKey()) === todayKey());
         $("#timelineSaveStatus").textContent = `今天 ${todayBlocks.length} 项安排`;
         todayBlocks.forEach((block) => {
-          const start = block.start || block.time || "00:00";
-          const minutes = timeToMinutes(start);
-          const slot = formatTime(Math.max(0, Math.min(1410, Math.floor(minutes / 30) * 30)));
-          const current = blocksBySlot.get(slot) || [];
-          current.push(block);
-          blocksBySlot.set(slot, current);
+          timelineSlotsForBlock(block).forEach((slot) => {
+            const current = blocksBySlot.get(slot) || [];
+            current.push(block);
+            blocksBySlot.set(slot, current);
+          });
         });
 
         const now = new Date();
-        const currentSlot = formatTime(Math.floor(((now.getHours() * 60) + now.getMinutes()) / 30) * 30);
+        const currentSlot = formatTime(Math.floor(((now.getHours() * 60) + now.getMinutes()) / 60) * 60);
         const pendingTask = state.tasks.find((task) => task.id === schedulingTaskId);
         let html = pendingTask
           ? `<div class="axis-prompt">请选择时间轴位置：${escapeHtml(pendingTask.title)}</div>`
           : "";
 
-        for (let minutes = 0; minutes < 1440; minutes += 30) {
+        for (let minutes = 0; minutes < 1440; minutes += 60) {
           const time = formatTime(minutes);
           const blocks = blocksBySlot.get(time) || [];
           const blockHtml = blocks.map((block) => {
             const start = block.start || block.time || time;
-            const end = block.end || addMinutes(start, block.duration || 30);
+            const end = normalizedBlockEnd(block);
             return `
               <article class="axis-block">
                 <div>
@@ -4561,7 +4554,7 @@
             `;
           }).join("");
           html += `
-            <div class="time-slot${minutes % 60 ? " half-hour" : ""}${time === currentSlot ? " current" : ""}" data-time-row="${time}">
+            <div class="time-slot${time === currentSlot ? " current" : ""}" data-time-row="${time}">
               <div class="time-label">${time}</div>
               <div class="time-slot-content">
                 ${blockHtml}
@@ -4588,6 +4581,32 @@
       function formatTime(totalMinutes) {
         const normalized = ((Number(totalMinutes) % 1440) + 1440) % 1440;
         return `${String(Math.floor(normalized / 60)).padStart(2, "0")}:${String(normalized % 60).padStart(2, "0")}`;
+      }
+
+      function normalizedBlockEnd(block) {
+        const start = block.start || block.time || "00:00";
+        if (block.end) return block.end;
+        return addMinutes(start, Number(block.duration) || 60);
+      }
+
+      function blockDurationMinutes(block) {
+        const startMinutes = timeToMinutes(block.start || block.time || "00:00");
+        const endMinutes = timeToMinutes(normalizedBlockEnd(block));
+        const raw = endMinutes - startMinutes;
+        if (raw > 0) return raw;
+        if (raw < 0) return raw + 1440;
+        return 60;
+      }
+
+      function timelineSlotsForBlock(block) {
+        const startMinutes = timeToMinutes(block.start || block.time || "00:00");
+        const duration = Math.max(60, blockDurationMinutes(block));
+        const firstSlot = Math.floor(startMinutes / 60) * 60;
+        const lastTouched = Math.min(startMinutes + duration - 1, 1439);
+        const lastSlot = Math.floor(lastTouched / 60) * 60;
+        const slots = [];
+        for (let minutes = firstSlot; minutes <= lastSlot; minutes += 60) slots.push(formatTime(minutes));
+        return slots.length ? slots : [formatTime(firstSlot)];
       }
 
       function renderAiSummary() {
@@ -4917,6 +4936,7 @@
         if (type === "goal") editingGoalId = seed.id || null;
         if (type === "block") editingBlockId = seed.id || null;
         const defaultStart = seed.start || currentTimeValue();
+        const defaultEnd = seed.end || addMinutes(defaultStart, Number(seed.duration) || 60);
         const configurations = {
           habit: {
             title: "新增习惯",
@@ -4928,9 +4948,9 @@
           block: {
             title: seed.id ? "编辑时间轴事项" : "添加时间轴事项",
             fields: `
-              <div class="dual"><div class="field"><label for="editorDate">日期</label><input id="editorDate" name="date" type="date" value="${escapeHtml(seed.date || todayKey())}" required></div><div class="field"><label for="editorStart">开始时间</label><input id="editorStart" name="start" type="time" value="${escapeHtml(defaultStart)}" required></div></div>
               <div class="field"><label for="editorName">时间块名称</label><input id="editorName" name="name" value="${escapeHtml(seed.name || "")}" required autocomplete="off"></div>
-              <div class="field"><label for="editorDuration">持续分钟</label><input id="editorDuration" name="duration" type="number" min="15" step="15" value="${Number(seed.duration) || 30}" required></div>
+              <div class="field"><label for="editorDate">日期</label><input id="editorDate" name="date" type="date" value="${escapeHtml(seed.date || todayKey())}" required></div>
+              <div class="dual"><div class="field"><label for="editorStart">开始时间</label><input id="editorStart" name="start" type="time" step="3600" value="${escapeHtml(defaultStart)}" required></div><div class="field"><label for="editorEnd">结束时间</label><input id="editorEnd" name="end" type="time" step="3600" value="${escapeHtml(defaultEnd)}" required></div></div>
               <div class="field"><label for="editorDetail">备注</label><input id="editorDetail" name="detail" value="${escapeHtml(seed.detail || "")}" autocomplete="off"></div>
             `
           },
@@ -5166,13 +5186,14 @@
           }
           if (editorType === "block") {
             const start = String(form.get("start"));
-            const duration = Math.max(15, Number(form.get("duration")) || 30);
+            const end = String(form.get("end") || addMinutes(start, 60));
+            const duration = Math.max(60, blockDurationMinutes({ start, end }));
             const block = editingBlockId ? state.timeBlocks.find((item) => item.id === editingBlockId) : null;
             const nextBlock = {
               id: block?.id || uid(),
               date: String(form.get("date") || todayKey()),
               start,
-              end: addMinutes(start, duration),
+              end,
               duration,
               title: String(form.get("name")).trim(),
               detail: String(form.get("detail") || "").trim()
@@ -5275,7 +5296,7 @@
           const time = target.dataset.time;
           const task = state.tasks.find((item) => item.id === schedulingTaskId);
           if (task) {
-            const duration = 30;
+            const duration = 60;
             state.timeBlocks.push({
               id: uid(),
               date: todayKey(),
