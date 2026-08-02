@@ -152,8 +152,9 @@
       });
       const body = await readJson(response);
       if (body?.access_token) return { user: setSession(body), needsConfirmation: false };
-      if (!isPlainObject(body?.user) || typeof body.user.id !== "string") throw new SyncRequestError("注册响应格式不正确");
-      return { user: { id: body.user.id, email: body.user.email || normalizedEmail }, needsConfirmation: true };
+      const user = isPlainObject(body?.user) ? body.user : body;
+      if (!isPlainObject(user) || typeof user.id !== "string") throw new SyncRequestError("注册响应格式不正确");
+      return { user: { id: user.id, email: user.email || normalizedEmail }, needsConfirmation: true };
     }
 
     async function refreshSession() {
