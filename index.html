@@ -350,7 +350,7 @@
       grid-column: 1;
       display: flex;
       flex-direction: column;
-      align-self: stretch;
+      align-self: start;
     }
 
     #timeblocks .panel-body {
@@ -676,7 +676,7 @@
     #timeline.timeline-axis {
       display: block;
       flex: 1;
-      min-height: 36rem;
+      min-height: 0;
       padding: 0;
       overflow-y: auto;
       border: 1px solid #e4d8d5;
@@ -2428,6 +2428,10 @@
         width: 100%;
       }
 
+      #timeline.timeline-axis {
+        min-height: 36rem;
+      }
+
       .status-note {
         align-self: flex-start;
       }
@@ -3969,6 +3973,7 @@
       let syncApplying = false;
       let syncTimer = 0;
       let syncConflict = null;
+      let timelineHeightObserver = null;
 
       function saveState() {
         try {
@@ -4274,6 +4279,7 @@
           history.replaceState({ view }, "", `#${view}`);
         }
         window.scrollTo({ top: 0, behavior: scrollBehavior });
+        window.requestAnimationFrame(syncTimelineHeight);
       }
 
       function render() {
@@ -4283,6 +4289,7 @@
         renderTasks();
         renderTimeline();
         renderAiSummary();
+        syncTimelineHeight();
         renderHabits();
         renderGoals();
         renderFinance();
@@ -4624,6 +4631,18 @@
         const slots = [];
         for (let minutes = firstSlot; minutes <= lastSlot; minutes += 60) slots.push(formatTime(minutes));
         return slots.length ? slots : [formatTime(firstSlot)];
+      }
+
+      function syncTimelineHeight() {
+        const timeblocks = $("#timeblocks");
+        const summaryPanel = $("#daySummaryTimeline");
+        if (!timeblocks || !summaryPanel) return;
+        if (!window.matchMedia("(min-width: 1121px)").matches || timeblocks.hidden || summaryPanel.hidden) {
+          timeblocks.style.removeProperty("height");
+          return;
+        }
+        const targetHeight = Math.ceil(summaryPanel.getBoundingClientRect().height);
+        if (targetHeight > 0) timeblocks.style.height = `${targetHeight}px`;
       }
 
       function renderAiSummary() {
@@ -5577,6 +5596,12 @@
       });
 
       fillSelects();
+      const summaryPanel = $("#daySummaryTimeline");
+      if (typeof ResizeObserver !== "undefined" && summaryPanel) {
+        timelineHeightObserver = new ResizeObserver(syncTimelineHeight);
+        timelineHeightObserver.observe(summaryPanel);
+      }
+      window.addEventListener("resize", syncTimelineHeight);
       render();
       setView(location.hash.slice(1));
       syncDirty = false;
