@@ -4950,7 +4950,7 @@
             fields: `
               <div class="field"><label for="editorName">时间块名称</label><input id="editorName" name="name" value="${escapeHtml(seed.name || "")}" required autocomplete="off"></div>
               <div class="field"><label for="editorDate">日期</label><input id="editorDate" name="date" type="date" value="${escapeHtml(seed.date || todayKey())}" required></div>
-              <div class="dual"><div class="field"><label for="editorStart">开始时间</label><input id="editorStart" name="start" type="time" step="3600" value="${escapeHtml(defaultStart)}" required></div><div class="field"><label for="editorEnd">结束时间</label><input id="editorEnd" name="end" type="time" step="3600" value="${escapeHtml(defaultEnd)}" required></div></div>
+              <div class="dual"><div class="field"><label for="editorStart">开始时间</label><input id="editorStart" name="start" type="time" step="60" value="${escapeHtml(defaultStart)}" required></div><div class="field"><label for="editorEnd">结束时间</label><input id="editorEnd" name="end" type="time" step="60" value="${escapeHtml(defaultEnd)}" required></div></div>
               <div class="field"><label for="editorDetail">备注</label><input id="editorDetail" name="detail" value="${escapeHtml(seed.detail || "")}" autocomplete="off"></div>
             `
           },
