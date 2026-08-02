@@ -1966,6 +1966,115 @@
       font-size: 1.35rem;
     }
 
+    .finance-chart-card {
+      display: grid;
+      gap: 0.75rem;
+      margin-bottom: 1rem;
+      padding: 1rem;
+      border: 1px solid #e3d8d5;
+      border-radius: var(--radius);
+      background: rgba(255, 255, 255, 0.62);
+    }
+
+    .finance-chart-title {
+      margin-bottom: 0.65rem;
+      font-family: "Songti SC", "STSong", serif;
+      font-size: 1rem;
+      font-weight: 700;
+    }
+
+    .finance-chart-note {
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.76rem;
+    }
+
+    #financeCategoryChart {
+      display: grid;
+      grid-template-columns: minmax(8rem, 12rem) minmax(0, 1fr);
+      gap: 1rem;
+      align-items: center;
+    }
+
+    .finance-pie-wrap {
+      display: grid;
+      place-items: center;
+    }
+
+    .finance-pie {
+      position: relative;
+      width: min(12rem, 100%);
+      aspect-ratio: 1;
+      border-radius: 50%;
+      background: var(--pie-gradient, #d8c8c5);
+    }
+
+    .finance-pie::after {
+      position: absolute;
+      inset: 22%;
+      border-radius: 50%;
+      background: var(--surface);
+      content: "";
+    }
+
+    .finance-pie-center {
+      position: absolute;
+      z-index: 1;
+      inset: 0;
+      display: grid;
+      place-content: center;
+      text-align: center;
+    }
+
+    .finance-pie-center strong {
+      font-family: "Songti SC", "STSong", serif;
+      font-size: 1.05rem;
+    }
+
+    .finance-pie-center span {
+      margin-top: 0.15rem;
+      color: var(--muted);
+      font-size: 0.72rem;
+    }
+
+    .finance-legend {
+      display: grid;
+      gap: 0.55rem;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .finance-legend li {
+      display: grid;
+      grid-template-columns: auto minmax(0, 1fr) auto;
+      gap: 0.45rem;
+      align-items: center;
+      min-width: 0;
+      font-size: 0.8rem;
+    }
+
+    .finance-legend-dot {
+      width: 0.62rem;
+      height: 0.62rem;
+      border-radius: 50%;
+      background: var(--legend-color);
+    }
+
+    .finance-legend-label {
+      overflow: hidden;
+      color: var(--ink);
+      font-weight: 650;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .finance-legend-value {
+      color: var(--muted);
+      font-variant-numeric: tabular-nums;
+      white-space: nowrap;
+    }
+
     dialog {
       width: min(31rem, calc(100vw - 2rem));
       padding: 0;
@@ -2473,6 +2582,10 @@
         grid-template-columns: 1fr;
       }
 
+      #financeCategoryChart {
+        grid-template-columns: 1fr;
+      }
+
       .import-zone .btn {
         width: 100%;
       }
@@ -2822,6 +2935,15 @@
       .finance-stat,
       .period-day {
         border-color: var(--line);
+        background: #262122;
+      }
+
+      .finance-chart-card {
+        border-color: var(--line);
+        background: #262122;
+      }
+
+      .finance-pie::after {
         background: #262122;
       }
 
@@ -3279,6 +3401,13 @@
                 <article class="finance-stat"><span>本月收入</span><strong id="financeIncome">¥0</strong></article>
                 <article class="finance-stat"><span>账单记录</span><strong id="financeCount">0</strong></article>
               </div>
+              <section class="finance-chart-card" aria-labelledby="financeChartTitle">
+                <div class="finance-chart-copy">
+                  <h3 class="finance-chart-title" id="financeChartTitle">已导入支出分类</h3>
+                  <p class="finance-chart-note">按全部已导入的支出记录统计，收入不计入图表。</p>
+                </div>
+                <div id="financeCategoryChart" aria-label="已导入支出分类饼状图"></div>
+              </section>
               <p class="muted" id="financeSyncNote">这里只保留摘要，账单明细请回到原记账软件查看。</p>
             </div>
           </section>
@@ -5091,6 +5220,49 @@
         return state.financeRecords.filter((record) => String(record.date).slice(0, 7) === month);
       }
 
+      const FINANCE_CHART_COLORS = ["#9a4f5f", "#68798a", "#748676", "#b08a5b", "#8d6a8d", "#7c8d9a", "#a96b58", "#786b55"];
+
+      function financeCategoryTotals(records) {
+        const totals = new Map();
+        records
+          .filter((record) => record.type === "expense" && Number(record.amount) > 0)
+          .forEach((record) => {
+            const category = String(record.category || "").trim() || "未分类";
+            totals.set(category, (totals.get(category) || 0) + Number(record.amount));
+          });
+        return [...totals.entries()]
+          .map(([category, amount]) => ({ category, amount }))
+          .sort((a, b) => b.amount - a.amount || a.category.localeCompare(b.category, "zh-CN"));
+      }
+
+      function renderFinanceCategoryChart() {
+        const chart = $("#financeCategoryChart");
+        const totals = financeCategoryTotals(state.financeRecords);
+        if (!totals.length) {
+          chart.innerHTML = `<div class="empty" role="status">导入账单后，这里会按支出分类生成饼状图。</div>`;
+          return;
+        }
+        const total = totals.reduce((sum, item) => sum + item.amount, 0);
+        let cursor = 0;
+        const segments = totals.map((item, index) => {
+          const start = cursor;
+          cursor += (item.amount / total) * 100;
+          return `${FINANCE_CHART_COLORS[index % FINANCE_CHART_COLORS.length]} ${start}% ${cursor}%`;
+        }).join(", ");
+        chart.innerHTML = `
+          <div class="finance-pie" style="--pie-gradient: conic-gradient(${segments})" role="img" aria-label="${escapeHtml(totals.map((item) => `${item.category} ${currency.format(item.amount)}`).join("，"))}">
+            <div class="finance-pie-center"><strong>${currency.format(total)}</strong><span>总支出</span></div>
+          </div>
+          <ul class="finance-legend">
+            ${totals.map((item, index) => {
+              const color = FINANCE_CHART_COLORS[index % FINANCE_CHART_COLORS.length];
+              const share = Math.round((item.amount / total) * 100);
+              return `<li><i class="finance-legend-dot" style="--legend-color:${color}"></i><span class="finance-legend-label">${escapeHtml(item.category)}</span><span class="finance-legend-value">${currency.format(item.amount)} · ${share}%</span></li>`;
+            }).join("")}
+          </ul>
+        `;
+      }
+
       function renderFinance() {
         const current = monthlyFinance();
         const spending = current.filter((record) => record.type === "expense").reduce((sum, record) => sum + record.amount, 0);
@@ -5104,6 +5276,7 @@
         $("#financeSyncNote").textContent = state.financeRecords.length
           ? `最近一次同步：${state.lastImport?.at ? new Date(state.lastImport.at).toLocaleString("zh-CN") : "已有历史记录"}。重复导入会覆盖相同记录。`
           : "这里只保留摘要，账单明细请回到原记账软件查看。";
+        renderFinanceCategoryChart();
       }
 
       function renderWellbeing() {
