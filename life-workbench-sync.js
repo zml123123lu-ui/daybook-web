@@ -95,7 +95,7 @@
         const message = response.status === 401
           ? "登录已失效，请重新登录"
           : response.status === 429
-            ? "操作太频繁，请稍后再试"
+            ? "操作太频繁。请先停 10-15 分钟，不要继续点；如果刚才点过创建账号，请先去邮箱看确认邮件。"
             : (body?.msg || body?.message || body?.error_description || "云端连接失败");
         throw new SyncRequestError(message, response.status);
       }
