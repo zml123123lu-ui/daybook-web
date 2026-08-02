@@ -5836,6 +5836,8 @@
       if (!syncClient) {
         $("#syncButton").disabled = true;
         setSyncStatus("同步不可用", "error");
+      } else if (syncClient.getSession()) {
+        initializeCloudSync().catch(handleSyncError);
       }
     })();
   </script>

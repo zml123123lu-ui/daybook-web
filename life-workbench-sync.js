@@ -72,14 +72,69 @@
     };
   }
 
-  function createSyncClient({ projectUrl, publishableKey, fetchImpl = globalThis.fetch }) {
+  const SESSION_STORAGE_KEY = "life-workbench-auth-v1";
+
+  function getStorage(storage) {
+    if (storage) return storage;
+    try {
+      return globalThis.localStorage || null;
+    } catch {
+      return null;
+    }
+  }
+
+  function createSyncClient({ projectUrl, publishableKey, fetchImpl = globalThis.fetch, storage = null }) {
     const baseUrl = String(projectUrl || "").replace(/\/+$/, "");
     const apiKey = String(publishableKey || "").trim();
+    const sessionStorage = getStorage(storage);
     if (!/^https:\/\/[^/]+\.supabase\.co$/.test(baseUrl)) throw new Error("Supabase 项目地址不正确");
     if (!apiKey.startsWith("sb_publishable_")) throw new Error("Supabase 公开连接钥匙不正确");
     if (typeof fetchImpl !== "function") throw new Error("当前浏览器不支持云端同步");
 
     let session = null;
+
+    function persistSession() {
+      if (!sessionStorage || !session) return;
+      try {
+        sessionStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(session));
+      } catch {
+        // Storage may be blocked in private browsing; memory-only sync still works.
+      }
+    }
+
+    function clearPersistedSession() {
+      if (!sessionStorage) return;
+      try {
+        sessionStorage.removeItem(SESSION_STORAGE_KEY);
+      } catch {
+        // Ignore cleanup failures; the in-memory session is still cleared.
+      }
+    }
+
+    function restoreSession() {
+      if (!sessionStorage) return null;
+      try {
+        const parsed = JSON.parse(sessionStorage.getItem(SESSION_STORAGE_KEY) || "null");
+        if (!isPlainObject(parsed)
+          || typeof parsed.accessToken !== "string"
+          || typeof parsed.refreshToken !== "string"
+          || !Number.isFinite(parsed.expiresAt)
+          || !isPlainObject(parsed.user)
+          || typeof parsed.user.id !== "string") return null;
+        return {
+          accessToken: parsed.accessToken,
+          refreshToken: parsed.refreshToken,
+          expiresAt: parsed.expiresAt,
+          user: {
+            id: parsed.user.id,
+            email: typeof parsed.user.email === "string" ? parsed.user.email : ""
+          }
+        };
+      } catch {
+        clearPersistedSession();
+        return null;
+      }
+    }
 
     async function readJson(response) {
       const text = await response.text();
@@ -126,6 +181,7 @@
           email: typeof body.user.email === "string" ? body.user.email : ""
         }
       };
+      persistSession();
       return { ...session.user };
     }
 
@@ -225,12 +281,15 @@
       return validateCloudRow(rows[0]);
     }
 
+    session = restoreSession();
+
     function getSession() {
       return session ? { user: { ...session.user } } : null;
     }
 
     function signOut() {
       session = null;
+      clearPersistedSession();
     }
 
     return { createState, fetchState, getSession, signIn, signOut, signUp, updateState };
