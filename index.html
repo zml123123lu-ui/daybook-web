@@ -4832,9 +4832,9 @@
                 <form id="mealForm">
                   <div class="field meal-date-field"><label for="mealDate">记录日期</label><input id="mealDate" name="date" type="date" required></div>
                   <div class="meal-grid">
-                    <div class="field"><label for="mealBreakfast">早餐</label><textarea id="mealBreakfast" name="breakfast" placeholder="写下吃了什么和大致份量"></textarea></div>
-                    <div class="field"><label for="mealLunch">午餐</label><textarea id="mealLunch" name="lunch" placeholder="写下吃了什么和大致份量"></textarea></div>
-                    <div class="field"><label for="mealDinner">晚餐</label><textarea id="mealDinner" name="dinner" placeholder="写下吃了什么和大致份量"></textarea></div>
+                    <div class="field"><label for="mealBreakfast">早餐</label><textarea id="mealBreakfast" name="breakfast" placeholder="例如：鸡蛋2个、牛奶250毫升、全麦面包2片"></textarea></div>
+                    <div class="field"><label for="mealLunch">午餐</label><textarea id="mealLunch" name="lunch" placeholder="例如：米饭半碗、鸡胸肉120克、青菜一份"></textarea></div>
+                    <div class="field"><label for="mealDinner">晚餐</label><textarea id="mealDinner" name="dinner" placeholder="尽量写克数、个数、碗数或杯数，估算会更接近实际"></textarea></div>
                   </div>
                   <div class="meal-actions">
                     <span class="save-caption" id="mealSaveStatus" aria-live="polite">记录会保存在本机</span>
@@ -4851,7 +4851,7 @@
                   </header>
                   <div class="nutrition-grid" id="mealNutritionGrid"></div>
                   <p class="nutrition-summary" id="mealNutritionSummary"></p>
-                  <p class="nutrition-disclaimer">仅为粗略估算，实际营养会受食材重量、烹饪方式和品牌影响，不替代医生或营养师建议。</p>
+                  <p class="nutrition-disclaimer">仅为粗略估算，请尽量填写份量。未识别的内容不会计入总量；烹饪用油、调味料和品牌差异仍可能带来误差，不替代医生或营养师建议。</p>
                 </section>
                 <div class="meal-history" id="mealHistory"></div>
               </section>
@@ -7316,52 +7316,107 @@
       }
 
       const MEAL_NUTRIENTS = [
-        { terms: ["鸡蛋", "煎蛋", "水煮蛋"], calories: 75, protein: 6.5, carbs: 0.5, fat: 5, fiber: 0 },
-        { terms: ["牛奶", "鲜奶"], calories: 125, protein: 6.5, carbs: 10, fat: 6.5, fiber: 0 },
-        { terms: ["酸奶", "优格"], calories: 110, protein: 5, carbs: 15, fat: 3, fiber: 0 },
-        { terms: ["全麦面包", "吐司", "面包"], calories: 180, protein: 7, carbs: 32, fat: 3, fiber: 2.5 },
-        { terms: ["燕麦", "麦片"], calories: 170, protein: 6, carbs: 29, fat: 3.5, fiber: 4 },
-        { terms: ["米饭", "白饭"], calories: 230, protein: 4, carbs: 50, fat: 0.5, fiber: 0.6 },
-        { terms: ["粥", "稀饭"], calories: 120, protein: 2.5, carbs: 26, fat: 0.5, fiber: 0.5 },
-        { terms: ["面条", "意面", "米粉", "河粉"], calories: 300, protein: 10, carbs: 58, fat: 4, fiber: 2.5 },
-        { terms: ["鸡胸肉", "鸡肉", "鸡腿"], calories: 165, protein: 31, carbs: 0, fat: 3.6, fiber: 0 },
-        { terms: ["牛肉"], calories: 230, protein: 26, carbs: 0, fat: 14, fiber: 0 },
-        { terms: ["猪肉", "排骨"], calories: 260, protein: 24, carbs: 0, fat: 18, fiber: 0 },
-        { terms: ["鱼", "三文鱼", "鳕鱼", "虾", "海鲜"], calories: 180, protein: 26, carbs: 0, fat: 8, fiber: 0 },
-        { terms: ["豆腐", "豆干", "豆制品"], calories: 120, protein: 12, carbs: 4, fat: 7, fiber: 2 },
-        { terms: ["青菜", "蔬菜", "生菜", "菠菜", "白菜"], calories: 60, protein: 3, carbs: 10, fat: 1, fiber: 4 },
-        { terms: ["西兰花", "花椰菜"], calories: 55, protein: 4, carbs: 11, fat: 0.6, fiber: 5 },
-        { terms: ["苹果", "梨", "橙子", "水果"], calories: 90, protein: 0.5, carbs: 24, fat: 0.3, fiber: 4 },
-        { terms: ["香蕉"], calories: 105, protein: 1.3, carbs: 27, fat: 0.4, fiber: 3 },
-        { terms: ["坚果", "杏仁", "核桃", "花生"], calories: 170, protein: 6, carbs: 6, fat: 15, fiber: 3 },
-        { terms: ["豆浆"], calories: 90, protein: 7, carbs: 8, fat: 4, fiber: 1.5 },
-        { terms: ["奶茶", "含糖饮料", "可乐"], calories: 280, protein: 2, carbs: 55, fat: 7, fiber: 0 }
+        { terms: ["水煮蛋", "煎蛋", "鸡蛋"], base: 50, units: { 个: 1, 只: 1, 枚: 1 }, calories: 72, protein: 6.3, carbs: 0.4, fat: 4.8, fiber: 0 },
+        { terms: ["鲜奶", "牛奶"], base: 250, measure: "ml", units: { 杯: 1 }, calories: 150, protein: 8, carbs: 12, fat: 8, fiber: 0 },
+        { terms: ["酸奶", "优格"], base: 150, units: { 杯: 1 }, calories: 120, protein: 5.5, carbs: 17, fat: 3.5, fiber: 0 },
+        { terms: ["全麦面包", "吐司", "面包"], base: 60, units: { 片: 0.5 }, calories: 160, protein: 7, carbs: 28, fat: 2.5, fiber: 4 },
+        { terms: ["燕麦", "麦片"], base: 40, units: { 碗: 1 }, calories: 152, protein: 5.2, carbs: 27, fat: 2.8, fiber: 4 },
+        { terms: ["米饭", "白饭"], base: 150, units: { 碗: 1 }, calories: 174, protein: 3.9, carbs: 38.9, fat: 0.5, fiber: 0.5 },
+        { terms: ["稀饭", "白粥", "粥"], base: 300, units: { 碗: 1 }, calories: 138, protein: 3.3, carbs: 29.7, fat: 0.9, fiber: 0.9 },
+        { terms: ["意面", "面条", "米粉", "河粉"], base: 250, units: { 碗: 1 }, calories: 345, protein: 11.3, carbs: 62.5, fat: 5.3, fiber: 3 },
+        { terms: ["鸡胸肉", "鸡腿肉", "鸡肉", "鸡腿"], base: 100, units: { 份: 1 }, calories: 165, protein: 31, carbs: 0, fat: 3.6, fiber: 0 },
+        { terms: ["牛肉"], base: 100, units: { 份: 1 }, calories: 250, protein: 26, carbs: 0, fat: 15, fiber: 0 },
+        { terms: ["排骨", "猪肉"], base: 100, units: { 份: 1 }, calories: 242, protein: 27, carbs: 0, fat: 14, fiber: 0 },
+        { terms: ["三文鱼", "鲑鱼"], base: 100, units: { 份: 1 }, calories: 208, protein: 20, carbs: 0, fat: 13, fiber: 0 },
+        { terms: ["鳕鱼", "鱼肉", "鱼"], base: 100, units: { 份: 1 }, calories: 120, protein: 22, carbs: 0, fat: 3, fiber: 0 },
+        { terms: ["虾仁", "虾"], base: 100, units: { 份: 1 }, calories: 99, protein: 24, carbs: 0.2, fat: 0.3, fiber: 0 },
+        { terms: ["豆腐", "豆干", "豆制品"], base: 150, units: { 份: 1 }, calories: 120, protein: 12, carbs: 4, fat: 7, fiber: 2 },
+        { terms: ["青菜", "蔬菜", "生菜", "菠菜", "白菜"], base: 150, units: { 份: 1, 碗: 1 }, calories: 45, protein: 3, carbs: 7.5, fat: 0.8, fiber: 3.5 },
+        { terms: ["西兰花", "花椰菜"], base: 150, units: { 份: 1, 碗: 1 }, calories: 52, protein: 4.2, carbs: 10.5, fat: 0.6, fiber: 5 },
+        { terms: ["苹果"], base: 180, units: { 个: 1 }, calories: 95, protein: 0.5, carbs: 25, fat: 0.3, fiber: 4.4 },
+        { terms: ["梨"], base: 180, units: { 个: 1 }, calories: 102, protein: 0.6, carbs: 27, fat: 0.2, fiber: 5.5 },
+        { terms: ["橙子", "橘子"], base: 150, units: { 个: 1 }, calories: 71, protein: 1.4, carbs: 18, fat: 0.2, fiber: 3.6 },
+        { terms: ["香蕉"], base: 118, units: { 根: 1, 个: 1 }, calories: 105, protein: 1.3, carbs: 27, fat: 0.4, fiber: 3.1 },
+        { terms: ["坚果", "杏仁", "核桃", "花生"], base: 30, units: { 把: 1, 份: 1 }, calories: 180, protein: 6, carbs: 6, fat: 16, fiber: 3 },
+        { terms: ["豆浆"], base: 250, measure: "ml", units: { 杯: 1 }, calories: 83, protein: 7, carbs: 4, fat: 4, fiber: 1.5 },
+        { terms: ["奶茶"], base: 500, measure: "ml", units: { 杯: 1 }, calories: 350, protein: 3, carbs: 58, fat: 12, fiber: 0 },
+        { terms: ["含糖饮料", "可乐"], base: 500, measure: "ml", units: { 瓶: 1, 杯: 0.5 }, calories: 210, protein: 0, carbs: 53, fat: 0, fiber: 0 }
       ];
+      const NUTRITION_ESTIMATOR_VERSION = 2;
+
+      function parseMealAmount(raw) {
+        const value = String(raw || "").trim();
+        if (!value) return NaN;
+        if (value === "半") return 0.5;
+        const numeric = Number.parseFloat(value);
+        if (Number.isFinite(numeric)) return numeric;
+        const digits = { 零: 0, 一: 1, 二: 2, 两: 2, 三: 3, 四: 4, 五: 5, 六: 6, 七: 7, 八: 8, 九: 9 };
+        if (value === "十") return 10;
+        if (value.includes("十")) {
+          const [tens, ones] = value.split("十");
+          return (tens ? digits[tens] : 1) * 10 + (ones ? digits[ones] : 0);
+        }
+        return digits[value] ?? NaN;
+      }
+
+      function mealQuantityForMatch(text, match, food) {
+        const amountPattern = "(半|[一二两三四五六七八九十]+|\\d+(?:\\.\\d+)?)";
+        const unitPattern = "(千克|公斤|kg|KG|克|g|G|毫升|ml|ML|个|只|枚|碗|杯|片|份|根|把|瓶)?";
+        const before = text.slice(Math.max(0, match.start - 14), match.start);
+        const after = text.slice(match.end, match.end + 14);
+        const beforeMatch = before.match(new RegExp(`${amountPattern}\\s*${unitPattern}\\s*$`));
+        const afterMatch = after.match(new RegExp(`^\\s*${amountPattern}\\s*${unitPattern}`));
+        const quantity = beforeMatch || afterMatch;
+        if (!quantity) return { multiplier: 1, explicit: false };
+        const amount = parseMealAmount(quantity[1]);
+        const unit = quantity[2] || "份";
+        if (!Number.isFinite(amount) || amount <= 0) return { multiplier: 1, explicit: false };
+        if (["克", "g", "G"].includes(unit)) return { multiplier: amount / food.base, explicit: true };
+        if (["千克", "公斤", "kg", "KG"].includes(unit)) return { multiplier: amount * 1000 / food.base, explicit: true };
+        if (["毫升", "ml", "ML"].includes(unit)) return { multiplier: amount / food.base, explicit: true };
+        return { multiplier: amount * (food.units?.[unit] ?? 1), explicit: true };
+      }
+
+      function mealFoodMatches(text) {
+        const candidates = [];
+        MEAL_NUTRIENTS.forEach((food) => {
+          food.terms.forEach((term) => {
+            let start = text.indexOf(term);
+            while (start >= 0) {
+              candidates.push({ food, term, start, end: start + term.length });
+              start = text.indexOf(term, start + term.length);
+            }
+          });
+        });
+        return candidates
+          .sort((a, b) => b.term.length - a.term.length || a.start - b.start)
+          .reduce((selected, candidate) => {
+            const overlaps = selected.some((match) => candidate.start < match.end && candidate.end > match.start);
+            if (!overlaps) selected.push(candidate);
+            return selected;
+          }, [])
+          .sort((a, b) => a.start - b.start);
+      }
 
       function estimateMealNutrition(meals) {
-        const totals = { calories: 0, protein: 0, carbs: 0, fat: 0, fiber: 0, recognizedFoods: 0, unknownMeals: 0 };
+        const totals = { calories: 0, protein: 0, carbs: 0, fat: 0, fiber: 0, recognizedFoods: 0, quantityFoods: 0, assumedFoods: 0, unknownMeals: 0 };
         [meals.breakfast, meals.lunch, meals.dinner].forEach((meal) => {
           const text = String(meal || "").trim();
           if (!text) return;
-          let recognizedInMeal = 0;
-          MEAL_NUTRIENTS.forEach((food) => {
-            if (!food.terms.some((term) => text.includes(term))) return;
-            totals.calories += food.calories;
-            totals.protein += food.protein;
-            totals.carbs += food.carbs;
-            totals.fat += food.fat;
-            totals.fiber += food.fiber;
-            totals.recognizedFoods += 1;
-            recognizedInMeal += 1;
-          });
-          if (!recognizedInMeal) {
-            totals.calories += 420;
-            totals.protein += 18;
-            totals.carbs += 55;
-            totals.fat += 14;
-            totals.fiber += 4;
+          const matches = mealFoodMatches(text);
+          if (!matches.length) {
             totals.unknownMeals += 1;
+            return;
           }
+          matches.forEach((match) => {
+            const quantity = mealQuantityForMatch(text, match, match.food);
+            ["calories", "protein", "carbs", "fat", "fiber"].forEach((key) => {
+              totals[key] += match.food[key] * quantity.multiplier;
+            });
+            totals.recognizedFoods += 1;
+            if (quantity.explicit) totals.quantityFoods += 1;
+            else totals.assumedFoods += 1;
+          });
         });
         ["protein", "carbs", "fat", "fiber"].forEach((key) => {
           totals[key] = Math.round(totals[key] * 10) / 10;
@@ -7371,12 +7426,18 @@
       }
 
       function localMealNutritionSummary(nutrition) {
-        const notes = [`按常见份量粗略换算约 ${nutrition.calories} 千卡，蛋白质 ${nutrition.protein} 克。`];
-        if (nutrition.protein < 45) notes.push("蛋白质来源可能偏少，可结合实际份量检查蛋、奶、豆、鱼或瘦肉是否充足。");
-        else notes.push("今天记录中包含了较明确的蛋白质来源。");
-        if (nutrition.fiber < 18) notes.push("膳食纤维估算偏少，蔬菜、水果或全谷物可以再丰富一些。");
-        else notes.push("蔬果和全谷物带来的膳食纤维相对充足。");
-        if (nutrition.unknownMeals) notes.push(`有 ${nutrition.unknownMeals} 餐未识别到具体食物，已按普通一餐估算，误差会比较大。`);
+        if (!nutrition.recognizedFoods) {
+          return "没有识别到可计算的食物。请写成“食物 + 份量”，例如鸡蛋2个、米饭半碗或鸡胸肉120克。未识别的内容不会计入总量。";
+        }
+        const notes = [`根据已识别的 ${nutrition.recognizedFoods} 项食物，粗略换算约 ${nutrition.calories} 千卡，蛋白质 ${nutrition.protein} 克。`];
+        if (nutrition.assumedFoods) notes.push(`其中 ${nutrition.assumedFoods} 项没有写份量，暂按常见一份计算；补充克数、个数、碗数或杯数会更准确。`);
+        if (nutrition.unknownMeals) notes.push(`有 ${nutrition.unknownMeals} 餐没有识别到可计算的食物，未识别的内容不会计入总量。`);
+        if (!nutrition.unknownMeals && nutrition.recognizedFoods >= 3) {
+          if (nutrition.protein < 45) notes.push("按当前记录看，蛋白质来源可能偏少，可检查蛋、奶、豆、鱼或瘦肉的实际份量。");
+          else notes.push("按当前记录看，蛋白质来源相对明确。");
+          if (nutrition.fiber < 18) notes.push("按当前记录看，膳食纤维可能偏少，可检查蔬菜、水果或全谷物的实际份量。");
+          else notes.push("按当前记录看，膳食纤维相对充足。");
+        }
         return notes.join("\n\n");
       }
 
@@ -7390,7 +7451,18 @@
         $("#mealSaveStatus").textContent = record.updatedAt ? "这一天已有餐饮记录" : "记录会保存在本机";
 
         const card = $("#mealNutritionCard");
-        const nutrition = record.nutrition;
+        let nutrition = record.nutrition;
+        if (nutrition && nutrition.estimatorVersion !== NUTRITION_ESTIMATOR_VERSION) {
+          const recalculated = estimateMealNutrition(record);
+          nutrition = {
+            ...recalculated,
+            summary: localMealNutritionSummary(recalculated),
+            mode: "本地营养估算 · 已按份量更新",
+            estimatorVersion: NUTRITION_ESTIMATOR_VERSION,
+            generatedAt: new Date().toISOString()
+          };
+          record.nutrition = nutrition;
+        }
         $("#estimateMealNutritionBtn").textContent = nutrition ? "重新估算营养" : "AI 估算营养";
         card.classList.toggle("empty", !nutrition);
         if (!nutrition) {
@@ -7472,7 +7544,7 @@
         } catch {
           summary = localMealNutritionSummary(nutrition);
         }
-        record.nutrition = { ...nutrition, summary, mode, generatedAt: new Date().toISOString() };
+        record.nutrition = { ...nutrition, summary, mode, estimatorVersion: NUTRITION_ESTIMATOR_VERSION, generatedAt: new Date().toISOString() };
         button.disabled = false;
         button.textContent = "重新估算营养";
         render();
