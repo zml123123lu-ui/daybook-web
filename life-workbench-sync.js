@@ -29,7 +29,8 @@
     const arrayKeys = ["tasks", "timeBlocks", "habits", "goals", "financeRecords", "thoughts"];
     const recordKeys = ["notes", "dailySummaries", "aiSummaries", "periodSummaries", "wellbeing", "mealRecords", "gratitude"];
     return arrayKeys.some((key) => Array.isArray(state[key]) && state[key].length > 0)
-      || recordKeys.some((key) => isPlainObject(state[key]) && Object.keys(state[key]).length > 0);
+      || recordKeys.some((key) => isPlainObject(state[key]) && Object.keys(state[key]).length > 0)
+      || (isPlainObject(state.appearance) && typeof state.appearance.theme === "string" && state.appearance.theme !== "mist-rose");
   }
 
   function stableStringify(value) {

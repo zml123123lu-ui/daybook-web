@@ -82,6 +82,10 @@
       overflow: auto;
     }
 
+    .sidebar-head {
+      display: block;
+    }
+
     .brand {
       display: grid;
       grid-template-columns: 2.75rem 1fr;
@@ -184,16 +188,35 @@
       font-size: 0.9rem;
     }
 
-    .nav-kbd {
-      width: 1.45rem;
-      height: 1.45rem;
+    .nav-icon {
+      width: 1.75rem;
+      height: 1.75rem;
       border-radius: 6px;
       display: grid;
       place-items: center;
       background: rgba(255,255,255,0.08);
       color: #bfd2c1;
-      font-size: 0.75rem;
-      font-weight: 800;
+      flex: 0 0 auto;
+    }
+
+    .nav-icon svg {
+      width: 1rem;
+      height: 1rem;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 1.8;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .nav-label {
+      min-width: 0;
+      text-align: center;
+    }
+
+    .nav-balance {
+      width: 1.75rem;
+      height: 1px;
     }
 
     .side-card {
@@ -1014,12 +1037,13 @@
     }
 
     .range-field {
+      --range-value: 50%;
       display: grid;
-      gap: 0.45rem;
-      padding: 0.7rem;
+      gap: 0.55rem;
+      padding: 0.75rem 0.85rem 0.6rem;
       border: 1px solid var(--line);
       border-radius: var(--radius);
-      background: rgba(255, 255, 255, 0.7);
+      background: var(--surface-2);
     }
 
     .range-field span {
@@ -1029,9 +1053,115 @@
       font-weight: 750;
     }
 
+    .range-heading {
+      min-height: 1.35rem;
+    }
+
+    .range-field .range-control {
+      position: relative;
+      display: block;
+      height: 1.25rem;
+    }
+
+    .range-control::before,
+    .range-control::after {
+      content: "";
+      position: absolute;
+      top: 50%;
+      left: 0;
+      height: 0.28rem;
+      border-radius: 999px;
+      transform: translateY(-50%);
+      pointer-events: none;
+    }
+
+    .range-control::before {
+      right: 0;
+      background: var(--theme-line, var(--line));
+    }
+
+    .range-control::after {
+      width: var(--range-value);
+      background: var(--theme-accent, var(--berry));
+    }
+
     .range-field input[type="range"] {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      height: 1.25rem;
+      margin: 0;
       padding: 0;
-      accent-color: var(--berry);
+      border: 0;
+      border-radius: 0;
+      appearance: none;
+      background: transparent;
+      box-shadow: none;
+      cursor: pointer;
+    }
+
+    .range-field input[type="range"]::-webkit-slider-runnable-track {
+      height: 0.32rem;
+      border: 0;
+      border-radius: 999px;
+      background: transparent;
+    }
+
+    .range-field input[type="range"]::-webkit-slider-thumb {
+      width: 1rem;
+      height: 1rem;
+      margin-top: -0.34rem;
+      border: 3px solid var(--theme-surface, var(--surface));
+      border-radius: 50%;
+      appearance: none;
+      background: var(--theme-accent, var(--berry));
+      box-shadow: 0 0 0 1px var(--theme-accent, var(--berry));
+    }
+
+    .range-field input[type="range"]::-moz-range-track {
+      height: 0.32rem;
+      border: 0;
+      border-radius: 999px;
+      background: transparent;
+    }
+
+    .range-field input[type="range"]::-moz-range-thumb {
+      width: 0.72rem;
+      height: 0.72rem;
+      border: 3px solid var(--theme-surface, var(--surface));
+      border-radius: 50%;
+      background: var(--theme-accent, var(--berry));
+      box-shadow: 0 0 0 1px var(--theme-accent, var(--berry));
+    }
+
+    .range-field input[type="range"]::-moz-range-progress {
+      height: 0.28rem;
+      border-radius: 999px;
+      background: transparent;
+    }
+
+    .range-scale {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      margin-top: -0.35rem;
+      color: var(--muted);
+      font-size: 0.68rem;
+      font-weight: 500;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .range-scale span {
+      display: block;
+      font-weight: 500;
+      text-align: center;
+    }
+
+    .range-scale span:first-child {
+      text-align: left;
+    }
+
+    .range-scale span:last-child {
+      text-align: right;
     }
 
     .wellbeing-notes textarea {
@@ -1959,6 +2089,10 @@
     }
 
     @media (max-width: 820px) {
+      .appearance-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+
       .app {
         grid-template-columns: 1fr;
       }
@@ -2171,6 +2305,10 @@
 
     .nav a {
       position: relative;
+      display: grid;
+      grid-template-columns: 1.75rem minmax(0, 1fr) 1.75rem;
+      align-items: center;
+      gap: 0.6rem;
       padding: 0.72rem 0.4rem;
       color: #665b5d;
       border-radius: 0;
@@ -2612,6 +2750,85 @@
       color: var(--muted);
       font-variant-numeric: tabular-nums;
       white-space: nowrap;
+    }
+
+    #appearanceDialog {
+      width: min(58rem, calc(100vw - 2rem));
+      max-height: min(46rem, calc(100vh - 2rem));
+    }
+
+    #appearanceDialog .dialog-fields {
+      overflow: auto;
+    }
+
+    .appearance-intro {
+      color: var(--muted);
+      font-size: 0.82rem;
+      line-height: 1.55;
+    }
+
+    .appearance-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 0.65rem;
+    }
+
+    .appearance-option {
+      min-width: 0;
+      padding: 0.75rem;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--surface);
+      color: var(--ink);
+      text-align: left;
+    }
+
+    .appearance-option:hover {
+      border-color: var(--theme-accent, #9a4f5f);
+      background: var(--surface-2);
+    }
+
+    .appearance-option[aria-checked="true"] {
+      border-color: var(--theme-accent, #9a4f5f);
+      box-shadow: inset 0 0 0 1px var(--theme-accent, #9a4f5f);
+    }
+
+    .appearance-swatches {
+      display: grid;
+      grid-template-columns: 5.5fr 2.3fr 1.4fr 0.8fr;
+      height: 2.25rem;
+      margin-bottom: 0.65rem;
+      overflow: hidden;
+      border: 1px solid rgba(80, 60, 64, 0.12);
+      border-radius: 6px;
+    }
+
+    .appearance-swatches i {
+      background: var(--swatch);
+    }
+
+    .appearance-option strong,
+    .appearance-option small {
+      display: block;
+    }
+
+    .appearance-option strong {
+      font-family: var(--serif);
+      font-size: 0.92rem;
+    }
+
+    .appearance-option small {
+      min-height: 2.4em;
+      margin-top: 0.2rem;
+      color: var(--muted);
+      font-size: 0.72rem;
+      line-height: 1.35;
+    }
+
+    .appearance-current {
+      margin-right: auto;
+      color: var(--muted);
+      font-size: 0.78rem;
     }
 
     dialog {
@@ -3069,10 +3286,6 @@
         font-size: 1.8rem;
       }
 
-      .sidebar {
-        background: #eee5e3;
-      }
-
       .nav a.active::after {
         left: 0.4rem;
       }
@@ -3134,8 +3347,27 @@
       }
 
       .nav a {
+        display: block;
+        position: relative;
         justify-content: center;
         padding: 0.55rem 0.25rem;
+      }
+
+      .nav-icon {
+        position: absolute;
+        left: 0.35rem;
+        top: 50%;
+        width: 1.5rem;
+        height: 1.5rem;
+        transform: translateY(-50%);
+      }
+
+      .nav-balance {
+        display: none;
+      }
+
+      .nav-label {
+        display: block;
       }
 
       .nav a.active::after {
@@ -3146,6 +3378,19 @@
 
       .top-actions {
         grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .appearance-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      #appearanceDialog {
+        width: calc(100vw - 1rem);
+        max-height: calc(100vh - 1rem);
+      }
+
+      .appearance-option {
+        padding: 0.6rem;
       }
 
       .finance-overview {
@@ -3831,26 +4076,446 @@
         color: #251f20;
       }
     }
+
+    html[data-appearance-theme] body {
+      background: var(--theme-bg);
+      color: var(--theme-ink);
+    }
+
+    html[data-appearance-theme] .sidebar {
+      border-color: color-mix(in srgb, var(--theme-accent) 86%, var(--theme-ink));
+      background: var(--theme-accent);
+      color: var(--theme-accent-ink);
+    }
+
+    html[data-appearance-theme] .brand p,
+    html[data-appearance-theme] .nav a,
+    html[data-appearance-theme] .side-card p {
+      color: color-mix(in srgb, var(--theme-accent-ink) 82%, var(--theme-accent));
+    }
+
+    html[data-appearance-theme] .brand h1,
+    html[data-appearance-theme] .side-card strong {
+      color: var(--theme-accent-ink);
+    }
+
+    html[data-appearance-theme] .nav a:hover,
+    html[data-appearance-theme] .nav a:focus-visible,
+    html[data-appearance-theme] .nav a.active {
+      border-radius: var(--radius);
+      background: color-mix(in srgb, var(--theme-accent-ink) 12%, transparent);
+      color: var(--theme-accent-ink);
+      box-shadow: none;
+    }
+
+    html[data-appearance-theme] .brand-mark,
+    html[data-appearance-theme] .btn:not(.secondary):not(.ghost):not(.danger),
+    html[data-appearance-theme] .check[aria-pressed="true"],
+    html[data-appearance-theme] .progress > span {
+      border-color: var(--theme-accent);
+      background: var(--theme-accent);
+      color: var(--theme-accent-ink);
+    }
+
+    html[data-appearance-theme] .eyebrow,
+    html[data-appearance-theme] .nav a.active,
+    html[data-appearance-theme] .chip.active,
+    html[data-appearance-theme] .period-tab.active {
+      color: var(--theme-accent);
+    }
+
+    html[data-appearance-theme] .page-title,
+    html[data-appearance-theme] .view-heading h2,
+    html[data-appearance-theme] .panel-header h3,
+    html[data-appearance-theme] .thought-list-header h3 {
+      color: color-mix(in srgb, var(--theme-accent) 62%, var(--theme-ink));
+    }
+
+    html[data-appearance-theme] .metric strong,
+    html[data-appearance-theme] .finance-stat strong,
+    html[data-appearance-theme] .habit-period-label {
+      color: color-mix(in srgb, var(--theme-accent) 46%, var(--theme-ink));
+    }
+
+    html[data-appearance-theme] .period-tab:not(.active),
+    html[data-appearance-theme] .chip:not(.active),
+    html[data-appearance-theme] .habit-period-nav .icon-btn:disabled {
+      color: color-mix(in srgb, var(--theme-ink) 58%, var(--theme-surface));
+    }
+
+    html[data-appearance-theme] .metric:nth-child(2)::before,
+    html[data-appearance-theme] .calendar-day.today,
+    html[data-appearance-theme] .calendar-day.selected.today {
+      border-color: var(--theme-contrast);
+    }
+
+    html[data-appearance-theme] .metric:nth-child(2)::before,
+    html[data-appearance-theme] .calendar-day.today::after {
+      background: var(--theme-contrast);
+    }
+
+    html[data-appearance-theme] .side-card,
+    html[data-appearance-theme] .thought-list-item.active {
+      border-color: color-mix(in srgb, var(--theme-contrast) 24%, var(--theme-line));
+    }
+
+    html[data-appearance-theme] .side-card {
+      border-color: color-mix(in srgb, var(--theme-accent-ink) 22%, transparent);
+      background: color-mix(in srgb, var(--theme-accent-ink) 8%, transparent);
+    }
+
+    html[data-appearance-theme] .block-category,
+    html[data-appearance-theme] .finance-chart-note,
+    html[data-appearance-theme] .thought-list-meta {
+      color: color-mix(in srgb, var(--theme-accent) 22%, var(--theme-muted));
+    }
+
+    html[data-appearance-theme] .nav a.active::after,
+    html[data-appearance-theme] .calendar-dot {
+      background: var(--theme-accent);
+    }
+
+    html[data-appearance-theme] .sidebar .brand-mark,
+    html[data-appearance-theme] .sidebar .nav a.active .nav-icon {
+      border-color: color-mix(in srgb, var(--theme-accent-ink) 22%, transparent);
+      background: color-mix(in srgb, var(--theme-accent-ink) 14%, transparent);
+      color: var(--theme-accent-ink);
+    }
+
+    html[data-appearance-theme] .sidebar .nav a.active {
+      color: var(--theme-accent-ink);
+    }
+
+    html[data-appearance-theme] .nav a.active::after {
+      display: none;
+    }
+
+    html[data-appearance-theme] .nav a.active::before {
+      content: "";
+      position: absolute;
+      left: -0.35rem;
+      top: 50%;
+      width: 3px;
+      height: 1.5rem;
+      border-radius: 999px;
+      background: var(--theme-contrast);
+      transform: translateY(-50%);
+    }
+
+    html[data-appearance-theme] .sidebar .nav a.active .nav-icon {
+      border: 1px solid color-mix(in srgb, var(--theme-contrast) 58%, transparent);
+      background: color-mix(in srgb, var(--theme-contrast) 26%, transparent);
+      color: color-mix(in srgb, var(--theme-contrast) 70%, var(--theme-accent-ink));
+      box-shadow: none;
+    }
+
+    html[data-appearance-theme] #thoughtPinBtn[aria-pressed="true"] {
+      border-color: var(--theme-contrast);
+      background: var(--theme-contrast-soft);
+      color: color-mix(in srgb, var(--theme-contrast) 78%, var(--theme-ink));
+    }
+
+    html[data-appearance-theme] .period-tab.active,
+    html[data-appearance-theme] .chip.active {
+      border-color: color-mix(in srgb, var(--theme-contrast) 72%, var(--theme-line));
+      background: var(--theme-contrast-soft);
+      color: color-mix(in srgb, var(--theme-contrast) 78%, var(--theme-ink));
+    }
+
+    html[data-appearance-theme] .calendar-day.selected {
+      border-color: var(--theme-contrast);
+      background: var(--theme-contrast-soft);
+      color: color-mix(in srgb, var(--theme-contrast) 72%, var(--theme-ink));
+    }
+
+    html[data-appearance-theme] .panel,
+    html[data-appearance-theme] .metric,
+    html[data-appearance-theme] .goal-card,
+    html[data-appearance-theme] .finance-stat,
+    html[data-appearance-theme] .finance-chart-card,
+    html[data-appearance-theme] .habit-chart-card,
+    html[data-appearance-theme] .thought-list-pane,
+    html[data-appearance-theme] .thought-editor-pane,
+    html[data-appearance-theme] dialog {
+      border-color: var(--theme-line);
+      background: var(--theme-surface);
+      color: var(--theme-ink);
+    }
+
+    html[data-appearance-theme] .panel,
+    html[data-appearance-theme] .metric,
+    html[data-appearance-theme] .goal-card,
+    html[data-appearance-theme] .finance-chart-card,
+    html[data-appearance-theme] .habit-chart-card,
+    html[data-appearance-theme] .side-card {
+      box-shadow: 0 8px 24px color-mix(in srgb, var(--theme-accent) 7%, transparent);
+    }
+
+    html[data-appearance-theme] .panel-header,
+    html[data-appearance-theme] .appearance-option,
+    html[data-appearance-theme] input,
+    html[data-appearance-theme] select,
+    html[data-appearance-theme] textarea,
+    html[data-appearance-theme] .btn.secondary,
+    html[data-appearance-theme] .calendar-day,
+    html[data-appearance-theme] .ai-summary-card,
+    html[data-appearance-theme] .empty {
+      border-color: var(--theme-line);
+      background-color: var(--theme-surface);
+      color: var(--theme-ink);
+    }
+
+    html[data-appearance-theme] input,
+    html[data-appearance-theme] select,
+    html[data-appearance-theme] textarea,
+    html[data-appearance-theme] .btn,
+    html[data-appearance-theme] .icon-btn,
+    html[data-appearance-theme] .icon-close,
+    html[data-appearance-theme] .slot-add {
+      box-shadow: 0 1px 3px color-mix(in srgb, var(--theme-accent) 9%, transparent);
+    }
+
+    html[data-appearance-theme] input:focus-visible,
+    html[data-appearance-theme] select:focus-visible,
+    html[data-appearance-theme] textarea:focus-visible,
+    html[data-appearance-theme] button:focus-visible,
+    html[data-appearance-theme] label.btn:focus-within {
+      border-color: var(--theme-accent);
+      outline-color: color-mix(in srgb, var(--theme-accent) 28%, transparent);
+      box-shadow: 0 0 0 3px color-mix(in srgb, var(--theme-accent) 16%, transparent);
+    }
+
+    html[data-appearance-theme] input::placeholder,
+    html[data-appearance-theme] textarea::placeholder {
+      color: color-mix(in srgb, var(--theme-muted) 72%, var(--theme-surface));
+      opacity: 1;
+    }
+
+    html[data-appearance-theme] .appearance-option:hover,
+    html[data-appearance-theme] .btn.secondary:hover,
+    html[data-appearance-theme] .calendar-day:hover,
+    html[data-appearance-theme] .calendar-day.selected,
+    html[data-appearance-theme] .period-tab.active,
+    html[data-appearance-theme] .chip.active,
+    html[data-appearance-theme] .pill {
+      border-color: var(--theme-line);
+      background: var(--theme-surface-2);
+      color: var(--theme-accent);
+    }
+
+    html[data-appearance-theme] .muted,
+    html[data-appearance-theme] .helper,
+    html[data-appearance-theme] label,
+    html[data-appearance-theme] .finance-chart-note,
+    html[data-appearance-theme] .appearance-intro,
+    html[data-appearance-theme] .appearance-option small,
+    html[data-appearance-theme] .appearance-current {
+      color: var(--theme-muted);
+    }
+
+    html[data-appearance-theme] .finance-pie::after {
+      background: var(--theme-surface);
+    }
+
+    html[data-appearance-theme] .btn.danger {
+      border-color: color-mix(in srgb, var(--theme-accent) 72%, var(--theme-danger));
+      background: color-mix(in srgb, var(--theme-accent) 7%, var(--theme-surface));
+      color: color-mix(in srgb, var(--theme-accent) 78%, var(--theme-danger));
+      box-shadow: none;
+    }
+
+    html[data-appearance-theme] .btn.danger:hover {
+      border-color: color-mix(in srgb, var(--theme-accent) 52%, var(--theme-danger));
+      background: color-mix(in srgb, var(--theme-accent) 13%, var(--theme-surface));
+      color: color-mix(in srgb, var(--theme-accent) 62%, var(--theme-danger));
+    }
+
+    html[data-appearance-theme] .icon-btn,
+    html[data-appearance-theme] .icon-close,
+    html[data-appearance-theme] .check,
+    html[data-appearance-theme] .period-tabs {
+      border-color: var(--theme-line);
+      background: var(--theme-surface-2);
+      color: var(--theme-accent);
+    }
+
+    html[data-appearance-theme] .icon-btn:hover,
+    html[data-appearance-theme] .icon-close:hover,
+    html[data-appearance-theme] .check:hover {
+      border-color: var(--theme-accent);
+      background: var(--theme-accent-soft);
+      color: var(--theme-accent);
+    }
+
+    html[data-appearance-theme] #timeline.timeline-axis {
+      border-color: var(--theme-line);
+      background: var(--theme-surface);
+    }
+
+    html[data-appearance-theme] .axis-prompt {
+      border-color: var(--theme-line);
+      background: var(--theme-accent-soft);
+      color: var(--theme-accent);
+    }
+
+    html[data-appearance-theme] .time-slot {
+      border-color: var(--theme-line);
+    }
+
+    html[data-appearance-theme] .time-slot.current {
+      background: var(--theme-accent-soft);
+    }
+
+    html[data-appearance-theme] .time-label {
+      border-color: var(--theme-line);
+      color: var(--theme-muted);
+    }
+
+    html[data-appearance-theme] .slot-add {
+      border-color: var(--theme-line);
+      background: var(--theme-surface);
+      color: var(--theme-accent);
+    }
+
+    html[data-appearance-theme] .slot-add:hover {
+      border-color: var(--theme-accent);
+      background: var(--theme-accent-soft);
+      color: var(--theme-accent);
+    }
+
+    html[data-appearance-theme] .axis-block {
+      border-left-color: var(--theme-accent);
+      background: color-mix(in srgb, var(--theme-accent) 12%, var(--theme-surface));
+    }
+
+    html[data-appearance-theme] .axis-block[data-category="工作"] { border-left-color: var(--theme-accent); background: color-mix(in srgb, var(--theme-accent) 14%, var(--theme-surface)); }
+    html[data-appearance-theme] .axis-block[data-category="学习"] { border-left-color: #6684a1; background: color-mix(in srgb, #6684a1 12%, var(--theme-surface)); }
+    html[data-appearance-theme] .axis-block[data-category="生活"] { border-left-color: #718b72; background: color-mix(in srgb, #718b72 12%, var(--theme-surface)); }
+    html[data-appearance-theme] .axis-block[data-category="健康"] { border-left-color: #ae7657; background: color-mix(in srgb, #ae7657 12%, var(--theme-surface)); }
+    html[data-appearance-theme] .axis-block[data-category="社交"] { border-left-color: #98718f; background: color-mix(in srgb, #98718f 12%, var(--theme-surface)); }
+    html[data-appearance-theme] .axis-block[data-category="娱乐"] { border-left-color: #a68a45; background: color-mix(in srgb, #a68a45 12%, var(--theme-surface)); }
+    html[data-appearance-theme] .axis-block[data-category="休息"] { border-left-color: #6e8492; background: color-mix(in srgb, #6e8492 12%, var(--theme-surface)); }
+
+    html[data-appearance-theme] .axis-block span,
+    html[data-appearance-theme] .block-category {
+      color: var(--theme-muted);
+    }
+
+    html[data-appearance-theme] .selected-time {
+      border-color: var(--theme-line);
+      background: var(--theme-accent-soft);
+      color: var(--theme-accent);
+    }
+
+    html[data-appearance-theme] .category-bar-label,
+    html[data-appearance-theme] .category-bar-time {
+      color: var(--theme-muted);
+    }
+
+    html[data-appearance-theme] .category-bar-track {
+      background: var(--theme-surface-2);
+    }
+
+    html[data-appearance-theme] .range-field {
+      border-color: var(--theme-line);
+      background: color-mix(in srgb, var(--theme-accent) 5%, var(--theme-surface));
+    }
+
+    html[data-appearance-theme] .range-field input[type="range"] {
+      border: 0;
+      background: transparent;
+      box-shadow: none;
+    }
+
+    html[data-appearance-theme] .range-field span {
+      color: var(--theme-ink);
+    }
+
+    html[data-appearance-theme] .range-heading .range-current {
+      color: var(--theme-accent);
+    }
+
+    html[data-appearance-theme] .range-heading small {
+      color: var(--theme-muted);
+    }
+
+    html[data-appearance-theme] .range-scale,
+    html[data-appearance-theme] .range-scale span {
+      color: var(--theme-muted);
+    }
+
+    html[data-appearance-theme] .thought-list-pane {
+      border-color: var(--theme-line);
+      background: color-mix(in srgb, var(--theme-surface-2) 28%, var(--theme-surface));
+    }
+
+    html[data-appearance-theme] .thought-editor-pane,
+    html[data-appearance-theme] #thoughtTitle,
+    html[data-appearance-theme] #thoughtBody,
+    html[data-appearance-theme] #thoughtSignature,
+    html[data-appearance-theme] #thoughtDate {
+      color: var(--theme-ink);
+      background: transparent;
+      box-shadow: none;
+    }
+
+    html[data-appearance-theme] #thoughtTitle,
+    html[data-appearance-theme] #thoughtSignature,
+    html[data-appearance-theme] #thoughtDate,
+    html[data-appearance-theme] .thought-editor-footer {
+      border-color: var(--theme-line);
+    }
+
+    html[data-appearance-theme] .thought-list-item.active {
+      border-color: color-mix(in srgb, var(--theme-accent) 30%, var(--theme-line));
+      background: color-mix(in srgb, var(--theme-accent) 8%, var(--theme-surface));
+    }
+
+    html[data-appearance-theme] .thought-list-item:hover {
+      background: color-mix(in srgb, var(--theme-accent) 6%, var(--theme-surface));
+    }
+
+    html[data-appearance-theme] #thoughtTitle:focus-visible,
+    html[data-appearance-theme] #thoughtSignature:focus-visible {
+      border-bottom-color: var(--theme-accent);
+      box-shadow: none;
+    }
+
+    html[data-appearance-theme] #thoughtBody:focus-visible {
+      background: color-mix(in srgb, var(--theme-accent) 2.5%, var(--theme-surface));
+      box-shadow: none;
+    }
+
+    html[data-appearance-theme] #thoughtDate:focus-visible {
+      color: var(--theme-accent);
+      box-shadow: none;
+    }
+
+    html[data-appearance-theme] dialog {
+      box-shadow: 0 24px 70px color-mix(in srgb, var(--theme-ink) 24%, transparent);
+    }
   </style>
 </head>
 <body>
-  <div class="app">
-    <aside class="sidebar" aria-label="生活工作台导航">
+  <div class="app" id="workbenchApp">
+    <aside class="sidebar" id="workbenchSidebar" aria-label="生活工作台导航">
+      <div class="sidebar-head">
       <div class="brand">
         <div class="brand-mark" aria-hidden="true">序</div>
-        <div>
+        <div class="brand-copy">
           <h1>日序</h1>
           <p id="todayLabel">今日</p>
         </div>
       </div>
+      </div>
       <nav class="nav">
-        <a href="#today" data-view="today"><span class="nav-kbd" aria-hidden="true"></span>今日</a>
-        <a href="#goals" data-view="goals"><span class="nav-kbd" aria-hidden="true"></span>目标</a>
-        <a href="#habits" data-view="habits"><span class="nav-kbd" aria-hidden="true"></span>习惯</a>
-        <a href="#money" data-view="money"><span class="nav-kbd" aria-hidden="true"></span>财务</a>
-        <a href="#health" data-view="health"><span class="nav-kbd" aria-hidden="true"></span>身心</a>
-        <a href="#thoughts" data-view="thoughts"><span class="nav-kbd" aria-hidden="true"></span>随想</a>
-        <a href="#review" data-view="review"><span class="nav-kbd" aria-hidden="true"></span>复盘</a>
+        <a href="#today" data-view="today" aria-label="今日"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M7 3v3M17 3v3M4 9h16M5 5h14a1 1 0 0 1 1 1v14H4V6a1 1 0 0 1 1-1Z"/></svg></span><span class="nav-label">今日</span><span class="nav-balance" aria-hidden="true"></span></a>
+        <a href="#goals" data-view="goals" aria-label="目标"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/><path d="m14 10 5-5"/></svg></span><span class="nav-label">目标</span><span class="nav-balance" aria-hidden="true"></span></a>
+        <a href="#habits" data-view="habits" aria-label="习惯"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M6 4v4M18 4v4M4 10h16M5 6h14a1 1 0 0 1 1 1v13H4V7a1 1 0 0 1 1-1Z"/><path d="m8 15 2 2 5-5"/></svg></span><span class="nav-label">习惯</span><span class="nav-balance" aria-hidden="true"></span></a>
+        <a href="#money" data-view="money" aria-label="财务"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 9h18M16 14h2"/></svg></span><span class="nav-label">财务</span><span class="nav-balance" aria-hidden="true"></span></a>
+        <a href="#health" data-view="health" aria-label="身心"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M20 8c0 5-8 11-8 11S4 13 4 8a4 4 0 0 1 7-2.6A4 4 0 0 1 20 8Z"/><path d="M8 11h2l1-2 2 5 1-3h2"/></svg></span><span class="nav-label">身心</span><span class="nav-balance" aria-hidden="true"></span></a>
+        <a href="#thoughts" data-view="thoughts" aria-label="随想"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 4h14v16H5zM8 8h8M8 12h8M8 16h5"/></svg></span><span class="nav-label">随想</span><span class="nav-balance" aria-hidden="true"></span></a>
+        <a href="#review" data-view="review" aria-label="复盘"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 12a8 8 0 1 0 2.3-5.7L4 8.6M4 4v4.6h4.6"/><path d="M12 8v4l3 2"/></svg></span><span class="nav-label">复盘</span><span class="nav-balance" aria-hidden="true"></span></a>
       </nav>
       <section class="side-card" aria-labelledby="balanceTitle">
         <strong id="balanceTitle">今日状态</strong>
@@ -3867,6 +4532,7 @@
         <div class="top-actions" aria-label="数据操作">
           <span class="pill status-note" id="storageStatus" role="status">本机保存中</span>
           <span class="pill status-note" id="syncStatus" data-state="offline" role="status">仅本机</span>
+          <button class="btn secondary" id="appearanceButton" type="button" aria-haspopup="dialog">外观</button>
           <button class="btn secondary" id="syncButton" type="button">云端同步</button>
           <input class="sr-only" id="backupFile" type="file" accept=".json,application/json">
           <label class="btn secondary" for="backupFile">导入备份</label>
@@ -4118,8 +4784,8 @@
                   <div class="field"><label for="sleepHours">睡眠小时</label><input id="sleepHours" name="sleep" type="number" min="0" max="24" step="0.5" placeholder="例如 7.5"></div>
                 </div>
                 <div class="wellbeing-sliders">
-                  <label class="range-field" for="moodRange"><span>心情 <output id="moodOutput">3</output>/5</span><input id="moodRange" name="mood" type="range" min="1" max="5" value="3"></label>
-                  <label class="range-field" for="energyRange"><span>精力 <output id="energyOutput">3</output>/5</span><input id="energyRange" name="energy" type="range" min="1" max="5" value="3"></label>
+                  <label class="range-field" for="moodRange"><span class="range-heading">心情</span><span class="range-control"><input id="moodRange" name="mood" type="range" min="1" max="5" step="1" value="3"></span><span class="range-scale" aria-hidden="true"><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span></span></label>
+                  <label class="range-field" for="energyRange"><span class="range-heading">精力</span><span class="range-control"><input id="energyRange" name="energy" type="range" min="1" max="5" step="1" value="3"></span><span class="range-scale" aria-hidden="true"><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span></span></label>
                 </div>
                 <div class="field"><label for="bodyStatus">身体状态</label><input id="bodyStatus" name="body" autocomplete="off" placeholder="例如：肩颈紧、胃口正常、运动后轻松"></div>
                 <div class="wellbeing-notes">
@@ -4205,7 +4871,7 @@
                     <footer class="thought-editor-footer">
                       <div class="thought-editor-status" aria-live="polite"><span id="thoughtWordCount">0 字</span><span id="thoughtSaveStatus">已自动保存</span></div>
                       <div class="thought-editor-actions">
-                        <button class="btn ghost small" id="thoughtPinBtn" type="button" data-action="toggle-thought-pin">置顶</button>
+                        <button class="btn secondary small" id="thoughtPinBtn" type="button" data-action="toggle-thought-pin">置顶</button>
                         <button class="btn secondary small" id="exportThoughtBtn" type="button">导出这封信</button>
                         <button class="btn danger small" type="button" data-action="delete-thought">删除</button>
                       </div>
@@ -4295,6 +4961,23 @@
         <button class="btn" type="submit">保存</button>
       </footer>
     </form>
+  </dialog>
+
+  <dialog id="appearanceDialog" aria-labelledby="appearanceDialogTitle">
+    <header class="dialog-header">
+      <div>
+        <h2 id="appearanceDialogTitle">选择外观</h2>
+        <p class="appearance-intro">颜色只能营造感受，不能替你决定情绪。选择此刻看着舒服、愿意长期使用的一套。</p>
+      </div>
+      <button class="icon-close" id="appearanceCloseBtn" type="button" aria-label="关闭外观设置">×</button>
+    </header>
+    <div class="dialog-fields">
+      <div class="appearance-grid" id="appearanceThemeGrid" role="radiogroup" aria-label="工作台配色"></div>
+    </div>
+    <footer class="dialog-footer">
+      <span class="appearance-current" id="appearanceCurrent"></span>
+      <button class="btn" id="appearanceDoneBtn" type="button">完成</button>
+    </footer>
   </dialog>
 
   <dialog id="syncDialog" aria-labelledby="syncDialogTitle">
@@ -4894,6 +5577,73 @@
       const SYNC_META_KEY = "life-workbench-sync-meta-v1";
       const SUPABASE_URL = "https://fqisquljcylklapvctys.supabase.co";
       const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_KMBd6AAlX76024h1cHk7dQ_XfxXWFXW";
+      const APPEARANCE_THEMES = [
+        { id: "mist-rose", name: "雾玫瑰", mood: "柔和、安定，适合日常书写", swatches: ["#f8f2f4", "#fffdfd", "#a35f78", "#71887c"], light: { bg: "#f8f2f4", surface: "#fffdfd", surface2: "#f2e7eb", ink: "#332b2f", muted: "#7c6d73", line: "#e7d6dc", accent: "#a35f78", accentSoft: "#f2dfe6", sidebar: "#eee3e7", sidebarInk: "#695a60" }, dark: { bg: "#181416", surface: "#221c1f", surface2: "#2d2529", ink: "#f0e8eb", muted: "#ad9da3", line: "#4d3d43", accent: "#d58aa4", accentSoft: "#3d2931", sidebar: "#1c1719", sidebarInk: "#dacdd2" } },
+        { id: "sage", name: "鼠尾草", mood: "平稳、恢复，适合放慢节奏", swatches: ["#f3f6ef", "#fcfdf9", "#718664", "#b08b6b"], light: { bg: "#f3f6ef", surface: "#fcfdf9", surface2: "#e8eee1", ink: "#2b3128", muted: "#6b7565", line: "#d6dfce", accent: "#718664", accentSoft: "#e2eadb", sidebar: "#e5ebdf", sidebarInk: "#586253" }, dark: { bg: "#141813", surface: "#1d231b", surface2: "#283025", ink: "#e9eee6", muted: "#9fa999", line: "#3f4939", accent: "#a8bd92", accentSoft: "#2d3828", sidebar: "#171c16", sidebarInk: "#ccd6c6" } },
+        { id: "morning-blue", name: "晨雾蓝", mood: "清醒、从容，适合规划工作", swatches: ["#eef7fa", "#fbfeff", "#3f8eaf", "#d69b6d"], light: { bg: "#eef7fa", surface: "#fbfeff", surface2: "#dfeef4", ink: "#26343a", muted: "#627883", line: "#cbdfe7", accent: "#3f8eaf", accentSoft: "#d7edf6", sidebar: "#dcecf2", sidebarInk: "#4d6976" }, dark: { bg: "#10181c", surface: "#172329", surface2: "#203039", ink: "#e5eff3", muted: "#95aab3", line: "#324b57", accent: "#75b9d4", accentSoft: "#1e3a47", sidebar: "#131d22", sidebarInk: "#c4d7df" } },
+        { id: "camellia", name: "山茶", mood: "温暖、有力量，适合推进计划", swatches: ["#faf2ee", "#fffaf7", "#b75438", "#687f74"], light: { bg: "#faf2ee", surface: "#fffaf7", surface2: "#f5e3da", ink: "#382b27", muted: "#846f67", line: "#ead3c9", accent: "#b75438", accentSoft: "#f5ddd3", sidebar: "#f1e1d9", sidebarInk: "#745e56" }, dark: { bg: "#1b1411", surface: "#261c18", surface2: "#33251f", ink: "#f3e8e2", muted: "#b29d93", line: "#553d32", accent: "#e58a6a", accentSoft: "#482a20", sidebar: "#201713", sidebarInk: "#e0cdc4" } },
+        { id: "sea-salt", name: "海盐", mood: "通透、轻盈，适合整理思绪", swatches: ["#eef8f7", "#fbfefd", "#3f9188", "#7b91a6"], light: { bg: "#eef8f7", surface: "#fbfefd", surface2: "#dcefeb", ink: "#253532", muted: "#607a76", line: "#c8e1dc", accent: "#3f9188", accentSoft: "#d5eeeb", sidebar: "#d9ece8", sidebarInk: "#4d6c67" }, dark: { bg: "#0f1918", surface: "#162421", surface2: "#1e322e", ink: "#e3f0ed", muted: "#91aba6", line: "#304e48", accent: "#76c0b6", accentSoft: "#1b3c37", sidebar: "#121e1c", sidebarInk: "#bfd9d4" } },
+        { id: "ginkgo", name: "银杏", mood: "明朗、积极，适合捕捉灵感", swatches: ["#faf7e9", "#fffdf6", "#a27b24", "#637c72"], light: { bg: "#faf7e9", surface: "#fffdf6", surface2: "#f3ecd0", ink: "#352f21", muted: "#7f7457", line: "#e8ddba", accent: "#a27b24", accentSoft: "#f2e5b9", sidebar: "#efe8cf", sidebarInk: "#6f664e" }, dark: { bg: "#19170f", surface: "#242116", surface2: "#312c1d", ink: "#f2edda", muted: "#ada286", line: "#4e452d", accent: "#d2ad57", accentSoft: "#3e3318", sidebar: "#1e1a12", sidebarInk: "#ddd3b7" } },
+        { id: "lavender-gray", name: "薰衣草灰", mood: "安静、内省，适合长篇记录", swatches: ["#f5f3f8", "#fdfcfe", "#8d819e", "#7e8d82"], light: { bg: "#f5f3f8", surface: "#fdfcfe", surface2: "#ece8f0", ink: "#312e36", muted: "#75707c", line: "#ddd8e3", accent: "#8d819e", accentSoft: "#e9e4ef", sidebar: "#eae7ed", sidebarInk: "#625e69" }, dark: { bg: "#161519", surface: "#201e24", surface2: "#2b2831", ink: "#edeaf0", muted: "#a6a0ad", line: "#45414c", accent: "#bdb1ca", accentSoft: "#332e3c", sidebar: "#1a181e", sidebarInk: "#d3ced8" } },
+        { id: "peach-tea", name: "薄荷巧克力", mood: "清凉、安稳，适合轻松整理", swatches: ["#d7eddf", "#eef7f0", "#3b241e", "#3f9f73"], light: { bg: "#d7eddf", surface: "#eef7f0", surface2: "#cfe4d5", ink: "#2e2824", muted: "#665f58", line: "#b9d3c0", accent: "#3b241e", accentSoft: "#ddd2cc", sidebar: "#c7ddce", sidebarInk: "#555d56" }, dark: { bg: "#110e0c", surface: "#1a1512", surface2: "#251d18", ink: "#e9f2ec", muted: "#9ca9a0", line: "#3b302a", accent: "#8e5f49", accentSoft: "#30221c", sidebar: "#15110f", sidebarInk: "#d2ddd5" } },
+        { id: "pine", name: "松林", mood: "沉静、专注，适合深度工作", swatches: ["#eff5f1", "#fafcf9", "#356b4f", "#9c7659"], light: { bg: "#eff5f1", surface: "#fafcf9", surface2: "#dfeae3", ink: "#243129", muted: "#5f7166", line: "#cbdcd1", accent: "#356b4f", accentSoft: "#d6e9dd", sidebar: "#dce8e0", sidebarInk: "#486154" }, dark: { bg: "#0f1713", surface: "#17221b", surface2: "#1f3027", ink: "#e3eee7", muted: "#91a69a", line: "#30483a", accent: "#73ae8d", accentSoft: "#1c3829", sidebar: "#121c17", sidebarInk: "#bed5c8" } },
+        { id: "ink-blue", name: "墨蓝", mood: "理性、可靠，适合复盘分析", swatches: ["#f0f3f8", "#fafcff", "#344e73", "#9a7459"], light: { bg: "#f0f3f8", surface: "#fafcff", surface2: "#e1e7f0", ink: "#242e3b", muted: "#5f6d7f", line: "#cdd7e4", accent: "#344e73", accentSoft: "#d9e2ee", sidebar: "#dde4ed", sidebarInk: "#485b72" }, dark: { bg: "#10141b", surface: "#171e29", surface2: "#202a38", ink: "#e4eaf1", muted: "#92a0b0", line: "#304052", accent: "#7792bc", accentSoft: "#203047", sidebar: "#131923", sidebarInk: "#c0ccda" } },
+        { id: "plum", name: "梅子", mood: "克制、细腻，适合私人书写", swatches: ["#f8f1f6", "#fefafd", "#8c4775", "#718477"], light: { bg: "#f8f1f6", surface: "#fefafd", surface2: "#f0e1eb", ink: "#352a31", muted: "#7c6874", line: "#e4d1dd", accent: "#8c4775", accentSoft: "#eed9e7", sidebar: "#ebdfe7", sidebarInk: "#6c5663" }, dark: { bg: "#191216", surface: "#231a20", surface2: "#30232b", ink: "#f0e6ec", muted: "#aa98a3", line: "#4d3844", accent: "#c47fa8", accentSoft: "#3e2634", sidebar: "#1d151a", sidebarInk: "#d8c5d0" } },
+        { id: "clay", name: "陶土", mood: "踏实、温厚，适合长期目标", swatches: ["#f8f2ec", "#fdfaf7", "#9b6039", "#667e79"], light: { bg: "#f8f2ec", surface: "#fdfaf7", surface2: "#efe3d8", ink: "#352d27", muted: "#796d63", line: "#e2d2c3", accent: "#9b6039", accentSoft: "#efdccc", sidebar: "#ebe0d5", sidebarInk: "#6b5d52" }, dark: { bg: "#19140f", surface: "#231c17", surface2: "#30261e", ink: "#efe8e1", muted: "#a99b8f", line: "#4b3b2f", accent: "#cb8b67", accentSoft: "#3f291d", sidebar: "#1d1712", sidebarInk: "#d6c9be" } },
+        { id: "rain", name: "雨后", mood: "清凉、复位，适合重新开始", swatches: ["#eff5f6", "#fbfdfd", "#527f8a", "#7c876a"], light: { bg: "#eff5f6", surface: "#fbfdfd", surface2: "#e0eaec", ink: "#273235", muted: "#63767a", line: "#cddde0", accent: "#527f8a", accentSoft: "#d9e9ec", sidebar: "#dce8ea", sidebarInk: "#50696f" }, dark: { bg: "#111719", surface: "#192124", surface2: "#222d31", ink: "#e5edef", muted: "#96a7ab", line: "#35474c", accent: "#8bafb8", accentSoft: "#24373c", sidebar: "#141b1d", sidebarInk: "#c4d3d7" } },
+        { id: "iris", name: "鸢尾", mood: "清晰、独立，适合创作思考", swatches: ["#f2f2fb", "#fcfcff", "#5961ad", "#a8795c"], light: { bg: "#f2f2fb", surface: "#fcfcff", surface2: "#e5e5f5", ink: "#292b3b", muted: "#686b81", line: "#d3d5e9", accent: "#5961ad", accentSoft: "#dfe1f5", sidebar: "#e2e3ef", sidebarInk: "#555a75" }, dark: { bg: "#12131b", surface: "#1a1c28", surface2: "#24273a", ink: "#e8e9f2", muted: "#9da0b2", line: "#3a3f58", accent: "#969de0", accentSoft: "#292d50", sidebar: "#151720", sidebarInk: "#c9cce0" } },
+        { id: "matcha", name: "抹茶", mood: "自然、轻快，适合习惯养成", swatches: ["#f6f8eb", "#fdfef7", "#82963f", "#a46f62"], light: { bg: "#f6f8eb", surface: "#fdfef7", surface2: "#ebefd7", ink: "#303426", muted: "#737960", line: "#dce2c5", accent: "#82963f", accentSoft: "#e7edce", sidebar: "#e9ecda", sidebarInk: "#62694d" }, dark: { bg: "#16180f", surface: "#202317", surface2: "#2b301d", ink: "#edefe1", muted: "#a2a68c", line: "#444a2f", accent: "#b5c96f", accentSoft: "#333b19", sidebar: "#1a1d12", sidebarInk: "#d1d5bc" } },
+        { id: "cherry", name: "勃艮第", mood: "深邃、坚定，适合专注推进", swatches: ["#f8f1f2", "#fffafa", "#5d1228", "#536f65"], light: { bg: "#f8f1f2", surface: "#fffafa", surface2: "#f0e1e4", ink: "#35272a", muted: "#78686c", line: "#e2d1d5", accent: "#5d1228", accentSoft: "#ecd9de", sidebar: "#eadde0", sidebarInk: "#66555a" }, dark: { bg: "#180f12", surface: "#211619", surface2: "#2d1d21", ink: "#f0e6e8", muted: "#aa969b", line: "#4a3238", accent: "#a94c63", accentSoft: "#3d2027", sidebar: "#1b1215", sidebarInk: "#d7c3c8" } },
+        { id: "sandstone", name: "砂岩", mood: "朴素、稳定，适合财务整理", swatches: ["#f6f4ef", "#fcfbf8", "#82715c", "#587675"], light: { bg: "#f6f4ef", surface: "#fcfbf8", surface2: "#ece8df", ink: "#322f29", muted: "#736d63", line: "#ddd7cc", accent: "#82715c", accentSoft: "#eae2d8", sidebar: "#e9e5dc", sidebarInk: "#625d54" }, dark: { bg: "#171512", surface: "#211e19", surface2: "#2c2821", ink: "#ece9e2", muted: "#a49e92", line: "#474137", accent: "#b4a18a", accentSoft: "#372f27", sidebar: "#1b1915", sidebarInk: "#d1ccc1" } },
+        { id: "eucalyptus", name: "尤加利", mood: "洁净、平衡，适合身心记录", swatches: ["#eff7f3", "#fbfefc", "#43816b", "#977080"], light: { bg: "#eff7f3", surface: "#fbfefc", surface2: "#dcece4", ink: "#27332e", muted: "#62766d", line: "#c9ded4", accent: "#43816b", accentSoft: "#d7eae1", sidebar: "#daebe2", sidebarInk: "#4d685c" }, dark: { bg: "#101815", surface: "#17221e", surface2: "#1f3029", ink: "#e4eee9", muted: "#93a79e", line: "#31483e", accent: "#7eb79f", accentSoft: "#1d382d", sidebar: "#131c18", sidebarInk: "#c1d5cb" } },
+        { id: "moon-gray", name: "月光灰", mood: "中性、低干扰，适合长时间使用", swatches: ["#f4f4f4", "#fdfdfd", "#646a70", "#a27866"], light: { bg: "#f4f4f4", surface: "#fdfdfd", surface2: "#e9eaeb", ink: "#2c2f32", muted: "#707479", line: "#d9dbdd", accent: "#646a70", accentSoft: "#e4e6e8", sidebar: "#e7e8e9", sidebarInk: "#5d6267" }, dark: { bg: "#141516", surface: "#1e2022", surface2: "#282b2e", ink: "#ebeced", muted: "#a0a3a6", line: "#414548", accent: "#a4aab0", accentSoft: "#2c3034", sidebar: "#181a1b", sidebarInk: "#cdd0d2" } },
+        { id: "night-bloom", name: "夜花", mood: "沉浸、私密，适合夜间随想", swatches: ["#f6f0f8", "#fdfafe", "#633b7d", "#ad765f"], light: { bg: "#f6f0f8", surface: "#fdfafe", surface2: "#eadff0", ink: "#32283a", muted: "#75677d", line: "#ddcfe4", accent: "#633b7d", accentSoft: "#e8d7ef", sidebar: "#e8dceb", sidebarInk: "#62526b" }, dark: { bg: "#151018", surface: "#1f1724", surface2: "#2a1f31", ink: "#eee5f1", muted: "#a592ac", line: "#46344f", accent: "#a27ac0", accentSoft: "#32203e", sidebar: "#19131d", sidebarInk: "#d1c1d8" } }
+      ];
+      const APPEARANCE_BACKGROUND_TONES = {
+        "mist-rose": { bg: "#fbf3f6", surface: "#fffdfd", surface2: "#f5e9ee", line: "#ead8df", sidebar: "#f2e5ea" },
+        sage: { bg: "#f5f8ef", surface: "#fdfefa", surface2: "#ebf1e1", line: "#d9e3cc", sidebar: "#e8efdd" },
+        "morning-blue": { bg: "#ebf7fb", surface: "#fafeff", surface2: "#dcedf5", line: "#c6dfe9", sidebar: "#d5e8f1" },
+        camellia: { bg: "#fcf2f0", surface: "#fffdfc", surface2: "#f6e2df", line: "#e9ceca", sidebar: "#f2dcda" },
+        "sea-salt": { bg: "#eef9f6", surface: "#fbfefd", surface2: "#dff1ec", line: "#cce3dd", sidebar: "#dbece7" },
+        ginkgo: { bg: "#fbf7e8", surface: "#fffef9", surface2: "#f4ebce", line: "#e7dab7", sidebar: "#f1e6c5" },
+        "lavender-gray": { bg: "#f8f5fa", surface: "#fefcfe", surface2: "#eee9f2", line: "#e0d8e7", sidebar: "#ebe5ef" },
+        "peach-tea": { bg: "#d7eddf", surface: "#eef7f0", surface2: "#cfe4d5", line: "#b9d3c0", sidebar: "#c7ddce" },
+        pine: { bg: "#f2f6f2", surface: "#fbfdfb", surface2: "#e6ede7", line: "#d3dfd5", sidebar: "#e0e9e2" },
+        "ink-blue": { bg: "#f2f3f6", surface: "#fbfcfd", surface2: "#e3e6ec", line: "#cfd4dd", sidebar: "#dce1e8" },
+        plum: { bg: "#f9f0f5", surface: "#fffbfd", surface2: "#f1e1eb", line: "#e4d0dc", sidebar: "#eddae5" },
+        clay: { bg: "#f8f1ea", surface: "#fefbf8", surface2: "#eee1d5", line: "#e0cebd", sidebar: "#eadacd" },
+        rain: { bg: "#f1f8f9", surface: "#fbfefe", surface2: "#e2f0f2", line: "#cee2e5", sidebar: "#dcebed" },
+        iris: { bg: "#f1effa", surface: "#fcfbff", surface2: "#e4e1f3", line: "#d3cfe7", sidebar: "#dfdcef" },
+        matcha: { bg: "#f5f8e9", surface: "#fdfef8", surface2: "#eaf0d4", line: "#dae4bd", sidebar: "#e5edca" },
+        cherry: { bg: "#f9f4f1", surface: "#fffdf9", surface2: "#f2e5e5", line: "#e3ced1", sidebar: "#ecdadd" },
+        sandstone: { bg: "#f5f2ed", surface: "#fdfbf8", surface2: "#e9e3da", line: "#dcd2c5", sidebar: "#e5ddd2" },
+        eucalyptus: { bg: "#ecf8f2", surface: "#fafdfb", surface2: "#daeee4", line: "#c5dfd2", sidebar: "#d3e9de" },
+        "moon-gray": { bg: "#f4f4f5", surface: "#fdfdfd", surface2: "#e9eaeb", line: "#dadcde", sidebar: "#e5e6e8" },
+        "night-bloom": { bg: "#f5eff8", surface: "#fdfbfe", surface2: "#e9dff0", line: "#dacbe2", sidebar: "#e5d8eb" }
+      };
+      APPEARANCE_THEMES.forEach((theme) => Object.assign(theme.light, APPEARANCE_BACKGROUND_TONES[theme.id]));
+      const APPEARANCE_ART_ACCENTS = {
+        "mist-rose": "#39776c",
+        sage: "#a45f6c",
+        "morning-blue": "#c66a3d",
+        camellia: "#2f776e",
+        "sea-salt": "#b26076",
+        ginkgo: "#5267a0",
+        "lavender-gray": "#758650",
+        "peach-tea": "#3f9f73",
+        pine: "#a76655",
+        "ink-blue": "#a66b42",
+        plum: "#477c70",
+        clay: "#497779",
+        rain: "#a66275",
+        iris: "#b97832",
+        matcha: "#a24f67",
+        cherry: "#27756a",
+        sandstone: "#3e7375",
+        eucalyptus: "#9a5870",
+        "moon-gray": "#8c5b79",
+        "night-bloom": "#b88a2e"
+      };
       const VIEW_META = {
         today: {
           title: "今天，温柔而坚定地安排自己。",
@@ -4965,6 +5715,7 @@
           mealRecords: {},
           gratitude: {},
           thoughts: [],
+          appearance: { theme: "mist-rose" },
           lastImport: null
         };
       }
@@ -5007,6 +5758,9 @@
           wellbeing: source.wellbeing && typeof source.wellbeing === "object" ? source.wellbeing : {},
           mealRecords: source.mealRecords && typeof source.mealRecords === "object" ? source.mealRecords : {},
           gratitude: source.gratitude && typeof source.gratitude === "object" ? source.gratitude : {},
+          appearance: source.appearance && typeof source.appearance === "object"
+            ? { theme: APPEARANCE_THEMES.some((theme) => theme.id === source.appearance.theme) ? source.appearance.theme : "mist-rose" }
+            : { theme: "mist-rose" },
           thoughts: Array.isArray(source.thoughts)
             ? source.thoughts
               .filter((thought) => thought && typeof thought === "object")
@@ -5049,6 +5803,127 @@
       let syncTimer = 0;
       let syncConflict = null;
       let timelineHeightObserver = null;
+      const colorSchemeQuery = window.matchMedia("(prefers-color-scheme: dark)");
+
+      function currentAppearanceTheme() {
+        return APPEARANCE_THEMES.find((theme) => theme.id === state.appearance?.theme) || APPEARANCE_THEMES[0];
+      }
+
+      function mixHexColors(first, second, firstWeight = 0.5) {
+        const parse = (color) => [1, 3, 5].map((index) => Number.parseInt(color.slice(index, index + 2), 16));
+        const a = parse(first);
+        const b = parse(second);
+        return `#${a.map((channel, index) => Math.round(channel * firstWeight + b[index] * (1 - firstWeight)).toString(16).padStart(2, "0")).join("")}`;
+      }
+
+      function lowGlarePalette(source, isDark = false, themeId = "") {
+        if (isDark) {
+          const accent = mixHexColors(source.accent, source.bg, 0.48);
+          return {
+            ...source,
+            accent,
+            accentSoft: mixHexColors(accent, source.surface, 0.22),
+            sidebar: accent,
+            sidebarInk: source.ink
+          };
+        }
+
+        // A warm-gray paper base lowers screen glare without flattening each theme's identity.
+        const paper = themeId === "cherry" ? "#e8e2d9" : "#e5e5e1";
+        const surfacePaper = themeId === "cherry" ? "#f0ebe3" : "#ecece8";
+        const ink = mixHexColors(source.ink, "#161817", 0.88);
+        const accent = mixHexColors(source.accent, ink, 0.68);
+        const bg = mixHexColors(source.bg, paper, themeId === "cherry" ? 0.55 : 0.58);
+        const surface = mixHexColors(source.surface, surfacePaper, themeId === "cherry" ? 0.46 : 0.52);
+        const surface2 = mixHexColors(source.surface2, surface, 0.58);
+        const muted = mixHexColors(source.muted, ink, 0.78);
+        const line = mixHexColors(source.line, muted, 0.78);
+
+        return {
+          ...source,
+          bg,
+          surface,
+          surface2,
+          ink,
+          muted,
+          line,
+          accent,
+          accentSoft: mixHexColors(accent, surface, 0.13),
+          sidebar: accent,
+          sidebarInk: surface
+        };
+      }
+
+      function applyAppearanceTheme() {
+        const theme = currentAppearanceTheme();
+        const palette = lowGlarePalette(
+          colorSchemeQuery.matches ? theme.dark : theme.light,
+          colorSchemeQuery.matches,
+          theme.id
+        );
+        const root = document.documentElement;
+        root.dataset.appearanceTheme = theme.id;
+        root.style.colorScheme = colorSchemeQuery.matches ? "dark" : "light";
+        Object.entries({
+          "--theme-bg": palette.bg,
+          "--theme-surface": palette.surface,
+          "--theme-surface-2": palette.surface2,
+          "--theme-ink": palette.ink,
+          "--theme-muted": palette.muted,
+          "--theme-line": palette.line,
+          "--theme-accent": palette.accent,
+          "--theme-accent-soft": palette.accentSoft,
+          "--theme-accent-ink": colorSchemeQuery.matches ? palette.ink : palette.surface,
+          "--theme-contrast": colorSchemeQuery.matches ? mixHexColors(APPEARANCE_ART_ACCENTS[theme.id], "#ffffff", 0.68) : APPEARANCE_ART_ACCENTS[theme.id],
+          "--theme-contrast-soft": mixHexColors(APPEARANCE_ART_ACCENTS[theme.id], palette.surface, colorSchemeQuery.matches ? 0.18 : 0.08),
+          "--theme-danger": mixHexColors(palette.accent, colorSchemeQuery.matches ? "#ef8b96" : "#b74452", 0.32),
+          "--theme-danger-soft": mixHexColors(palette.accent, palette.surface, colorSchemeQuery.matches ? 0.14 : 0.07),
+          "--theme-sidebar": palette.sidebar,
+          "--theme-sidebar-ink": palette.sidebarInk,
+          "--bg": palette.bg,
+          "--surface": palette.surface,
+          "--surface-2": palette.surface2,
+          "--ink": palette.ink,
+          "--muted": palette.muted,
+          "--line": palette.line,
+          "--berry": palette.accent,
+          "--coral": palette.accent
+        }).forEach(([property, value]) => root.style.setProperty(property, value));
+      }
+
+      function updateWellbeingRange(input) {
+        const min = Number(input.min) || 0;
+        const max = Number(input.max) || 100;
+        const value = Number(input.value);
+        const progress = max === min ? 0 : ((value - min) / (max - min)) * 100;
+        input.closest(".range-field")?.style.setProperty("--range-value", `${progress}%`);
+      }
+
+      function renderAppearanceThemes() {
+        const activeTheme = currentAppearanceTheme();
+        $("#appearanceThemeGrid").innerHTML = APPEARANCE_THEMES.map((theme) => {
+          const preview = lowGlarePalette(theme.light, false, theme.id);
+          return `
+          <button class="appearance-option" type="button" role="radio" aria-checked="${theme.id === activeTheme.id}" data-appearance-theme="${theme.id}" style="--theme-accent:${preview.accent}">
+            <span class="appearance-swatches" aria-hidden="true">${[preview.bg, preview.surface, preview.accent, APPEARANCE_ART_ACCENTS[theme.id]].map((color) => `<i style="--swatch:${color}"></i>`).join("")}</span>
+            <strong>${escapeHtml(theme.name)}</strong>
+            <small>${escapeHtml(theme.mood)}</small>
+          </button>
+        `;
+        }).join("");
+        $("#appearanceCurrent").textContent = `当前：${activeTheme.name}`;
+      }
+
+      function openAppearanceDialog() {
+        renderAppearanceThemes();
+        $("#appearanceDialog").showModal();
+        $("#appearanceThemeGrid [aria-checked='true']")?.focus();
+      }
+
+      function closeAppearanceDialog() {
+        $("#appearanceDialog").close();
+        $("#appearanceButton").focus();
+      }
 
       function saveState() {
         try {
@@ -5501,6 +6376,7 @@
       }
 
       function render() {
+        applyAppearanceTheme();
         $("#todayLabel").textContent = formatDateLabel();
         $("#dailyNote").value = state.notes[reviewDate] || "";
         renderFilters();
@@ -6390,8 +7266,8 @@
         $("#sleepHours").value = entry.sleep ?? "";
         $("#moodRange").value = entry.mood ?? 3;
         $("#energyRange").value = entry.energy ?? 3;
-        $("#moodOutput").textContent = entry.mood ?? 3;
-        $("#energyOutput").textContent = entry.energy ?? 3;
+        updateWellbeingRange($("#moodRange"));
+        updateWellbeingRange($("#energyRange"));
         $("#bodyStatus").value = entry.body || "";
         $("#dayHighlight").value = entry.highlight || "";
         $("#dayDrain").value = entry.drain || "";
@@ -6947,8 +7823,16 @@
       });
 
       document.addEventListener("click", (event) => {
-        const target = event.target.closest("[data-action], [data-filter], [data-period], [data-habit-period], [data-finance-scope]");
+        const target = event.target.closest("[data-action], [data-filter], [data-period], [data-habit-period], [data-finance-scope], [data-appearance-theme]");
         if (!target) return;
+        if (target.dataset.appearanceTheme) {
+          state.appearance = { theme: target.dataset.appearanceTheme };
+          applyAppearanceTheme();
+          renderAppearanceThemes();
+          saveState();
+          showToast(`已切换为${currentAppearanceTheme().name}`);
+          return;
+        }
         if (target.dataset.period) {
           reviewPeriod = target.dataset.period;
           renderReview();
@@ -7107,6 +7991,13 @@
       });
 
       $("#addHabitBtn").addEventListener("click", () => openEditor("habit"));
+      $("#appearanceButton").addEventListener("click", openAppearanceDialog);
+      $("#appearanceCloseBtn").addEventListener("click", closeAppearanceDialog);
+      $("#appearanceDoneBtn").addEventListener("click", closeAppearanceDialog);
+      $("#appearanceDialog").addEventListener("click", (event) => {
+        if (event.target === $("#appearanceDialog")) closeAppearanceDialog();
+      });
+      colorSchemeQuery.addEventListener?.("change", applyAppearanceTheme);
       $("#addBlockBtn").addEventListener("click", () => {
         schedulingTaskId = null;
         delete $("#timeline").dataset.positioned;
@@ -7176,8 +8067,12 @@
 
       $("#generatePeriodAiBtn").addEventListener("click", generatePeriodAiSummary);
 
-      $("#moodRange").addEventListener("input", (event) => $("#moodOutput").textContent = event.target.value);
-      $("#energyRange").addEventListener("input", (event) => $("#energyOutput").textContent = event.target.value);
+      $("#moodRange").addEventListener("input", (event) => {
+        updateWellbeingRange(event.target);
+      });
+      $("#energyRange").addEventListener("input", (event) => {
+        updateWellbeingRange(event.target);
+      });
       $("#wellbeingDate").addEventListener("change", renderWellbeing);
       $("#mealDate").addEventListener("change", renderMealRecord);
       $("#estimateMealNutritionBtn").addEventListener("click", generateMealNutrition);
