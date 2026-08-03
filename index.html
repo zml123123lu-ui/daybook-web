@@ -1085,6 +1085,142 @@
       border-top: 1px solid var(--line);
     }
 
+    .meal-section {
+      display: grid;
+      gap: 0.9rem;
+      margin-top: 1.25rem;
+      padding-top: 1.25rem;
+      border-top: 1px solid var(--line);
+    }
+
+    .meal-section-header,
+    .meal-actions,
+    .meal-nutrition-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+    }
+
+    .meal-section-header h3,
+    .meal-nutrition-header h4 {
+      margin: 0;
+      font-family: var(--serif);
+    }
+
+    .meal-section-header p {
+      margin: 0.2rem 0 0;
+    }
+
+    #mealForm {
+      display: grid;
+      gap: 0.8rem;
+    }
+
+    .meal-date-field {
+      max-width: 14rem;
+    }
+
+    .meal-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 0.7rem;
+    }
+
+    .meal-grid textarea {
+      min-height: 6rem;
+      resize: vertical;
+    }
+
+    .meal-action-buttons {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 0.45rem;
+      flex-wrap: wrap;
+    }
+
+    .meal-nutrition-card {
+      display: grid;
+      gap: 0.75rem;
+      padding: 0.9rem;
+      border: 1px solid #e2d6d3;
+      border-radius: var(--radius);
+      background: rgba(255, 253, 252, 0.65);
+    }
+
+    .meal-nutrition-card.empty .nutrition-grid,
+    .meal-nutrition-card.empty .nutrition-summary,
+    .meal-nutrition-card.empty .nutrition-disclaimer {
+      display: none;
+    }
+
+    .nutrition-mode {
+      color: var(--muted);
+      font-size: 0.72rem;
+    }
+
+    .nutrition-grid {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 0.5rem;
+    }
+
+    .nutrition-stat {
+      padding: 0.65rem;
+      border-left: 2px solid #bd8a95;
+      background: rgba(244, 235, 233, 0.58);
+    }
+
+    .nutrition-stat span,
+    .nutrition-stat small {
+      display: block;
+      color: var(--muted);
+      font-size: 0.7rem;
+    }
+
+    .nutrition-stat strong {
+      display: block;
+      margin: 0.18rem 0 0.05rem;
+      font-family: var(--serif);
+      font-size: 1.05rem;
+    }
+
+    .nutrition-summary {
+      margin: 0;
+      line-height: 1.75;
+      white-space: pre-wrap;
+    }
+
+    .nutrition-disclaimer {
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.7rem;
+    }
+
+    .meal-history {
+      display: grid;
+      gap: 0.45rem;
+    }
+
+    .meal-history-entry {
+      display: grid;
+      grid-template-columns: 7rem minmax(0, 1fr) auto;
+      gap: 0.75rem;
+      align-items: center;
+      padding: 0.65rem 0;
+      border-top: 1px solid var(--line);
+    }
+
+    .meal-history-entry span {
+      overflow: hidden;
+      color: var(--muted);
+      font-size: 0.78rem;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
     .habit-item {
       display: grid;
       grid-template-columns: auto minmax(0, 1fr) auto;
@@ -1645,6 +1781,20 @@
 
       .wellbeing-entry {
         grid-template-columns: 1fr;
+      }
+
+      .meal-grid,
+      .nutrition-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .meal-history-entry {
+        grid-template-columns: 1fr auto;
+      }
+
+      .meal-history-entry span {
+        grid-column: 1 / -1;
+        grid-row: 2;
       }
 
       .period-review {
@@ -3120,6 +3270,26 @@
         background: #262122;
       }
 
+      .meal-nutrition-card {
+        border-color: var(--line);
+        background: #262122;
+      }
+
+      .nutrition-stat {
+        border-color: #a46b78;
+        background: #302729;
+      }
+
+      .nutrition-summary {
+        color: #ded4d6;
+      }
+
+      .nutrition-mode,
+      .nutrition-disclaimer,
+      .meal-history-entry span {
+        color: #a99da0;
+      }
+
       .task.done {
         background: #202321;
       }
@@ -3638,6 +3808,39 @@
                 <div class="wellbeing-actions"><span class="save-caption" id="wellbeingSaveStatus" aria-live="polite">记录会保存在本机</span><button class="btn" type="submit">保存今日状态</button></div>
               </form>
               <div class="wellbeing-history" id="wellbeingHistory"></div>
+              <section class="meal-section" aria-labelledby="mealSectionTitle">
+                <header class="meal-section-header">
+                  <div>
+                    <h3 id="mealSectionTitle">一日三餐</h3>
+                    <p class="muted">记录实际吃过的内容，再生成大致营养估算。</p>
+                  </div>
+                </header>
+                <form id="mealForm">
+                  <div class="field meal-date-field"><label for="mealDate">记录日期</label><input id="mealDate" name="date" type="date" required></div>
+                  <div class="meal-grid">
+                    <div class="field"><label for="mealBreakfast">早餐</label><textarea id="mealBreakfast" name="breakfast" placeholder="写下吃了什么和大致份量"></textarea></div>
+                    <div class="field"><label for="mealLunch">午餐</label><textarea id="mealLunch" name="lunch" placeholder="写下吃了什么和大致份量"></textarea></div>
+                    <div class="field"><label for="mealDinner">晚餐</label><textarea id="mealDinner" name="dinner" placeholder="写下吃了什么和大致份量"></textarea></div>
+                  </div>
+                  <div class="meal-actions">
+                    <span class="save-caption" id="mealSaveStatus" aria-live="polite">记录会保存在本机</span>
+                    <div class="meal-action-buttons">
+                      <button class="btn secondary small" type="submit">保存餐饮记录</button>
+                      <button class="btn small" id="estimateMealNutritionBtn" type="button">AI 估算营养</button>
+                    </div>
+                  </div>
+                </form>
+                <section class="meal-nutrition-card empty" id="mealNutritionCard" aria-labelledby="mealNutritionTitle">
+                  <header class="meal-nutrition-header">
+                    <h4 id="mealNutritionTitle">营养估算</h4>
+                    <span class="nutrition-mode" id="mealNutritionMode">等待三餐记录</span>
+                  </header>
+                  <div class="nutrition-grid" id="mealNutritionGrid"></div>
+                  <p class="nutrition-summary" id="mealNutritionSummary"></p>
+                  <p class="nutrition-disclaimer">仅为粗略估算，实际营养会受食材重量、烹饪方式和品牌影响，不替代医生或营养师建议。</p>
+                </section>
+                <div class="meal-history" id="mealHistory"></div>
+              </section>
             </div>
           </section>
 
@@ -4343,9 +4546,9 @@
           description: "从你的记账软件同步账单记录。"
         },
         health: {
-          title: "记录真实状态，才能看见自己的节律。",
-          heading: "每日身心记录",
-          description: "心情、精力、睡眠和身体感受都会进入 AI 复盘。"
+          title: "记录真实状态和饮食，才能看见自己的节律。",
+          heading: "身心与餐饮",
+          description: "心情、睡眠、身体感受和三餐都会进入 AI 复盘。"
         },
         review: {
           title: "把每一天存下来，才看得见自己的变化。",
@@ -4384,6 +4587,7 @@
           aiSummaries: {},
           periodSummaries: {},
           wellbeing: {},
+          mealRecords: {},
           gratitude: {},
           lastImport: null
         };
@@ -4425,6 +4629,7 @@
           aiSummaries: source.aiSummaries && typeof source.aiSummaries === "object" ? source.aiSummaries : {},
           periodSummaries: source.periodSummaries && typeof source.periodSummaries === "object" ? source.periodSummaries : {},
           wellbeing: source.wellbeing && typeof source.wellbeing === "object" ? source.wellbeing : {},
+          mealRecords: source.mealRecords && typeof source.mealRecords === "object" ? source.mealRecords : {},
           gratitude: source.gratitude && typeof source.gratitude === "object" ? source.gratitude : {}
         };
       }
@@ -4733,6 +4938,7 @@
       function fillSelects() {
         $("#taskDate").value = todayKey();
         $("#wellbeingDate").value = todayKey();
+        $("#mealDate").value = todayKey();
       }
 
       function setView(requestedView, updateHistory = false) {
@@ -4774,6 +4980,7 @@
         renderGoals();
         renderFinance();
         renderWellbeing();
+        renderMealRecord();
         renderGratitude();
         renderReview();
         renderMetrics();
@@ -4790,6 +4997,7 @@
           || state.habits.some((habit) => habit.completions?.[key])
           || state.financeRecords.some((record) => record.date === key)
           || state.wellbeing[key]
+          || state.mealRecords[key]
           || state.gratitude[key]?.text
         );
       }
@@ -4836,6 +5044,9 @@
         const wellbeingEntries = dates
           .filter((date) => state.wellbeing[date])
           .map((date) => ({ date, ...state.wellbeing[date] }));
+        const mealEntries = dates
+          .filter((date) => state.mealRecords[date])
+          .map((date) => ({ date, ...state.mealRecords[date] }));
         const gratitudeEntries = dates
           .filter((date) => state.gratitude[date]?.text?.trim())
           .map((date) => `${date}：${state.gratitude[date].text.trim()}`);
@@ -4854,6 +5065,7 @@
           habitCompletions,
           notes,
           wellbeingEntries,
+          mealEntries,
           gratitudeEntries,
           label: period === "year"
             ? `${start.getFullYear()} 年`
@@ -4864,6 +5076,7 @@
             `分类用时：${categoryDurationText(blocks)}`,
             `习惯打卡：${habitCompletions.join("；") || "无"}`,
             `身心记录：${wellbeingEntries.map((entry) => `${entry.date} 心情${entry.mood}/5 精力${entry.energy}/5 睡眠${entry.sleep || "-"}小时 身体${entry.body || "无"} 开心${entry.highlight || "无"} 消耗${entry.drain || "无"}`).join("\n") || "无"}`,
+            `餐饮记录：${mealEntries.map((entry) => `${entry.date} 早餐${entry.breakfast || "无"} 午餐${entry.lunch || "无"} 晚餐${entry.dinner || "无"}${entry.nutrition ? ` 估算热量${entry.nutrition.calories}千卡 蛋白质${entry.nutrition.protein}克` : ""}`).join("\n") || "无"}`,
             `每日记录：${notes.join("\n") || "无"}`,
             `感恩日记：${gratitudeEntries.join("\n") || "无"}`
           ].join("\n")
@@ -4871,14 +5084,14 @@
       }
 
       function localPeriodSummary(context) {
-        if (!context.tasks.length && !context.blocks.length && !context.habitCompletions.length && !context.notes.length && !context.wellbeingEntries.length && !context.gratitudeEntries.length) {
+        if (!context.tasks.length && !context.blocks.length && !context.habitCompletions.length && !context.notes.length && !context.wellbeingEntries.length && !context.mealEntries.length && !context.gratitudeEntries.length) {
           return "这个周期还没有足够的记录。先从一天的计划、习惯打卡或一句复盘开始，下一次这里就会有可回看的内容。";
         }
         const completion = context.tasks.length ? Math.round((context.doneTasks.length / context.tasks.length) * 100) : 0;
         const doneNames = context.doneTasks.slice(0, 3).map((task) => task.title).join("、");
         const pendingNames = context.pendingTasks.slice(0, 3).map((task) => task.title).join("、");
         const lines = [
-          `这段时间共完成 ${context.doneTasks.length}/${context.tasks.length} 项计划，完成率 ${completion}%，习惯打卡 ${context.habitCompletions.length} 次，留下 ${context.notes.length} 天文字记录、${context.wellbeingEntries.length} 天身心记录和 ${context.gratitudeEntries.length} 天感恩记录。`,
+          `这段时间共完成 ${context.doneTasks.length}/${context.tasks.length} 项计划，完成率 ${completion}%，习惯打卡 ${context.habitCompletions.length} 次，留下 ${context.notes.length} 天文字记录、${context.wellbeingEntries.length} 天身心记录、${context.mealEntries.length} 天餐饮记录和 ${context.gratitudeEntries.length} 天感恩记录。`,
           `分类用时：${categoryDurationText(context.blocks)}。`
         ];
         if (doneNames) lines.push(`值得保留的推进：${doneNames}。`);
@@ -5227,6 +5440,7 @@
           .sort((a, b) => String(a.start || a.time || "").localeCompare(String(b.start || b.time || "")));
         const completedHabits = state.habits.filter((habit) => habit.completions[date]);
         const wellbeing = state.wellbeing[date] || null;
+        const mealRecord = state.mealRecords[date] || null;
         const gratitude = state.gratitude[date]?.text || "";
         return {
           tasks,
@@ -5235,6 +5449,7 @@
           blocks,
           completedHabits,
           wellbeing,
+          mealRecord,
           gratitude,
           text: [
             `日期：${date}`,
@@ -5243,13 +5458,14 @@
             `分类用时：${categoryDurationText(blocks)}`,
             `完成习惯：${completedHabits.map((habit) => habit.title).join("；") || "无"}`,
             `身心状态：${wellbeing ? `心情${wellbeing.mood}/5，精力${wellbeing.energy}/5，睡眠${wellbeing.sleep || "-"}小时，身体${wellbeing.body || "无"}，开心${wellbeing.highlight || "无"}，消耗${wellbeing.drain || "无"}，下一步${wellbeing.nextStep || "无"}` : "未记录"}`,
+            `三餐：${mealRecord ? `早餐${mealRecord.breakfast || "无"}；午餐${mealRecord.lunch || "无"}；晚餐${mealRecord.dinner || "无"}${mealRecord.nutrition ? `；估算热量${mealRecord.nutrition.calories}千卡，蛋白质${mealRecord.nutrition.protein}克` : ""}` : "未记录"}`,
             `感恩日记：${gratitude || "未记录"}`
           ].join("\n")
         };
       }
 
       function localStructuredSummary(context) {
-        if (!context.tasks.length && !context.blocks.length && !context.completedHabits.length && !context.wellbeing && !context.gratitude) {
+        if (!context.tasks.length && !context.blocks.length && !context.completedHabits.length && !context.wellbeing && !context.mealRecord && !context.gratitude) {
           return "今天还没有足够的计划或行动记录。先在近期计划中添加事项，并将它放入今日时间轴，稍后再生成总结。";
         }
         const completedNames = context.doneTasks.slice(0, 3).map((task) => task.title).join("、");
@@ -5262,6 +5478,7 @@
         if (pendingNames) lines.push(`仍需继续：${pendingNames}。`);
         if (context.completedHabits.length) lines.push(`完成的习惯包括：${context.completedHabits.map((habit) => habit.title).join("、")}。`);
         if (context.wellbeing) lines.push(`状态记录：心情 ${context.wellbeing.mood}/5，精力 ${context.wellbeing.energy}/5，睡眠 ${context.wellbeing.sleep || "-"} 小时。`);
+        if (context.mealRecord) lines.push(`餐饮记录：早餐 ${context.mealRecord.breakfast || "未记"}，午餐 ${context.mealRecord.lunch || "未记"}，晚餐 ${context.mealRecord.dinner || "未记"}。`);
         if (context.gratitude) lines.push(`感恩日记：${context.gratitude}。`);
         lines.push(context.pendingTasks.length
           ? "明天建议先处理一项未完成计划，再安排新的时间块。"
@@ -5622,6 +5839,170 @@
           : `<div class="empty" role="status">还没有身心记录。先从今天开始，不需要写得完整。</div>`;
       }
 
+      const MEAL_NUTRIENTS = [
+        { terms: ["鸡蛋", "煎蛋", "水煮蛋"], calories: 75, protein: 6.5, carbs: 0.5, fat: 5, fiber: 0 },
+        { terms: ["牛奶", "鲜奶"], calories: 125, protein: 6.5, carbs: 10, fat: 6.5, fiber: 0 },
+        { terms: ["酸奶", "优格"], calories: 110, protein: 5, carbs: 15, fat: 3, fiber: 0 },
+        { terms: ["全麦面包", "吐司", "面包"], calories: 180, protein: 7, carbs: 32, fat: 3, fiber: 2.5 },
+        { terms: ["燕麦", "麦片"], calories: 170, protein: 6, carbs: 29, fat: 3.5, fiber: 4 },
+        { terms: ["米饭", "白饭"], calories: 230, protein: 4, carbs: 50, fat: 0.5, fiber: 0.6 },
+        { terms: ["粥", "稀饭"], calories: 120, protein: 2.5, carbs: 26, fat: 0.5, fiber: 0.5 },
+        { terms: ["面条", "意面", "米粉", "河粉"], calories: 300, protein: 10, carbs: 58, fat: 4, fiber: 2.5 },
+        { terms: ["鸡胸肉", "鸡肉", "鸡腿"], calories: 165, protein: 31, carbs: 0, fat: 3.6, fiber: 0 },
+        { terms: ["牛肉"], calories: 230, protein: 26, carbs: 0, fat: 14, fiber: 0 },
+        { terms: ["猪肉", "排骨"], calories: 260, protein: 24, carbs: 0, fat: 18, fiber: 0 },
+        { terms: ["鱼", "三文鱼", "鳕鱼", "虾", "海鲜"], calories: 180, protein: 26, carbs: 0, fat: 8, fiber: 0 },
+        { terms: ["豆腐", "豆干", "豆制品"], calories: 120, protein: 12, carbs: 4, fat: 7, fiber: 2 },
+        { terms: ["青菜", "蔬菜", "生菜", "菠菜", "白菜"], calories: 60, protein: 3, carbs: 10, fat: 1, fiber: 4 },
+        { terms: ["西兰花", "花椰菜"], calories: 55, protein: 4, carbs: 11, fat: 0.6, fiber: 5 },
+        { terms: ["苹果", "梨", "橙子", "水果"], calories: 90, protein: 0.5, carbs: 24, fat: 0.3, fiber: 4 },
+        { terms: ["香蕉"], calories: 105, protein: 1.3, carbs: 27, fat: 0.4, fiber: 3 },
+        { terms: ["坚果", "杏仁", "核桃", "花生"], calories: 170, protein: 6, carbs: 6, fat: 15, fiber: 3 },
+        { terms: ["豆浆"], calories: 90, protein: 7, carbs: 8, fat: 4, fiber: 1.5 },
+        { terms: ["奶茶", "含糖饮料", "可乐"], calories: 280, protein: 2, carbs: 55, fat: 7, fiber: 0 }
+      ];
+
+      function estimateMealNutrition(meals) {
+        const totals = { calories: 0, protein: 0, carbs: 0, fat: 0, fiber: 0, recognizedFoods: 0, unknownMeals: 0 };
+        [meals.breakfast, meals.lunch, meals.dinner].forEach((meal) => {
+          const text = String(meal || "").trim();
+          if (!text) return;
+          let recognizedInMeal = 0;
+          MEAL_NUTRIENTS.forEach((food) => {
+            if (!food.terms.some((term) => text.includes(term))) return;
+            totals.calories += food.calories;
+            totals.protein += food.protein;
+            totals.carbs += food.carbs;
+            totals.fat += food.fat;
+            totals.fiber += food.fiber;
+            totals.recognizedFoods += 1;
+            recognizedInMeal += 1;
+          });
+          if (!recognizedInMeal) {
+            totals.calories += 420;
+            totals.protein += 18;
+            totals.carbs += 55;
+            totals.fat += 14;
+            totals.fiber += 4;
+            totals.unknownMeals += 1;
+          }
+        });
+        ["protein", "carbs", "fat", "fiber"].forEach((key) => {
+          totals[key] = Math.round(totals[key] * 10) / 10;
+        });
+        totals.calories = Math.round(totals.calories);
+        return totals;
+      }
+
+      function localMealNutritionSummary(nutrition) {
+        const notes = [`按常见份量粗略换算约 ${nutrition.calories} 千卡，蛋白质 ${nutrition.protein} 克。`];
+        if (nutrition.protein < 45) notes.push("蛋白质来源可能偏少，可结合实际份量检查蛋、奶、豆、鱼或瘦肉是否充足。");
+        else notes.push("今天记录中包含了较明确的蛋白质来源。");
+        if (nutrition.fiber < 18) notes.push("膳食纤维估算偏少，蔬菜、水果或全谷物可以再丰富一些。");
+        else notes.push("蔬果和全谷物带来的膳食纤维相对充足。");
+        if (nutrition.unknownMeals) notes.push(`有 ${nutrition.unknownMeals} 餐未识别到具体食物，已按普通一餐估算，误差会比较大。`);
+        return notes.join("\n\n");
+      }
+
+      function renderMealRecord() {
+        const selectedDate = $("#mealDate").value || todayKey();
+        const record = state.mealRecords[selectedDate] || {};
+        $("#mealDate").value = selectedDate;
+        $("#mealBreakfast").value = record.breakfast || "";
+        $("#mealLunch").value = record.lunch || "";
+        $("#mealDinner").value = record.dinner || "";
+        $("#mealSaveStatus").textContent = record.updatedAt ? "这一天已有餐饮记录" : "记录会保存在本机";
+
+        const card = $("#mealNutritionCard");
+        const nutrition = record.nutrition;
+        $("#estimateMealNutritionBtn").textContent = nutrition ? "重新估算营养" : "AI 估算营养";
+        card.classList.toggle("empty", !nutrition);
+        if (!nutrition) {
+          $("#mealNutritionMode").textContent = "等待三餐记录";
+          $("#mealNutritionGrid").innerHTML = "";
+          $("#mealNutritionSummary").textContent = "";
+        } else {
+          const stats = [
+            ["热量", nutrition.calories, "千卡"],
+            ["蛋白质", nutrition.protein, "克"],
+            ["碳水", nutrition.carbs, "克"],
+            ["脂肪", nutrition.fat, "克"],
+            ["膳食纤维", nutrition.fiber, "克"]
+          ];
+          $("#mealNutritionGrid").innerHTML = stats.map(([label, value, unit]) => `<div class="nutrition-stat"><span>${label}</span><strong>${value}</strong><small>${unit}</small></div>`).join("");
+          $("#mealNutritionSummary").textContent = nutrition.summary || localMealNutritionSummary(nutrition);
+          $("#mealNutritionMode").textContent = nutrition.mode || "本地营养估算";
+        }
+
+        const entries = Object.entries(state.mealRecords)
+          .filter(([, value]) => value && typeof value === "object")
+          .sort(([a], [b]) => b.localeCompare(a))
+          .slice(0, 7);
+        $("#mealHistory").innerHTML = entries.length
+          ? entries.map(([date, value]) => {
+            const meals = [value.breakfast, value.lunch, value.dinner].filter(Boolean).join(" · ");
+            return `<article class="meal-history-entry"><strong>${escapeHtml(date)}</strong><span>${escapeHtml(meals || "未填写三餐内容")}</span><button class="btn ghost small" type="button" data-action="open-meal" data-date="${date}">查看</button></article>`;
+          }).join("")
+          : `<div class="empty" role="status">还没有餐饮记录。</div>`;
+      }
+
+      function mealFormValues() {
+        return {
+          date: $("#mealDate").value || todayKey(),
+          breakfast: $("#mealBreakfast").value.trim(),
+          lunch: $("#mealLunch").value.trim(),
+          dinner: $("#mealDinner").value.trim()
+        };
+      }
+
+      function saveMealRecord(values = mealFormValues()) {
+        const existing = state.mealRecords[values.date] || {};
+        const changed = existing.breakfast !== values.breakfast || existing.lunch !== values.lunch || existing.dinner !== values.dinner;
+        state.mealRecords[values.date] = {
+          breakfast: values.breakfast,
+          lunch: values.lunch,
+          dinner: values.dinner,
+          nutrition: changed ? null : existing.nutrition || null,
+          updatedAt: new Date().toISOString()
+        };
+        return state.mealRecords[values.date];
+      }
+
+      async function generateMealNutrition() {
+        const button = $("#estimateMealNutritionBtn");
+        const values = mealFormValues();
+        if (![values.breakfast, values.lunch, values.dinner].some(Boolean)) {
+          showToast("先写下至少一餐吃了什么");
+          return;
+        }
+        const record = saveMealRecord(values);
+        const nutrition = estimateMealNutrition(values);
+        let summary = localMealNutritionSummary(nutrition);
+        let mode = "本地营养估算";
+        button.disabled = true;
+        button.textContent = "估算中";
+        try {
+          if ("Summarizer" in window) {
+            const availability = await window.Summarizer.availability();
+            if (availability === "available") {
+              const summarizer = await window.Summarizer.create({ type: "key-points", format: "plain-text", length: "medium" });
+              summary = await summarizer.summarize(`早餐：${values.breakfast || "无"}\n午餐：${values.lunch || "无"}\n晚餐：${values.dinner || "无"}\n估算：热量${nutrition.calories}千卡，蛋白质${nutrition.protein}克，碳水${nutrition.carbs}克，脂肪${nutrition.fat}克，膳食纤维${nutrition.fiber}克。`, {
+                context: "请用简洁、温和的中文总结今天的饮食结构，只能使用给出的估算数字，不要改变数字，不做诊断。指出蛋白质、蔬果、主食结构中值得保留或可调整的一点，并提醒结果受份量和烹饪方式影响。"
+              });
+              mode = "浏览器本地 AI · 营养估算";
+              summarizer.destroy?.();
+            }
+          }
+        } catch {
+          summary = localMealNutritionSummary(nutrition);
+        }
+        record.nutrition = { ...nutrition, summary, mode, generatedAt: new Date().toISOString() };
+        button.disabled = false;
+        button.textContent = "重新估算营养";
+        render();
+        showToast("营养估算已生成");
+      }
+
       function renderGratitude() {
         const today = todayKey();
         const entry = state.gratitude[today] || {};
@@ -5932,6 +6313,18 @@
           showToast(`${date} 的身心状态已保存`);
         }
 
+        if (event.target.id === "mealForm") {
+          event.preventDefault();
+          const values = mealFormValues();
+          if (![values.breakfast, values.lunch, values.dinner].some(Boolean)) {
+            showToast("先写下至少一餐吃了什么");
+            return;
+          }
+          saveMealRecord(values);
+          render();
+          showToast(`${values.date} 的餐饮记录已保存`);
+        }
+
         if (event.target.id === "editorForm") {
           event.preventDefault();
           const form = new FormData(event.target);
@@ -6040,6 +6433,12 @@
           $("#wellbeingDate").value = target.dataset.date;
           renderWellbeing();
           $("#wellbeingForm").scrollIntoView({ behavior: scrollBehavior, block: "start" });
+          return;
+        }
+        if (action === "open-meal") {
+          $("#mealDate").value = target.dataset.date;
+          renderMealRecord();
+          $("#mealForm").scrollIntoView({ behavior: scrollBehavior, block: "start" });
           return;
         }
         if (action === "toggle-task") {
@@ -6175,6 +6574,8 @@
       $("#moodRange").addEventListener("input", (event) => $("#moodOutput").textContent = event.target.value);
       $("#energyRange").addEventListener("input", (event) => $("#energyOutput").textContent = event.target.value);
       $("#wellbeingDate").addEventListener("change", renderWellbeing);
+      $("#mealDate").addEventListener("change", renderMealRecord);
+      $("#estimateMealNutritionBtn").addEventListener("click", generateMealNutrition);
 
       $("#financeFile").addEventListener("change", async (event) => {
         const file = event.target.files?.[0];
