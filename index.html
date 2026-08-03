@@ -1435,6 +1435,267 @@
       gap: 0.8rem;
     }
 
+    .thought-panel .panel-body {
+      padding: 0;
+    }
+
+    .thought-workspace {
+      display: grid;
+      grid-template-columns: 18rem minmax(0, 1fr);
+      min-height: 38rem;
+    }
+
+    .thought-list-pane,
+    .thought-editor-pane {
+      min-width: 0;
+      background: var(--surface);
+    }
+
+    .thought-list-pane {
+      padding: 1rem;
+      border-right: 1px solid var(--line);
+    }
+
+    .thought-list-header,
+    .thought-editor-footer,
+    .thought-editor-actions {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+    }
+
+    .thought-list-header {
+      justify-content: space-between;
+      margin-bottom: 0.75rem;
+    }
+
+    .thought-list-header h3 {
+      font-family: var(--serif);
+      font-size: 1.05rem;
+    }
+
+    .thought-search {
+      margin-bottom: 0.75rem;
+    }
+
+    .thought-list {
+      display: grid;
+      gap: 0.35rem;
+      max-height: 43rem;
+      overflow-y: auto;
+    }
+
+    .thought-list-item {
+      width: 100%;
+      padding: 0.75rem;
+      border: 1px solid transparent;
+      border-radius: var(--radius);
+      background: transparent;
+      color: var(--ink);
+      text-align: left;
+    }
+
+    .thought-list-item:hover {
+      background: var(--surface-2);
+    }
+
+    .thought-list-item.active {
+      border-color: rgba(157, 75, 96, 0.28);
+      background: rgba(157, 75, 96, 0.08);
+    }
+
+    .thought-list-title,
+    .thought-list-preview,
+    .thought-list-meta {
+      display: block;
+      overflow-wrap: anywhere;
+    }
+
+    .thought-list-title {
+      font-size: 0.9rem;
+      font-weight: 780;
+    }
+
+    .thought-list-preview {
+      margin-top: 0.3rem;
+      color: var(--muted);
+      font-size: 0.78rem;
+      line-height: 1.45;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .thought-list-meta {
+      margin-top: 0.45rem;
+      color: var(--muted);
+      font-size: 0.7rem;
+    }
+
+    .thought-editor-pane {
+      padding: clamp(1.2rem, 3vw, 2.4rem);
+    }
+
+    .thought-empty-editor {
+      min-height: 32rem;
+      display: grid;
+      place-items: center;
+      text-align: center;
+      color: var(--muted);
+    }
+
+    .thought-empty-editor > div {
+      max-width: 24rem;
+    }
+
+    .thought-empty-editor p {
+      margin: 0.45rem 0 1rem;
+      font-size: 0.86rem;
+      line-height: 1.6;
+    }
+
+    .thought-editor-meta {
+      margin-bottom: 1.4rem;
+    }
+
+    .thought-title-field {
+      flex: 1;
+    }
+
+    #thoughtTitle {
+      padding: 0 0 0.55rem;
+      border: 0;
+      border-bottom: 1px solid var(--line);
+      border-radius: 0;
+      background: transparent;
+      font-family: var(--serif);
+      font-size: 1.5rem;
+      font-weight: 700;
+    }
+
+    #thoughtDate {
+      width: 100%;
+      min-height: 0;
+      padding: 0.4rem 0;
+      border: 0;
+      border-bottom: 1px solid var(--line);
+      border-radius: 0;
+      background: transparent;
+      color: var(--ink);
+      font-family: var(--serif);
+      font-size: 1rem;
+      text-align: right;
+      text-align-last: right;
+      direction: rtl;
+    }
+
+    #thoughtDate::-webkit-date-and-time-value {
+      width: 100%;
+      text-align: right;
+    }
+
+    #thoughtDate::-webkit-datetime-edit {
+      display: block;
+      width: 100%;
+      text-align: right;
+    }
+
+    .thought-salutation,
+    .thought-closing,
+    .thought-date-line {
+      font-family: var(--serif);
+      color: var(--ink);
+      font-size: 1rem;
+    }
+
+    #thoughtBody {
+      min-height: 32rem;
+      margin: 0.7rem 0 1rem;
+      padding: 0;
+      border: 0;
+      border-radius: 0;
+      background: transparent;
+      font-family: var(--serif);
+      font-size: 1rem;
+      line-height: 1.9;
+      resize: vertical;
+    }
+
+    #thoughtTitle:focus-visible,
+    #thoughtBody:focus-visible,
+    #thoughtSignature:focus-visible,
+    #thoughtDate:focus-visible {
+      outline: none;
+      box-shadow: none;
+    }
+
+    #thoughtTitle:focus-visible,
+    #thoughtSignature:focus-visible {
+      border-bottom-color: var(--coral);
+    }
+
+    #thoughtBody:focus-visible {
+      background: rgba(157, 75, 96, 0.025);
+    }
+
+    #thoughtDate:focus-visible {
+      color: var(--coral);
+    }
+
+    .thought-letter-ending {
+      display: grid;
+      justify-items: end;
+      gap: 0.35rem;
+      margin-top: 0.75rem;
+    }
+
+    .thought-closing,
+    .thought-date-line {
+      display: grid;
+      grid-template-columns: auto minmax(0, 15rem);
+      gap: 0.65rem;
+      align-items: center;
+      justify-content: end;
+      width: min(100%, 20rem);
+    }
+
+    #thoughtSignature {
+      padding: 0.4rem 0;
+      border: 0;
+      border-bottom: 1px solid var(--line);
+      border-radius: 0;
+      background: transparent;
+      text-align: right;
+    }
+
+    #thoughtSignature,
+    #thoughtDate {
+      color: var(--ink);
+      font-family: var(--serif);
+      font-size: 1rem;
+    }
+
+    .thought-editor-footer {
+      justify-content: space-between;
+      flex-wrap: wrap;
+      margin-top: 1.4rem;
+      padding-top: 0.9rem;
+      border-top: 1px solid var(--line);
+    }
+
+    .thought-editor-status {
+      display: flex;
+      gap: 0.55rem;
+      color: var(--muted);
+      font-size: 0.75rem;
+    }
+
+    .thought-editor-actions {
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
     .calendar-panel,
     .review-day-panel,
     .period-review {
@@ -2847,6 +3108,38 @@
       .page-title {
         font-size: 1.4rem;
       }
+
+      .thought-workspace {
+        grid-template-columns: 1fr;
+        min-height: 0;
+      }
+
+      .thought-list-pane {
+        border-right: 0;
+        border-bottom: 1px solid var(--line);
+      }
+
+      .thought-list {
+        max-height: 15rem;
+      }
+
+      .thought-editor-pane {
+        padding: 1rem;
+      }
+
+      #thoughtBody {
+        min-height: 26rem;
+      }
+
+      .thought-closing,
+      .thought-date-line {
+        grid-template-columns: auto minmax(0, 1fr);
+      }
+
+      #thoughtSignature,
+      #thoughtDate {
+        text-align: right;
+      }
     }
 
     @media (max-width: 560px) {
@@ -3029,6 +3322,20 @@
         border-color: var(--line);
         background: var(--surface);
         box-shadow: none;
+      }
+
+      .thought-list-pane,
+      .thought-editor-pane {
+        background: #211d1e;
+      }
+
+      .thought-list-item.active {
+        border-color: #744c56;
+        background: #35262a;
+      }
+
+      .thought-list-item:hover {
+        background: #2b2526;
       }
 
       .metric::before {
@@ -3531,6 +3838,7 @@
         <a href="#habits" data-view="habits"><span class="nav-kbd" aria-hidden="true"></span>习惯</a>
         <a href="#money" data-view="money"><span class="nav-kbd" aria-hidden="true"></span>财务</a>
         <a href="#health" data-view="health"><span class="nav-kbd" aria-hidden="true"></span>身心</a>
+        <a href="#thoughts" data-view="thoughts"><span class="nav-kbd" aria-hidden="true"></span>随想</a>
         <a href="#review" data-view="review"><span class="nav-kbd" aria-hidden="true"></span>复盘</a>
       </nav>
       <section class="side-card" aria-labelledby="balanceTitle">
@@ -3841,6 +4149,56 @@
                 </section>
                 <div class="meal-history" id="mealHistory"></div>
               </section>
+            </div>
+          </section>
+
+          <section class="panel view-panel thought-panel" id="thoughts" data-panel="thoughts" hidden>
+            <div class="panel-body">
+              <div class="thought-workspace">
+                <aside class="thought-list-pane" aria-label="随想记录列表">
+                  <div class="thought-list-header">
+                    <h3>我的信件</h3>
+                    <button class="btn small" id="newThoughtBtn" type="button">新建</button>
+                  </div>
+                  <div class="thought-search field">
+                    <label class="sr-only" for="thoughtSearch">搜索信件</label>
+                    <input id="thoughtSearch" type="search" autocomplete="off" placeholder="搜索标题或内容">
+                  </div>
+                  <div class="thought-list" id="thoughtList"></div>
+                </aside>
+                <section class="thought-editor-pane" aria-label="随想编辑器">
+                  <div class="thought-empty-editor" id="thoughtEmptyEditor">
+                    <div>
+                      <strong>这里还没有信</strong>
+                      <p>不需要想好主题，先写下一句此刻真正想对自己说的话。</p>
+                      <button class="btn" id="firstThoughtBtn" type="button">写第一封信</button>
+                    </div>
+                  </div>
+                  <form id="thoughtForm" hidden>
+                    <div class="thought-editor-meta">
+                      <div class="thought-title-field field">
+                        <label class="sr-only" for="thoughtTitle">信件标题</label>
+                        <input id="thoughtTitle" name="title" autocomplete="off" placeholder="这封信的标题">
+                      </div>
+                    </div>
+                    <p class="thought-salutation">亲爱的自己：</p>
+                    <label class="sr-only" for="thoughtBody">信件正文</label>
+                    <textarea id="thoughtBody" name="body" placeholder="慢慢写，不必急着得出答案。"></textarea>
+                    <div class="thought-letter-ending">
+                      <label class="thought-closing" for="thoughtSignature"><span>写信的我</span><input id="thoughtSignature" name="signature" autocomplete="off" placeholder="落款（可不填）"></label>
+                      <label class="thought-date-line" for="thoughtDate"><span>写于</span><input id="thoughtDate" name="date" type="date" required></label>
+                    </div>
+                    <footer class="thought-editor-footer">
+                      <div class="thought-editor-status" aria-live="polite"><span id="thoughtWordCount">0 字</span><span id="thoughtSaveStatus">已自动保存</span></div>
+                      <div class="thought-editor-actions">
+                        <button class="btn ghost small" id="thoughtPinBtn" type="button" data-action="toggle-thought-pin">置顶</button>
+                        <button class="btn secondary small" id="exportThoughtBtn" type="button">导出这封信</button>
+                        <button class="btn danger small" type="button" data-action="delete-thought">删除</button>
+                      </div>
+                    </footer>
+                  </form>
+                </section>
+              </div>
             </div>
           </section>
 
@@ -4550,6 +4908,11 @@
           heading: "身心与餐饮",
           description: "心情、睡眠、身体感受和三餐都会进入 AI 复盘。"
         },
+        thoughts: {
+          title: "把没有答案的心事，慢慢写给自己。",
+          heading: "写给自己的信",
+          description: "长日记、随笔和未说完的话，都可以留在这里。"
+        },
         review: {
           title: "把每一天存下来，才看得见自己的变化。",
           heading: "日历与复盘",
@@ -4589,6 +4952,7 @@
           wellbeing: {},
           mealRecords: {},
           gratitude: {},
+          thoughts: [],
           lastImport: null
         };
       }
@@ -4630,7 +4994,21 @@
           periodSummaries: source.periodSummaries && typeof source.periodSummaries === "object" ? source.periodSummaries : {},
           wellbeing: source.wellbeing && typeof source.wellbeing === "object" ? source.wellbeing : {},
           mealRecords: source.mealRecords && typeof source.mealRecords === "object" ? source.mealRecords : {},
-          gratitude: source.gratitude && typeof source.gratitude === "object" ? source.gratitude : {}
+          gratitude: source.gratitude && typeof source.gratitude === "object" ? source.gratitude : {},
+          thoughts: Array.isArray(source.thoughts)
+            ? source.thoughts
+              .filter((thought) => thought && typeof thought === "object")
+              .map((thought) => ({
+                id: String(thought.id || uid()),
+                title: String(thought.title || ""),
+                body: String(thought.body || ""),
+                date: String(thought.date || todayKey()),
+                signature: String(thought.signature || ""),
+                pinned: Boolean(thought.pinned),
+                createdAt: String(thought.createdAt || thought.updatedAt || new Date().toISOString()),
+                updatedAt: String(thought.updatedAt || thought.createdAt || new Date().toISOString())
+              }))
+            : []
         };
       }
 
@@ -4644,6 +5022,9 @@
       let reviewPeriod = "week";
       let habitPeriod = "week";
       let habitChartAnchor = new Date();
+      let selectedThoughtId = null;
+      let thoughtSearch = "";
+      let thoughtSaveTimer = 0;
       const syncApi = window.WorkbenchSync || null;
       const syncClient = syncApi
         ? syncApi.createSyncClient({ projectUrl: SUPABASE_URL, publishableKey: SUPABASE_PUBLISHABLE_KEY })
@@ -4967,6 +5348,144 @@
         window.requestAnimationFrame(syncTimelineHeight);
       }
 
+      function sortedThoughts() {
+        return [...state.thoughts].sort((a, b) => {
+          if (Boolean(a.pinned) !== Boolean(b.pinned)) return a.pinned ? -1 : 1;
+          return String(b.updatedAt || b.createdAt || "").localeCompare(String(a.updatedAt || a.createdAt || ""));
+        });
+      }
+
+      function currentThought() {
+        return state.thoughts.find((thought) => thought.id === selectedThoughtId) || null;
+      }
+
+      function thoughtCharacterCount(value) {
+        return Array.from(String(value || "").replace(/\s/g, "")).length;
+      }
+
+      function renderThoughtList() {
+        const query = thoughtSearch.trim().toLocaleLowerCase("zh-CN");
+        const thoughts = sortedThoughts().filter((thought) => !query || `${thought.title || ""}\n${thought.body || ""}`.toLocaleLowerCase("zh-CN").includes(query));
+        if (!state.thoughts.length) {
+          $("#thoughtList").innerHTML = '<div class="empty" role="status">还没有随想。新建后，这里会按最近修改时间排列。</div>';
+          return;
+        }
+        if (!thoughts.length) {
+          $("#thoughtList").innerHTML = '<div class="empty" role="status">没有找到匹配的信。</div>';
+          return;
+        }
+        $("#thoughtList").innerHTML = thoughts.map((thought) => {
+          const active = thought.id === selectedThoughtId ? " active" : "";
+          const title = thought.title?.trim() || "未命名的信";
+          const preview = thought.body?.trim().replace(/\s+/g, " ") || "还没有正文";
+          const pin = thought.pinned ? "置顶 · " : "";
+          return `<button class="thought-list-item${active}" type="button" data-action="select-thought" data-id="${escapeHtml(thought.id)}" aria-pressed="${thought.id === selectedThoughtId}"><span class="thought-list-title">${escapeHtml(title)}</span><span class="thought-list-preview">${escapeHtml(preview.slice(0, 72))}</span><span class="thought-list-meta">${pin}${escapeHtml(thought.date || "未标日期")}</span></button>`;
+        }).join("");
+      }
+
+      function renderThoughtEditor() {
+        const thought = currentThought();
+        $("#thoughtEmptyEditor").hidden = Boolean(thought);
+        $("#thoughtForm").hidden = !thought;
+        if (!thought) return;
+        $("#thoughtTitle").value = thought.title || "";
+        $("#thoughtDate").value = thought.date || todayKey();
+        $("#thoughtBody").value = thought.body || "";
+        $("#thoughtSignature").value = thought.signature || "";
+        $("#thoughtWordCount").textContent = `${thoughtCharacterCount(thought.body)} 字`;
+        $("#thoughtSaveStatus").textContent = "已自动保存";
+        $("#thoughtPinBtn").textContent = thought.pinned ? "取消置顶" : "置顶";
+        $("#thoughtPinBtn").setAttribute("aria-pressed", String(Boolean(thought.pinned)));
+      }
+
+      function renderThoughts() {
+        if (selectedThoughtId && !currentThought()) selectedThoughtId = null;
+        if (!selectedThoughtId && state.thoughts.length) selectedThoughtId = sortedThoughts()[0].id;
+        renderThoughtList();
+        renderThoughtEditor();
+      }
+
+      function createThought() {
+        const now = new Date().toISOString();
+        const thought = { id: uid(), title: "", body: "", date: todayKey(), signature: "", pinned: false, createdAt: now, updatedAt: now };
+        state.thoughts.push(thought);
+        selectedThoughtId = thought.id;
+        saveState();
+        renderThoughts();
+        $("#thoughtTitle").focus();
+      }
+
+      function saveThoughtFromEditor() {
+        const thought = currentThought();
+        if (!thought || $("#thoughtForm").hidden) return false;
+        clearTimeout(thoughtSaveTimer);
+        thought.title = $("#thoughtTitle").value;
+        thought.date = $("#thoughtDate").value || todayKey();
+        thought.body = $("#thoughtBody").value;
+        thought.signature = $("#thoughtSignature").value;
+        thought.updatedAt = new Date().toISOString();
+        saveState();
+        $("#thoughtWordCount").textContent = `${thoughtCharacterCount(thought.body)} 字`;
+        $("#thoughtSaveStatus").textContent = "已自动保存";
+        renderThoughtList();
+        return true;
+      }
+
+      function scheduleThoughtAutosave() {
+        if (!currentThought()) return;
+        $("#thoughtWordCount").textContent = `${thoughtCharacterCount($("#thoughtBody").value)} 字`;
+        $("#thoughtSaveStatus").textContent = "保存中…";
+        clearTimeout(thoughtSaveTimer);
+        thoughtSaveTimer = window.setTimeout(saveThoughtFromEditor, 600);
+      }
+
+      function selectThought(id) {
+        if (id === selectedThoughtId) return;
+        saveThoughtFromEditor();
+        selectedThoughtId = id;
+        renderThoughts();
+      }
+
+      function deleteThought() {
+        const thought = currentThought();
+        if (!thought || !confirm(`确定删除“${thought.title?.trim() || "未命名的信"}”吗？删除后无法恢复。`)) return;
+        clearTimeout(thoughtSaveTimer);
+        state.thoughts = state.thoughts.filter((item) => item.id !== thought.id);
+        selectedThoughtId = sortedThoughts()[0]?.id || null;
+        saveState();
+        renderThoughts();
+        showToast("这封信已删除");
+      }
+
+      function toggleThoughtPin() {
+        const thought = currentThought();
+        if (!thought) return;
+        saveThoughtFromEditor();
+        thought.pinned = !thought.pinned;
+        thought.updatedAt = new Date().toISOString();
+        saveState();
+        renderThoughts();
+        showToast(thought.pinned ? "已置顶" : "已取消置顶");
+      }
+
+      function exportThought() {
+        saveThoughtFromEditor();
+        const thought = currentThought();
+        if (!thought) return;
+        const title = thought.title?.trim() || "未命名的信";
+        const content = `${title}\n${thought.date || ""}\n\n亲爱的自己：\n\n${thought.body || ""}\n\n写信的我${thought.signature ? `：${thought.signature}` : ""}\n`;
+        const blob = new Blob([content], { type: "text/plain;charset=utf-8" });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = `${title.replace(/[\\/:*?"<>|]/g, "-").slice(0, 60)}.txt`;
+        document.body.append(link);
+        link.click();
+        link.remove();
+        URL.revokeObjectURL(url);
+        showToast("这封信已导出");
+      }
+
       function render() {
         $("#todayLabel").textContent = formatDateLabel();
         $("#dailyNote").value = state.notes[reviewDate] || "";
@@ -4982,6 +5501,7 @@
         renderWellbeing();
         renderMealRecord();
         renderGratitude();
+        renderThoughts();
         renderReview();
         renderMetrics();
         saveState();
@@ -4999,6 +5519,7 @@
           || state.wellbeing[key]
           || state.mealRecords[key]
           || state.gratitude[key]?.text
+          || state.thoughts.some((thought) => thought.date === key && thought.body?.trim())
         );
       }
 
@@ -5050,6 +5571,9 @@
         const gratitudeEntries = dates
           .filter((date) => state.gratitude[date]?.text?.trim())
           .map((date) => `${date}：${state.gratitude[date].text.trim()}`);
+        const thoughtEntries = state.thoughts
+          .filter((thought) => dates.includes(thought.date) && thought.body?.trim())
+          .map((thought) => `${thought.date} ${thought.title?.trim() || "未命名的信"}：${thought.body.trim().slice(0, 500)}`);
         const periodName = { week: "本周", month: "本月", year: "本年" }[period];
         const endDate = new Date(end.getTime() - 86400000);
         return {
@@ -5067,6 +5591,7 @@
           wellbeingEntries,
           mealEntries,
           gratitudeEntries,
+          thoughtEntries,
           label: period === "year"
             ? `${start.getFullYear()} 年`
             : `${start.getFullYear()}年${start.getMonth() + 1}月${start.getDate()}日 - ${endDate.getMonth() + 1}月${endDate.getDate()}日`,
@@ -5078,20 +5603,21 @@
             `身心记录：${wellbeingEntries.map((entry) => `${entry.date} 心情${entry.mood}/5 精力${entry.energy}/5 睡眠${entry.sleep || "-"}小时 身体${entry.body || "无"} 开心${entry.highlight || "无"} 消耗${entry.drain || "无"}`).join("\n") || "无"}`,
             `餐饮记录：${mealEntries.map((entry) => `${entry.date} 早餐${entry.breakfast || "无"} 午餐${entry.lunch || "无"} 晚餐${entry.dinner || "无"}${entry.nutrition ? ` 估算热量${entry.nutrition.calories}千卡 蛋白质${entry.nutrition.protein}克` : ""}`).join("\n") || "无"}`,
             `每日记录：${notes.join("\n") || "无"}`,
-            `感恩日记：${gratitudeEntries.join("\n") || "无"}`
+            `感恩日记：${gratitudeEntries.join("\n") || "无"}`,
+            `写给自己的信：${thoughtEntries.join("\n") || "无"}`
           ].join("\n")
         };
       }
 
       function localPeriodSummary(context) {
-        if (!context.tasks.length && !context.blocks.length && !context.habitCompletions.length && !context.notes.length && !context.wellbeingEntries.length && !context.mealEntries.length && !context.gratitudeEntries.length) {
+        if (!context.tasks.length && !context.blocks.length && !context.habitCompletions.length && !context.notes.length && !context.wellbeingEntries.length && !context.mealEntries.length && !context.gratitudeEntries.length && !context.thoughtEntries.length) {
           return "这个周期还没有足够的记录。先从一天的计划、习惯打卡或一句复盘开始，下一次这里就会有可回看的内容。";
         }
         const completion = context.tasks.length ? Math.round((context.doneTasks.length / context.tasks.length) * 100) : 0;
         const doneNames = context.doneTasks.slice(0, 3).map((task) => task.title).join("、");
         const pendingNames = context.pendingTasks.slice(0, 3).map((task) => task.title).join("、");
         const lines = [
-          `这段时间共完成 ${context.doneTasks.length}/${context.tasks.length} 项计划，完成率 ${completion}%，习惯打卡 ${context.habitCompletions.length} 次，留下 ${context.notes.length} 天文字记录、${context.wellbeingEntries.length} 天身心记录、${context.mealEntries.length} 天餐饮记录和 ${context.gratitudeEntries.length} 天感恩记录。`,
+          `这段时间共完成 ${context.doneTasks.length}/${context.tasks.length} 项计划，完成率 ${completion}%，习惯打卡 ${context.habitCompletions.length} 次，留下 ${context.notes.length} 天文字记录、${context.wellbeingEntries.length} 天身心记录、${context.mealEntries.length} 天餐饮记录、${context.gratitudeEntries.length} 天感恩记录和 ${context.thoughtEntries.length} 封写给自己的信。`,
           `分类用时：${categoryDurationText(context.blocks)}。`
         ];
         if (doneNames) lines.push(`值得保留的推进：${doneNames}。`);
@@ -5178,7 +5704,7 @@
           ? visibleDates.map((key) => {
             const dayTasks = state.tasks.filter((task) => task.date === key);
             const dayDone = dayTasks.filter((task) => task.done).length;
-            const note = state.notes[key]?.trim() || state.gratitude[key]?.text?.trim() || state.aiSummaries[key]?.text || "这一天有行动记录，但还没有写文字。";
+            const note = state.notes[key]?.trim() || state.gratitude[key]?.text?.trim() || state.thoughts.find((thought) => thought.date === key && thought.body?.trim())?.body?.trim() || state.aiSummaries[key]?.text || "这一天有行动记录，但还没有写文字。";
             return `<article class="period-day"><time>${reviewDateLabel(key, false)}</time><p>${escapeHtml(note.slice(0, 150))}</p><span class="pill">${dayTasks.length ? `${dayDone}/${dayTasks.length} 完成` : "有记录"}</span></article>`;
           }).join("")
           : `<div class="empty" role="status">这个阶段还没有记录。先在日历里选一天，写下你的真实状态。</div>`;
@@ -5442,6 +5968,9 @@
         const wellbeing = state.wellbeing[date] || null;
         const mealRecord = state.mealRecords[date] || null;
         const gratitude = state.gratitude[date]?.text || "";
+        const thoughts = state.thoughts
+          .filter((thought) => thought.date === date && thought.body?.trim())
+          .map((thought) => ({ title: thought.title?.trim() || "未命名的信", excerpt: thought.body.trim().slice(0, 500) }));
         return {
           tasks,
           doneTasks,
@@ -5451,6 +5980,7 @@
           wellbeing,
           mealRecord,
           gratitude,
+          thoughts,
           text: [
             `日期：${date}`,
             `今日任务：${tasks.map((task) => `${task.done ? "已完成" : "未完成"}-${task.title}`).join("；") || "无"}`,
@@ -5459,13 +5989,14 @@
             `完成习惯：${completedHabits.map((habit) => habit.title).join("；") || "无"}`,
             `身心状态：${wellbeing ? `心情${wellbeing.mood}/5，精力${wellbeing.energy}/5，睡眠${wellbeing.sleep || "-"}小时，身体${wellbeing.body || "无"}，开心${wellbeing.highlight || "无"}，消耗${wellbeing.drain || "无"}，下一步${wellbeing.nextStep || "无"}` : "未记录"}`,
             `三餐：${mealRecord ? `早餐${mealRecord.breakfast || "无"}；午餐${mealRecord.lunch || "无"}；晚餐${mealRecord.dinner || "无"}${mealRecord.nutrition ? `；估算热量${mealRecord.nutrition.calories}千卡，蛋白质${mealRecord.nutrition.protein}克` : ""}` : "未记录"}`,
-            `感恩日记：${gratitude || "未记录"}`
+            `感恩日记：${gratitude || "未记录"}`,
+            `写给自己的信：${thoughts.map((thought) => `${thought.title}：${thought.excerpt}`).join("；") || "未记录"}`
           ].join("\n")
         };
       }
 
       function localStructuredSummary(context) {
-        if (!context.tasks.length && !context.blocks.length && !context.completedHabits.length && !context.wellbeing && !context.mealRecord && !context.gratitude) {
+        if (!context.tasks.length && !context.blocks.length && !context.completedHabits.length && !context.wellbeing && !context.mealRecord && !context.gratitude && !context.thoughts.length) {
           return "今天还没有足够的计划或行动记录。先在近期计划中添加事项，并将它放入今日时间轴，稍后再生成总结。";
         }
         const completedNames = context.doneTasks.slice(0, 3).map((task) => task.title).join("、");
@@ -5480,6 +6011,7 @@
         if (context.wellbeing) lines.push(`状态记录：心情 ${context.wellbeing.mood}/5，精力 ${context.wellbeing.energy}/5，睡眠 ${context.wellbeing.sleep || "-"} 小时。`);
         if (context.mealRecord) lines.push(`餐饮记录：早餐 ${context.mealRecord.breakfast || "未记"}，午餐 ${context.mealRecord.lunch || "未记"}，晚餐 ${context.mealRecord.dinner || "未记"}。`);
         if (context.gratitude) lines.push(`感恩日记：${context.gratitude}。`);
+        if (context.thoughts.length) lines.push(`写给自己的信：${context.thoughts.map((thought) => thought.title).join("、")}。`);
         lines.push(context.pendingTasks.length
           ? "明天建议先处理一项未完成计划，再安排新的时间块。"
           : "今天的计划收束得比较完整，明天可以继续保持清晰的时间边界。");
@@ -6412,6 +6944,18 @@
           return;
         }
         const { action, id } = target.dataset;
+        if (action === "select-thought") {
+          selectThought(id);
+          return;
+        }
+        if (action === "toggle-thought-pin") {
+          toggleThoughtPin();
+          return;
+        }
+        if (action === "delete-thought") {
+          deleteThought();
+          return;
+        }
         if (action === "select-review-date") {
           reviewDate = target.dataset.date;
           calendarCursor = dateFromKey(reviewDate);
@@ -6567,6 +7111,22 @@
         $("#gratitudeStatus").textContent = event.target.value.trim() ? "已记录" : "自动保存";
       });
       $("#saveGratitudeBtn").addEventListener("click", saveGratitude);
+
+      $("#newThoughtBtn").addEventListener("click", createThought);
+      $("#firstThoughtBtn").addEventListener("click", createThought);
+      $("#thoughtSearch").addEventListener("input", (event) => {
+        thoughtSearch = event.target.value;
+        renderThoughtList();
+      });
+      ["#thoughtTitle", "#thoughtDate", "#thoughtBody", "#thoughtSignature"].forEach((selector) => {
+        $(selector).addEventListener("input", scheduleThoughtAutosave);
+        $(selector).addEventListener("change", scheduleThoughtAutosave);
+      });
+      $("#thoughtForm").addEventListener("submit", (event) => {
+        event.preventDefault();
+        saveThoughtFromEditor();
+      });
+      $("#exportThoughtBtn").addEventListener("click", exportThought);
 
       $("#generateReviewAiBtn").addEventListener("click", generateReviewAiSummary);
       $("#generatePeriodAiBtn").addEventListener("click", generatePeriodAiSummary);
@@ -6734,6 +7294,10 @@
       });
       window.addEventListener("focus", () => {
         if (syncClient?.getSession()) void synchronizeNow();
+      });
+      window.addEventListener("beforeunload", saveThoughtFromEditor);
+      document.addEventListener("visibilitychange", () => {
+        if (document.hidden) saveThoughtFromEditor();
       });
 
       fillSelects();
