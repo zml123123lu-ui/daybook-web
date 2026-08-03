@@ -1000,31 +1000,6 @@
       accent-color: var(--berry);
     }
 
-    .guide-grid {
-      display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 0.65rem;
-      margin-bottom: 0.85rem;
-    }
-
-    .guide-card {
-      border: 1px solid var(--line);
-      border-radius: var(--radius);
-      background: rgba(255, 255, 255, 0.68);
-      padding: 0.8rem;
-    }
-
-    .guide-card strong {
-      display: block;
-      margin-bottom: 0.25rem;
-    }
-
-    .guide-card p {
-      color: var(--muted);
-      font-size: 0.8rem;
-      line-height: 1.45;
-    }
-
     #wellbeingForm {
       display: grid;
       gap: 0.75rem;
@@ -2031,7 +2006,6 @@
 
       .dual,
       .goal-grid,
-      .guide-grid,
       .review-layout,
       .wellbeing-topline,
       .wellbeing-sliders,
@@ -2471,31 +2445,6 @@
       background: #9a4f5f;
     }
 
-    .import-zone {
-      display: grid;
-      grid-template-columns: minmax(0, 1fr) auto;
-      gap: 1rem;
-      align-items: center;
-      padding: 1.15rem;
-      border: 1px dashed #cdb7b4;
-      border-radius: var(--radius);
-      background: #faf6f5;
-      margin-bottom: 1rem;
-    }
-
-    .import-zone strong {
-      display: block;
-      font-family: "Songti SC", "STSong", serif;
-      font-size: 1rem;
-    }
-
-    .import-zone span {
-      display: block;
-      margin-top: 0.25rem;
-      color: var(--muted);
-      font-size: 0.82rem;
-    }
-
     .finance-overview {
       display: grid;
       grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -2531,6 +2480,31 @@
       border: 1px solid #e3d8d5;
       border-radius: var(--radius);
       background: rgba(255, 255, 255, 0.62);
+    }
+
+    .finance-chart-header,
+    .finance-chart-controls,
+    .finance-month-nav {
+      display: flex;
+      align-items: center;
+      gap: 0.55rem;
+    }
+
+    .finance-chart-header {
+      justify-content: space-between;
+    }
+
+    .finance-chart-controls {
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .finance-month-nav strong {
+      min-width: 6.5rem;
+      color: var(--muted);
+      font-size: 0.8rem;
+      text-align: center;
+      font-variant-numeric: tabular-nums;
     }
 
     .finance-chart-title {
@@ -3174,17 +3148,56 @@
         grid-template-columns: repeat(2, minmax(0, 1fr));
       }
 
-      .finance-overview,
-      .import-zone {
+      .finance-overview {
         grid-template-columns: 1fr;
+      }
+
+      input[type="date"] {
+        display: block;
+        min-width: 0;
+        width: 100%;
+        max-width: 100%;
+        box-sizing: border-box;
+      }
+
+      input[type="date"]::-webkit-date-and-time-value {
+        min-width: 0;
+        text-align: center;
+      }
+
+      .quick-grid .field,
+      .quick-grid input,
+      #editorForm .field,
+      #editorForm input {
+        min-width: 0;
+        max-width: 100%;
+      }
+
+      .finance-chart-header {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      #money .panel-header {
+        align-items: center;
+        flex-direction: row;
+      }
+
+      #money .panel-header .btn {
+        width: auto;
+      }
+
+      .finance-chart-controls {
+        width: 100%;
+        justify-content: space-between;
+      }
+
+      .finance-month-nav {
+        margin-left: auto;
       }
 
       #financeCategoryChart {
         grid-template-columns: 1fr;
-      }
-
-      .import-zone .btn {
-        width: 100%;
       }
 
       .gratitude-actions,
@@ -3541,7 +3554,6 @@
       .expense-item,
       .contact-item,
       .goal-card,
-      .guide-card,
       .budget-card,
       .finance-stat,
       .habit-chart-card,
@@ -3626,7 +3638,6 @@
         background: #9a6875;
       }
 
-      .import-zone,
       .empty,
       .ai-summary-card,
       .selected-time {
@@ -4005,11 +4016,6 @@
               </div>
             </header>
             <div class="panel-body">
-              <div class="guide-grid" aria-label="目标使用说明">
-                <article class="guide-card"><strong>写方向</strong><p>例如：稳定运动、完成作品集、建立储蓄。</p></article>
-                <article class="guide-card"><strong>写下一步</strong><p>把目标拆成现在就能做的一小步。</p></article>
-                <article class="guide-card"><strong>用进度记录</strong><p>每完成一点，就用卡片上的按钮更新进度。</p></article>
-              </div>
               <div class="goal-grid" id="goalGrid"></div>
             </div>
           </section>
@@ -4062,30 +4068,38 @@
                 <h2>账单摘要</h2>
                 <p class="muted">从现有记账软件导入。</p>
               </div>
+              <div>
+                <input class="sr-only" id="financeFile" type="file" accept=".csv,.tsv,.json,text/csv,text/tab-separated-values,application/json">
+                <label class="btn secondary small" for="financeFile">导入账单</label>
+              </div>
             </header>
             <div class="panel-body">
-              <div class="import-zone">
-                <div>
-                  <strong>导入账单</strong>
-                  <span id="financeImportStatus">尚未导入</span>
-                </div>
-                <div>
-                  <input class="sr-only" id="financeFile" type="file" accept=".csv,.tsv,.json,text/csv,text/tab-separated-values,application/json">
-                  <label class="btn" for="financeFile">选择文件</label>
-                </div>
-              </div>
               <div class="finance-overview">
                 <article class="finance-stat"><span>本月支出</span><strong id="financeExpense">¥0</strong></article>
                 <article class="finance-stat"><span>本月收入</span><strong id="financeIncome">¥0</strong></article>
                 <article class="finance-stat"><span>账单记录</span><strong id="financeCount">0</strong></article>
               </div>
               <section class="finance-chart-card" aria-labelledby="financeChartTitle">
-                <div class="finance-chart-copy">
-                  <h3 class="finance-chart-title" id="financeChartTitle">已导入支出分类</h3>
-                  <p class="finance-chart-note">按全部已导入的支出记录统计，收入不计入图表。</p>
+                <div class="finance-chart-header">
+                  <div class="finance-chart-copy">
+                    <h3 class="finance-chart-title" id="financeChartTitle">支出分类</h3>
+                    <p class="finance-chart-note" id="financeChartNote">按本月支出记录统计，收入不计入图表。</p>
+                  </div>
+                  <div class="finance-chart-controls">
+                    <div class="period-tabs" role="tablist" aria-label="支出统计范围">
+                      <button class="period-tab active" type="button" data-finance-scope="month" role="tab" aria-selected="true">本月</button>
+                      <button class="period-tab" type="button" data-finance-scope="all" role="tab" aria-selected="false">全部支出</button>
+                    </div>
+                    <div class="finance-month-nav" id="financeMonthNav" aria-label="切换账单月份">
+                      <button class="icon-btn" type="button" data-action="finance-prev" aria-label="上一个月">‹</button>
+                      <strong id="financeChartMonthLabel"></strong>
+                      <button class="icon-btn" type="button" data-action="finance-next" aria-label="下一个月">›</button>
+                    </div>
+                  </div>
                 </div>
                 <div id="financeCategoryChart" aria-label="已导入支出分类饼状图"></div>
               </section>
+              <p class="muted" id="financeImportStatus">尚未导入</p>
               <p class="muted" id="financeSyncNote">这里只保留摘要，账单明细请回到原记账软件查看。</p>
             </div>
           </section>
@@ -4233,12 +4247,11 @@
                       <span class="save-caption" id="reviewSaveStatus" aria-live="polite">记录会保存在本机</span>
                       <div>
                         <button class="btn secondary small" id="saveNoteBtn" type="button">保存这天</button>
-                        <button class="btn small" id="generateReviewAiBtn" type="button">AI 总结这天</button>
                       </div>
                     </div>
                     <div class="review-ai" id="reviewAiCard">
-                      <strong>AI 每日总结</strong>
-                      <p class="ai-summary-text" id="reviewAiText">这一天还没有 AI 总结。</p>
+                      <strong>当日 AI 总结</strong>
+                      <p class="ai-summary-text" id="reviewAiText">在当天的“今日”页面生成后，这里会保留结果。</p>
                     </div>
                 </div>
 
@@ -4260,7 +4273,6 @@
                     <p class="ai-summary-text" id="periodInsightText">这个阶段还没有足够的数据。</p>
                     <p class="ai-summary-meta" id="periodInsightMeta">点击“AI 复盘本周期”，生成更完整的总结与下一步建议。</p>
                   </div>
-                  <div class="period-list" id="periodList"></div>
                 </div>
               </div>
             </div>
@@ -5022,6 +5034,8 @@
       let reviewPeriod = "week";
       let habitPeriod = "week";
       let habitChartAnchor = new Date();
+      let financeChartScope = "month";
+      let financeChartMonth = todayKey().slice(0, 7);
       let selectedThoughtId = null;
       let thoughtSearch = "";
       let thoughtSaveTimer = 0;
@@ -5523,6 +5537,15 @@
         );
       }
 
+      function hasWrittenReview(key) {
+        return Boolean(
+          state.notes[key]?.trim()
+          || state.aiSummaries[key]?.text?.trim()
+          || state.gratitude[key]?.text?.trim()
+          || state.thoughts.some((thought) => thought.date === key && thought.body?.trim())
+        );
+      }
+
       function getPeriodDates(period, anchorKey) {
         const anchor = dateFromKey(anchorKey);
         let start;
@@ -5659,10 +5682,12 @@
         const tasks = state.tasks.filter((task) => task.date === reviewDate);
         const completed = tasks.filter((task) => task.done).length;
         $("#reviewDateLabel").textContent = reviewDateLabel(reviewDate);
-        $("#reviewDayMetric").textContent = tasks.length ? `${completed}/${tasks.length} 项计划完成` : "暂无计划";
+        $("#reviewDayMetric").textContent = tasks.length
+          ? `${completed}/${tasks.length} 项计划完成`
+          : (hasWrittenReview(reviewDate) ? "有文字记录" : "暂无记录");
         $("#dailyNote").value = state.notes[reviewDate] || "";
         const summary = state.aiSummaries[reviewDate];
-        $("#reviewAiText").textContent = summary ? summary.text : "这一天还没有 AI 总结。";
+        $("#reviewAiText").textContent = summary ? summary.text : "在当天的“今日”页面生成后，这里会保留结果。";
         $("#reviewSaveStatus").textContent = state.notes[reviewDate] ? "已有记录，可继续修改" : "记录会保存在本机";
       }
 
@@ -5699,15 +5724,6 @@
           ? `${savedSummary.mode} · ${new Date(savedSummary.generatedAt).toLocaleString("zh-CN")}`
           : "点击“AI 复盘本周期”，生成更完整的总结与下一步建议。";
         $("#generatePeriodAiBtn").textContent = savedSummary ? "重新生成本周期" : "AI 复盘本周期";
-        const visibleDates = dates.filter(hasReviewData).reverse();
-        $("#periodList").innerHTML = visibleDates.length
-          ? visibleDates.map((key) => {
-            const dayTasks = state.tasks.filter((task) => task.date === key);
-            const dayDone = dayTasks.filter((task) => task.done).length;
-            const note = state.notes[key]?.trim() || state.gratitude[key]?.text?.trim() || state.thoughts.find((thought) => thought.date === key && thought.body?.trim())?.body?.trim() || state.aiSummaries[key]?.text || "这一天有行动记录，但还没有写文字。";
-            return `<article class="period-day"><time>${reviewDateLabel(key, false)}</time><p>${escapeHtml(note.slice(0, 150))}</p><span class="pill">${dayTasks.length ? `${dayDone}/${dayTasks.length} 完成` : "有记录"}</span></article>`;
-          }).join("")
-          : `<div class="empty" role="status">这个阶段还没有记录。先在日历里选一天，写下你的真实状态。</div>`;
       }
 
       function renderFilters() {
@@ -6018,7 +6034,9 @@
         return lines.join("\n\n");
       }
 
-      async function generateAiSummaryForDate(date, button, successMessage) {
+      async function generateAiSummary() {
+        const date = todayKey();
+        const button = $("#generateAiSummaryBtn");
         button.disabled = true;
         button.textContent = "生成中";
         const context = summaryContext(date);
@@ -6050,17 +6068,9 @@
           generatedAt: new Date().toISOString()
         };
         button.disabled = false;
-        button.textContent = date === todayKey() ? "重新生成" : "AI 总结这天";
+        button.textContent = "重新生成";
         render();
-        showToast(successMessage);
-      }
-
-      async function generateAiSummary() {
-        return generateAiSummaryForDate(todayKey(), $("#generateAiSummaryBtn"), "今日总结已生成");
-      }
-
-      async function generateReviewAiSummary() {
-        return generateAiSummaryForDate(reviewDate, $("#generateReviewAiBtn"), "这一天的总结已生成");
+        showToast("今日总结已生成");
       }
 
       async function generatePeriodAiSummary() {
@@ -6283,9 +6293,23 @@
         $("#goalAverage").textContent = `平均 ${average}%`;
       }
 
-      function monthlyFinance() {
-        const month = todayKey().slice(0, 7);
+      function monthlyFinance(month = todayKey().slice(0, 7)) {
         return state.financeRecords.filter((record) => String(record.date).slice(0, 7) === month);
+      }
+
+      function monthKeyFromDate(date) {
+        return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
+      }
+
+      function shiftMonthKey(month, amount) {
+        const [year, monthNumber] = String(month).split("-").map(Number);
+        return monthKeyFromDate(new Date(year, monthNumber - 1 + amount, 1));
+      }
+
+      function financeRecordsForChart(records, scope, month) {
+        return scope === "all"
+          ? records
+          : records.filter((record) => String(record.date).slice(0, 7) === month);
       }
 
       const FINANCE_CHART_COLORS = ["#9a4f5f", "#68798a", "#748676", "#b08a5b", "#8d6a8d", "#7c8d9a", "#a96b58", "#786b55"];
@@ -6305,9 +6329,21 @@
 
       function renderFinanceCategoryChart() {
         const chart = $("#financeCategoryChart");
-        const totals = financeCategoryTotals(state.financeRecords);
+        const records = financeRecordsForChart(state.financeRecords, financeChartScope, financeChartMonth);
+        const totals = financeCategoryTotals(records);
+        const monthLabel = `${Number(financeChartMonth.slice(0, 4))} 年 ${Number(financeChartMonth.slice(5, 7))} 月`;
+        $("#financeChartMonthLabel").textContent = monthLabel;
+        $("#financeMonthNav").hidden = financeChartScope !== "month";
+        $("#financeChartNote").textContent = financeChartScope === "month"
+          ? `${monthLabel}的支出分类，收入不计入图表。`
+          : "按全部已导入支出统计，收入不计入图表。";
+        document.querySelectorAll("[data-finance-scope]").forEach((tab) => {
+          const active = tab.dataset.financeScope === financeChartScope;
+          tab.classList.toggle("active", active);
+          tab.setAttribute("aria-selected", String(active));
+        });
         if (!totals.length) {
-          chart.innerHTML = `<div class="empty" role="status">导入账单后，这里会按支出分类生成饼状图。</div>`;
+          chart.innerHTML = `<div class="empty" role="status">${financeChartScope === "month" ? `${escapeHtml(monthLabel)}还没有支出记录。` : "导入账单后，这里会按支出分类生成饼状图。"}</div>`;
           return;
         }
         const total = totals.reduce((sum, item) => sum + item.amount, 0);
@@ -6319,7 +6355,7 @@
         }).join(", ");
         chart.innerHTML = `
           <div class="finance-pie" style="--pie-gradient: conic-gradient(${segments})" role="img" aria-label="${escapeHtml(totals.map((item) => `${item.category} ${currency.format(item.amount)}`).join("，"))}">
-            <div class="finance-pie-center"><strong>${currency.format(total)}</strong><span>总支出</span></div>
+            <div class="finance-pie-center"><strong>${currency.format(total)}</strong><span>${financeChartScope === "month" ? "当月支出" : "全部支出"}</span></div>
           </div>
           <ul class="finance-legend">
             ${totals.map((item, index) => {
@@ -6911,7 +6947,7 @@
       });
 
       document.addEventListener("click", (event) => {
-        const target = event.target.closest("[data-action], [data-filter], [data-period], [data-habit-period]");
+        const target = event.target.closest("[data-action], [data-filter], [data-period], [data-habit-period], [data-finance-scope]");
         if (!target) return;
         if (target.dataset.period) {
           reviewPeriod = target.dataset.period;
@@ -6922,6 +6958,11 @@
           habitPeriod = target.dataset.habitPeriod;
           habitChartAnchor = new Date();
           renderHabitChart();
+          return;
+        }
+        if (target.dataset.financeScope) {
+          financeChartScope = target.dataset.financeScope;
+          renderFinanceCategoryChart();
           return;
         }
         if (target.dataset.action === "habit-prev" || target.dataset.action === "habit-next") {
@@ -6944,6 +6985,11 @@
           return;
         }
         const { action, id } = target.dataset;
+        if (action === "finance-prev" || action === "finance-next") {
+          financeChartMonth = shiftMonthKey(financeChartMonth, action === "finance-prev" ? -1 : 1);
+          renderFinanceCategoryChart();
+          return;
+        }
         if (action === "select-thought") {
           selectThought(id);
           return;
@@ -7128,7 +7174,6 @@
       });
       $("#exportThoughtBtn").addEventListener("click", exportThought);
 
-      $("#generateReviewAiBtn").addEventListener("click", generateReviewAiSummary);
       $("#generatePeriodAiBtn").addEventListener("click", generatePeriodAiSummary);
 
       $("#moodRange").addEventListener("input", (event) => $("#moodOutput").textContent = event.target.value);
