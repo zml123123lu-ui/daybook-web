@@ -1274,9 +1274,15 @@
 
     .nutrition-stat {
       padding: 0.65rem;
-      border-left: 2px solid #bd8a95;
-      background: rgba(244, 235, 233, 0.58);
+      border-left: 3px solid var(--nutrition-color, #8a5f87);
+      background: color-mix(in srgb, var(--nutrition-color, #8a5f87) 11%, var(--surface));
     }
+
+    .nutrition-stat[data-nutrient="calories"] { --nutrition-color: #b26345; }
+    .nutrition-stat[data-nutrient="protein"] { --nutrition-color: #3f7f74; }
+    .nutrition-stat[data-nutrient="carbs"] { --nutrition-color: #4d7096; }
+    .nutrition-stat[data-nutrient="fat"] { --nutrition-color: #8a5f87; }
+    .nutrition-stat[data-nutrient="fiber"] { --nutrition-color: #728547; }
 
     .nutrition-stat span,
     .nutrition-stat small {
@@ -1288,6 +1294,7 @@
     .nutrition-stat strong {
       display: block;
       margin: 0.18rem 0 0.05rem;
+      color: color-mix(in srgb, var(--nutrition-color, #8a5f87) 72%, var(--ink));
       font-family: var(--serif);
       font-size: 1.05rem;
     }
@@ -1441,6 +1448,7 @@
     }
 
     .habit-bar {
+      --habit-bar-color: #a65466;
       display: grid;
       grid-template-rows: 1rem 7.4rem auto;
       gap: 0.3rem;
@@ -1450,8 +1458,14 @@
       text-align: center;
     }
 
+    .habit-bar:nth-child(5n + 1) { --habit-bar-color: #a65466; }
+    .habit-bar:nth-child(5n + 2) { --habit-bar-color: #427d70; }
+    .habit-bar:nth-child(5n + 3) { --habit-bar-color: #4f7197; }
+    .habit-bar:nth-child(5n + 4) { --habit-bar-color: #a1743f; }
+    .habit-bar:nth-child(5n + 5) { --habit-bar-color: #785d91; }
+
     .habit-bar-value {
-      color: #80515c;
+      color: color-mix(in srgb, var(--habit-bar-color) 78%, var(--ink));
       font-size: 0.62rem;
       font-weight: 750;
       white-space: nowrap;
@@ -1469,8 +1483,8 @@
       width: min(78%, 1.7rem);
       height: var(--habit-rate, 0%);
       border-radius: 4px 4px 1px 1px;
-      background: #9a4f5f;
-      box-shadow: 0 3px 8px rgba(107, 54, 67, 0.13);
+      background: var(--habit-bar-color);
+      box-shadow: 0 3px 8px color-mix(in srgb, var(--habit-bar-color) 18%, transparent);
     }
 
     .habit-bar-label {
@@ -3818,12 +3832,18 @@
       }
 
       .habit-bar-value {
-        color: #dba0ad;
+        color: var(--habit-bar-color);
       }
 
       .habit-bar-fill {
-        background: #d18a99;
+        background: var(--habit-bar-color);
       }
+
+      .habit-bar:nth-child(5n + 1) { --habit-bar-color: #d98da0; }
+      .habit-bar:nth-child(5n + 2) { --habit-bar-color: #75b9aa; }
+      .habit-bar:nth-child(5n + 3) { --habit-bar-color: #7fa6ce; }
+      .habit-bar:nth-child(5n + 4) { --habit-bar-color: #d2aa68; }
+      .habit-bar:nth-child(5n + 5) { --habit-bar-color: #ad8cc7; }
 
       .finance-chart-card {
         border-color: var(--line);
@@ -3840,9 +3860,15 @@
       }
 
       .nutrition-stat {
-        border-color: #a46b78;
-        background: #302729;
+        border-color: var(--nutrition-color);
+        background: color-mix(in srgb, var(--nutrition-color) 17%, #262122);
       }
+
+      .nutrition-stat[data-nutrient="calories"] { --nutrition-color: #d58b6f; }
+      .nutrition-stat[data-nutrient="protein"] { --nutrition-color: #76b8aa; }
+      .nutrition-stat[data-nutrient="carbs"] { --nutrition-color: #7fa5cc; }
+      .nutrition-stat[data-nutrient="fat"] { --nutrition-color: #c18caf; }
+      .nutrition-stat[data-nutrient="fiber"] { --nutrition-color: #a5b875; }
 
       .nutrition-summary {
         color: #ded4d6;
@@ -7373,13 +7399,13 @@
           $("#mealNutritionSummary").textContent = "";
         } else {
           const stats = [
-            ["热量", nutrition.calories, "千卡"],
-            ["蛋白质", nutrition.protein, "克"],
-            ["碳水", nutrition.carbs, "克"],
-            ["脂肪", nutrition.fat, "克"],
-            ["膳食纤维", nutrition.fiber, "克"]
+            ["calories", "热量", nutrition.calories, "千卡"],
+            ["protein", "蛋白质", nutrition.protein, "克"],
+            ["carbs", "碳水", nutrition.carbs, "克"],
+            ["fat", "脂肪", nutrition.fat, "克"],
+            ["fiber", "膳食纤维", nutrition.fiber, "克"]
           ];
-          $("#mealNutritionGrid").innerHTML = stats.map(([label, value, unit]) => `<div class="nutrition-stat"><span>${label}</span><strong>${value}</strong><small>${unit}</small></div>`).join("");
+          $("#mealNutritionGrid").innerHTML = stats.map(([key, label, value, unit]) => `<div class="nutrition-stat" data-nutrient="${key}"><span>${label}</span><strong>${value}</strong><small>${unit}</small></div>`).join("");
           $("#mealNutritionSummary").textContent = nutrition.summary || localMealNutritionSummary(nutrition);
           $("#mealNutritionMode").textContent = nutrition.mode || "本地营养估算";
         }
