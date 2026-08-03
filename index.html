@@ -5925,7 +5925,7 @@
         $("#appearanceButton").focus();
       }
 
-      function saveState() {
+      function saveState({ syncCloud = true } = {}) {
         try {
           localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
           const status = $("#storageStatus");
@@ -5933,7 +5933,7 @@
             status.textContent = "本机已保存";
             status.dataset.state = "saved";
           }
-          if (!syncApplying && syncClient?.getSession()) {
+          if (syncCloud && !syncApplying && syncClient?.getSession()) {
             syncDirty = true;
             scheduleCloudSync();
           }
@@ -6042,9 +6042,14 @@
       }
 
       function applyCloudRow(row) {
+        const localAppearance = state.appearance;
         syncApplying = true;
         try {
-          state = normalizeState(row.state);
+          state = {
+            ...normalizeState(row.state),
+            appearance: localAppearance
+          };
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
           render();
         } finally {
           syncApplying = false;
@@ -6154,7 +6159,8 @@
             markCloudRow(await syncClient.createState(state));
             return;
           }
-          const sameState = syncApi.stableStringify(state) === syncApi.stableStringify(cloudRow.state);
+          const sameState = syncApi.stableStringify(syncApi.stateForCloud(state))
+            === syncApi.stableStringify(syncApi.stateForCloud(cloudRow.state));
           if (sameState) {
             markCloudRow(cloudRow);
             return;
@@ -7829,7 +7835,7 @@
           state.appearance = { theme: target.dataset.appearanceTheme };
           applyAppearanceTheme();
           renderAppearanceThemes();
-          saveState();
+          saveState({ syncCloud: false });
           showToast(`已切换为${currentAppearanceTheme().name}`);
           return;
         }

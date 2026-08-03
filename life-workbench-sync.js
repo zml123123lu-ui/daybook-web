@@ -29,8 +29,14 @@
     const arrayKeys = ["tasks", "timeBlocks", "habits", "goals", "financeRecords", "thoughts"];
     const recordKeys = ["notes", "dailySummaries", "aiSummaries", "periodSummaries", "wellbeing", "mealRecords", "gratitude"];
     return arrayKeys.some((key) => Array.isArray(state[key]) && state[key].length > 0)
-      || recordKeys.some((key) => isPlainObject(state[key]) && Object.keys(state[key]).length > 0)
-      || (isPlainObject(state.appearance) && typeof state.appearance.theme === "string" && state.appearance.theme !== "mist-rose");
+      || recordKeys.some((key) => isPlainObject(state[key]) && Object.keys(state[key]).length > 0);
+  }
+
+  function stateForCloud(state) {
+    if (!isPlainObject(state)) return {};
+    const cloudState = { ...state };
+    delete cloudState.appearance;
+    return cloudState;
   }
 
   function stableStringify(value) {
@@ -47,7 +53,7 @@
 
   function decideInitialSync({ localState, cloudRow, syncMeta, userId }) {
     if (!cloudRow) return "create-cloud";
-    if (stableStringify(localState) === stableStringify(cloudRow.state)) return "use-cloud";
+    if (stableStringify(stateForCloud(localState)) === stableStringify(stateForCloud(cloudRow.state))) return "use-cloud";
     if (!hasMeaningfulState(localState)) return "use-cloud";
     const sharesBaseRevision = isPlainObject(syncMeta)
       && syncMeta.userId === userId
@@ -256,7 +262,7 @@
       const response = await authenticatedFetch(`${baseUrl}/rest/v1/workbench_state`, {
         method: "POST",
         headers: { Prefer: "return=representation" },
-        body: JSON.stringify({ user_id: session.user.id, state, revision: 1, updated_at: new Date().toISOString() })
+        body: JSON.stringify({ user_id: session.user.id, state: stateForCloud(state), revision: 1, updated_at: new Date().toISOString() })
       });
       const rows = await readJson(response);
       if (!Array.isArray(rows) || rows.length !== 1) throw new SyncRequestError("无法创建云端数据");
@@ -274,7 +280,7 @@
       const response = await authenticatedFetch(`${baseUrl}/rest/v1/workbench_state?${query}`, {
         method: "PATCH",
         headers: { Prefer: "return=representation" },
-        body: JSON.stringify({ state, revision: revision + 1, updated_at: new Date().toISOString() })
+        body: JSON.stringify({ state: stateForCloud(state), revision: revision + 1, updated_at: new Date().toISOString() })
       });
       const rows = await readJson(response);
       if (!Array.isArray(rows)) throw new SyncRequestError("云端数据格式不正确");
@@ -302,6 +308,7 @@
     createSyncClient,
     decideInitialSync,
     hasMeaningfulState,
+    stateForCloud,
     stableStringify,
     validateCloudRow
   };
