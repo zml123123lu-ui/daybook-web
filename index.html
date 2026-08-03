@@ -7316,23 +7316,28 @@
       }
 
       const MEAL_NUTRIENTS = [
-        { terms: ["水煮蛋", "煎蛋", "鸡蛋"], base: 50, units: { 个: 1, 只: 1, 枚: 1 }, calories: 72, protein: 6.3, carbs: 0.4, fat: 4.8, fiber: 0 },
+        { terms: ["番茄意面"], base: 400, units: { 盘: 1, 份: 1 }, calories: 560, protein: 18, carbs: 85, fat: 16, fiber: 6 },
+        { terms: ["盖浇饭", "盖饭"], base: 450, units: { 份: 1, 碗: 1 }, calories: 650, protein: 22, carbs: 85, fat: 23, fiber: 5, skipWhenDetailed: true },
+        { terms: ["卤鸡蛋", "水煮蛋", "煎蛋", "鸡蛋"], base: 50, units: { 个: 1, 只: 1, 枚: 1 }, calories: 72, protein: 6.3, carbs: 0.4, fat: 4.8, fiber: 0 },
         { terms: ["鲜奶", "牛奶"], base: 250, measure: "ml", units: { 杯: 1 }, calories: 150, protein: 8, carbs: 12, fat: 8, fiber: 0 },
         { terms: ["酸奶", "优格"], base: 150, units: { 杯: 1 }, calories: 120, protein: 5.5, carbs: 17, fat: 3.5, fiber: 0 },
         { terms: ["全麦面包", "吐司", "面包"], base: 60, units: { 片: 0.5 }, calories: 160, protein: 7, carbs: 28, fat: 2.5, fiber: 4 },
         { terms: ["燕麦", "麦片"], base: 40, units: { 碗: 1 }, calories: 152, protein: 5.2, carbs: 27, fat: 2.8, fiber: 4 },
-        { terms: ["米饭", "白饭"], base: 150, units: { 碗: 1 }, calories: 174, protein: 3.9, carbs: 38.9, fat: 0.5, fiber: 0.5 },
+        { terms: ["米饭", "白饭", "饭"], base: 150, units: { 碗: 1, 份: 1 }, calories: 174, protein: 3.9, carbs: 38.9, fat: 0.5, fiber: 0.5 },
         { terms: ["稀饭", "白粥", "粥"], base: 300, units: { 碗: 1 }, calories: 138, protein: 3.3, carbs: 29.7, fat: 0.9, fiber: 0.9 },
         { terms: ["意面", "面条", "米粉", "河粉"], base: 250, units: { 碗: 1 }, calories: 345, protein: 11.3, carbs: 62.5, fat: 5.3, fiber: 3 },
         { terms: ["鸡胸肉", "鸡腿肉", "鸡肉", "鸡腿"], base: 100, units: { 份: 1 }, calories: 165, protein: 31, carbs: 0, fat: 3.6, fiber: 0 },
         { terms: ["牛肉"], base: 100, units: { 份: 1 }, calories: 250, protein: 26, carbs: 0, fat: 15, fiber: 0 },
         { terms: ["排骨", "猪肉"], base: 100, units: { 份: 1 }, calories: 242, protein: 27, carbs: 0, fat: 14, fiber: 0 },
+        { terms: ["红烧肉", "卤肉"], base: 100, units: { 份: 1 }, calories: 300, protein: 18, carbs: 6, fat: 23, fiber: 0 },
+        { terms: ["卤香肠", "腊肠", "香肠"], base: 60, units: { 根: 1, 份: 1 }, calories: 180, protein: 8, carbs: 5, fat: 14, fiber: 0 },
         { terms: ["三文鱼", "鲑鱼"], base: 100, units: { 份: 1 }, calories: 208, protein: 20, carbs: 0, fat: 13, fiber: 0 },
         { terms: ["鳕鱼", "鱼肉", "鱼"], base: 100, units: { 份: 1 }, calories: 120, protein: 22, carbs: 0, fat: 3, fiber: 0 },
         { terms: ["虾仁", "虾"], base: 100, units: { 份: 1 }, calories: 99, protein: 24, carbs: 0.2, fat: 0.3, fiber: 0 },
         { terms: ["豆腐", "豆干", "豆制品"], base: 150, units: { 份: 1 }, calories: 120, protein: 12, carbs: 4, fat: 7, fiber: 2 },
         { terms: ["青菜", "蔬菜", "生菜", "菠菜", "白菜"], base: 150, units: { 份: 1, 碗: 1 }, calories: 45, protein: 3, carbs: 7.5, fat: 0.8, fiber: 3.5 },
         { terms: ["西兰花", "花椰菜"], base: 150, units: { 份: 1, 碗: 1 }, calories: 52, protein: 4.2, carbs: 10.5, fat: 0.6, fiber: 5 },
+        { terms: ["土豆丝", "马铃薯", "土豆"], base: 100, units: { 份: 1 }, calories: 100, protein: 2, carbs: 17, fat: 3, fiber: 1.5 },
         { terms: ["苹果"], base: 180, units: { 个: 1 }, calories: 95, protein: 0.5, carbs: 25, fat: 0.3, fiber: 4.4 },
         { terms: ["梨"], base: 180, units: { 个: 1 }, calories: 102, protein: 0.6, carbs: 27, fat: 0.2, fiber: 5.5 },
         { terms: ["橙子", "橘子"], base: 150, units: { 个: 1 }, calories: 71, protein: 1.4, carbs: 18, fat: 0.2, fiber: 3.6 },
@@ -7342,7 +7347,7 @@
         { terms: ["奶茶"], base: 500, measure: "ml", units: { 杯: 1 }, calories: 350, protein: 3, carbs: 58, fat: 12, fiber: 0 },
         { terms: ["含糖饮料", "可乐"], base: 500, measure: "ml", units: { 瓶: 1, 杯: 0.5 }, calories: 210, protein: 0, carbs: 53, fat: 0, fiber: 0 }
       ];
-      const NUTRITION_ESTIMATOR_VERSION = 2;
+      const NUTRITION_ESTIMATOR_VERSION = 3;
 
       function parseMealAmount(raw) {
         const value = String(raw || "").trim();
@@ -7361,9 +7366,14 @@
 
       function mealQuantityForMatch(text, match, food) {
         const amountPattern = "(半|[一二两三四五六七八九十]+|\\d+(?:\\.\\d+)?)";
-        const unitPattern = "(千克|公斤|kg|KG|克|g|G|毫升|ml|ML|个|只|枚|碗|杯|片|份|根|把|瓶)?";
+        const unitPattern = "(千克|公斤|kg|KG|克|g|G|毫升|ml|ML|个|只|枚|碗|杯|盘|片|份|根|把|瓶)?";
         const before = text.slice(Math.max(0, match.start - 14), match.start);
         const after = text.slice(match.end, match.end + 14);
+        const qualitativeAmounts = { "一点点": 0.25, "少量": 0.3, "小份": 0.65 };
+        const beforeQualitative = before.match(/(一点点|少量|小份)\s*$/);
+        const afterQualitative = after.match(/^\s*(一点点|少量|小份)/);
+        const qualitative = beforeQualitative || afterQualitative;
+        if (qualitative) return { multiplier: qualitativeAmounts[qualitative[1]], explicit: true };
         const beforeMatch = before.match(new RegExp(`${amountPattern}\\s*${unitPattern}\\s*$`));
         const afterMatch = after.match(new RegExp(`^\\s*${amountPattern}\\s*${unitPattern}`));
         const quantity = beforeMatch || afterMatch;
@@ -7383,7 +7393,15 @@
           food.terms.forEach((term) => {
             let start = text.indexOf(term);
             while (start >= 0) {
-              candidates.push({ food, term, start, end: start + term.length });
+              const end = start + term.length;
+              const previousCharacter = text[start - 1] || "";
+              const nextCharacter = text[end] || "";
+              const quantityBefore = /(?:半|[一二两三四五六七八九十]+|\d+(?:\.\d+)?)\s*(?:克|g|千克|公斤|kg|碗|份)\s*$/i.test(text.slice(Math.max(0, start - 12), start));
+              const embeddedSingleCharacter = term.length === 1 && /[\u3400-\u9fff]/.test(previousCharacter + nextCharacter) && !quantityBefore;
+              const followedByIngredientDetails = food.skipWhenDetailed && /^\s*[（(]/.test(text.slice(end));
+              if (!embeddedSingleCharacter && !followedByIngredientDetails) {
+                candidates.push({ food, term, start, end });
+              }
               start = text.indexOf(term, start + term.length);
             }
           });
@@ -7399,7 +7417,7 @@
       }
 
       function estimateMealNutrition(meals) {
-        const totals = { calories: 0, protein: 0, carbs: 0, fat: 0, fiber: 0, recognizedFoods: 0, quantityFoods: 0, assumedFoods: 0, unknownMeals: 0 };
+        const totals = { calories: 0, protein: 0, carbs: 0, fat: 0, fiber: 0, recognizedFoods: 0, recognizedLabels: [], quantityFoods: 0, assumedFoods: 0, unknownMeals: 0 };
         [meals.breakfast, meals.lunch, meals.dinner].forEach((meal) => {
           const text = String(meal || "").trim();
           if (!text) return;
@@ -7414,6 +7432,7 @@
               totals[key] += match.food[key] * quantity.multiplier;
             });
             totals.recognizedFoods += 1;
+            totals.recognizedLabels.push(match.term);
             if (quantity.explicit) totals.quantityFoods += 1;
             else totals.assumedFoods += 1;
           });
@@ -7430,6 +7449,9 @@
           return "没有识别到可计算的食物。请写成“食物 + 份量”，例如鸡蛋2个、米饭半碗或鸡胸肉120克。未识别的内容不会计入总量。";
         }
         const notes = [`根据已识别的 ${nutrition.recognizedFoods} 项食物，粗略换算约 ${nutrition.calories} 千卡，蛋白质 ${nutrition.protein} 克。`];
+        if (nutrition.recognizedLabels?.length) {
+          notes.push(`已计入：${[...new Set(nutrition.recognizedLabels)].join("、")}。记录中没有出现在这个列表里的食物，不会计入总量。`);
+        }
         if (nutrition.assumedFoods) notes.push(`其中 ${nutrition.assumedFoods} 项没有写份量，暂按常见一份计算；补充克数、个数、碗数或杯数会更准确。`);
         if (nutrition.unknownMeals) notes.push(`有 ${nutrition.unknownMeals} 餐没有识别到可计算的食物，未识别的内容不会计入总量。`);
         if (!nutrition.unknownMeals && nutrition.recognizedFoods >= 3) {
