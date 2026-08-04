@@ -7487,9 +7487,15 @@
         { terms: ["坚果", "杏仁", "核桃", "花生"], base: 30, units: { 把: 1, 份: 1 }, calories: 180, protein: 6, carbs: 6, fat: 16, fiber: 3 },
         { terms: ["豆浆"], base: 250, measure: "ml", units: { 杯: 1 }, calories: 83, protein: 7, carbs: 4, fat: 4, fiber: 1.5 },
         { terms: ["奶茶"], base: 500, measure: "ml", units: { 杯: 1 }, calories: 350, protein: 3, carbs: 58, fat: 12, fiber: 0 },
+        { terms: ["双层脆鸡堡", "双层鸡肉堡", "双层鸡腿堡"], base: 1, units: { 个: 1, 份: 1 }, calories: 690, protein: 30, carbs: 55, fat: 39, fiber: 3 },
+        { terms: ["脆鸡堡", "鸡肉堡", "鸡腿堡", "炸鸡汉堡"], base: 1, units: { 个: 1, 份: 1 }, calories: 510, protein: 22, carbs: 48, fat: 26, fiber: 2 },
+        { terms: ["汉堡包", "汉堡"], base: 1, units: { 个: 1, 份: 1 }, calories: 480, protein: 20, carbs: 45, fat: 24, fiber: 2 },
+        { terms: ["甜辣鸡块", "上校鸡块", "麦乐鸡", "鸡块"], base: 1, units: { 个: 1, 块: 1, 份: 6, 盒: 6 }, calories: 50, protein: 2.8, carbs: 3.2, fat: 3, fiber: 0.1 },
+        { terms: ["甜玉米杯", "玉米杯", "玉米粒"], base: 1, units: { 个: 1, 杯: 1, 份: 1 }, calories: 120, protein: 4, carbs: 26, fat: 1.5, fiber: 3 },
+        { terms: ["薯条"], base: 120, units: { 份: 1, 盒: 1 }, calories: 365, protein: 4, carbs: 48, fat: 17, fiber: 4 },
         { terms: ["含糖饮料", "可乐"], base: 500, measure: "ml", units: { 瓶: 1, 杯: 0.5 }, calories: 210, protein: 0, carbs: 53, fat: 0, fiber: 0 }
       ];
-      const NUTRITION_ESTIMATOR_VERSION = 7;
+      const NUTRITION_ESTIMATOR_VERSION = 8;
 
       function parseMealAmount(raw) {
         const value = String(raw || "").trim();
@@ -7508,7 +7514,7 @@
 
       function mealQuantityForMatch(text, match, food) {
         const amountPattern = "(半|[一二两三四五六七八九十]+|\\d+(?:\\.\\d+)?)";
-        const unitPattern = "(千克|公斤|kg|KG|克|g|G|毫升|ml|ML|个|只|枚|碗|杯|盘|片|份|根|把|瓶)?";
+        const unitPattern = "(千克|公斤|kg|KG|克|g|G|毫升|ml|ML|个|只|枚|碗|杯|盘|片|份|根|把|瓶|块|盒)?";
         const before = text.slice(Math.max(0, match.start - 14), match.start);
         const after = text.slice(match.end, match.end + 14);
         const qualitativeAmounts = { "一点点": 0.25, "少量": 0.3, "小份": 0.65 };
@@ -7535,7 +7541,7 @@
         const before = text.slice(0, start);
         const boundary = Math.max(before.lastIndexOf("，"), before.lastIndexOf(","), before.lastIndexOf("；"), before.lastIndexOf(";"), before.lastIndexOf("\n"));
         const segment = before.slice(boundary + 1);
-        const quantity = segment.match(/^(?:半|[一二两三四五六七八九十]+|\d+(?:\.\d+)?)\s*(?:千克|公斤|kg|KG|克|g|G|毫升|ml|ML|个|只|枚|碗|杯|盘|片|份|根|把|瓶)?\s*/i);
+        const quantity = segment.match(/^(?:半|[一二两三四五六七八九十]+|\d+(?:\.\d+)?)\s*(?:千克|公斤|kg|KG|克|g|G|毫升|ml|ML|个|只|枚|碗|杯|盘|片|份|根|把|瓶|块|盒)?\s*/i);
         const prefix = segment.slice(quantity ? quantity[0].length : 0).trim();
         if (!prefix || prefix.length > 8 || !/[\u3400-\u9fff]/.test(prefix)) return null;
         const ingredientTerms = MEAL_NUTRIENTS.filter((entry) => !entry.composite).flatMap((entry) => entry.terms);
