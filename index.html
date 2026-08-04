@@ -933,55 +933,126 @@
       line-height: 1.4;
     }
 
+    .goal-board {
+      display: grid;
+      gap: 0.9rem;
+    }
+
     .goal-grid {
       display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 0.75rem;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 0.85rem;
+    }
+
+    .goal-card {
+      display: grid;
+      gap: 0.8rem;
     }
 
     .goal-card header {
       display: flex;
       justify-content: space-between;
-      align-items: baseline;
-      gap: 0.5rem;
-      margin-bottom: 0.65rem;
+      align-items: flex-start;
+      gap: 0.75rem;
     }
 
     .goal-card h3 {
-      font-size: 0.95rem;
+      font-size: 1rem;
+      line-height: 1.3;
     }
 
-    .goal-card small {
+    .goal-card small,
+    .goal-step-date {
       color: var(--muted);
+      font-size: 0.76rem;
       font-weight: 700;
+      white-space: nowrap;
     }
 
-    .progress {
-      height: 0.55rem;
+    .goal-section {
+      display: grid;
+      gap: 0.35rem;
+      padding-top: 0.7rem;
+      border-top: 1px solid var(--line);
+    }
+
+    .goal-section:first-of-type {
+      padding-top: 0;
+      border-top: 0;
+    }
+
+    .goal-section span {
+      color: var(--muted);
+      font-size: 0.74rem;
+      font-weight: 850;
+    }
+
+    .goal-section p {
+      margin: 0;
+      color: var(--ink);
+      font-size: 0.88rem;
+      line-height: 1.55;
+      overflow-wrap: anywhere;
+    }
+
+    .goal-next {
+      border-radius: calc(var(--radius) - 0.35rem);
+      padding: 0.7rem;
       background: var(--surface-2);
-      border-radius: 999px;
-      overflow: hidden;
     }
 
-    .progress > span {
-      display: block;
-      height: 100%;
-      width: var(--value, 0%);
-      border-radius: inherit;
-      background: var(--green);
-    }
-
-    .goal-card p {
-      margin-top: 0.65rem;
+    .goal-latest {
+      display: flex;
+      align-items: baseline;
+      gap: 0.5rem;
+      min-width: 0;
       color: var(--muted);
       font-size: 0.82rem;
       line-height: 1.45;
     }
 
+    .goal-latest time {
+      flex: 0 0 auto;
+      color: var(--green);
+      font-weight: 800;
+    }
+
+    .goal-latest p {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .goal-progress-list {
+      display: grid;
+      gap: 0.65rem;
+    }
+
+    .goal-progress-entry {
+      border: 1px solid var(--line);
+      border-radius: calc(var(--radius) - 0.35rem);
+      padding: 0.75rem;
+      background: var(--surface-2);
+    }
+
+    .goal-progress-entry time {
+      display: block;
+      margin-bottom: 0.35rem;
+      color: var(--muted);
+      font-size: 0.76rem;
+      font-weight: 800;
+    }
+
+    .goal-progress-entry p {
+      margin: 0;
+      line-height: 1.55;
+      overflow-wrap: anywhere;
+    }
+
     .goal-actions {
       display: flex;
-      gap: 0.4rem;
-      margin-top: 0.75rem;
+      flex-wrap: wrap;
+      gap: 0.45rem;
     }
 
     .task-link-field {
@@ -4664,16 +4735,19 @@
           <section class="panel view-panel" id="goals" data-panel="goals" hidden>
             <header class="panel-header">
               <div>
-                <h2>生活目标</h2>
-                <p class="muted">目标不是待办，而是一件需要持续推进的事。</p>
+                <h2>生活主线</h2>
+                <p class="muted">不是打分，而是看清你想把生活带向哪里。</p>
               </div>
               <div>
-                <span class="pill status-note" id="goalAverage">平均 0%</span>
-                <button class="btn secondary small" id="addGoalBtn" type="button">写一个目标</button>
+                <span class="pill status-note" id="goalActiveCount">0 条主线</span>
+                <button class="btn secondary small" id="addGoalBtn" type="button">写一条主线</button>
               </div>
             </header>
             <div class="panel-body">
-              <div class="goal-grid" id="goalGrid"></div>
+              <div class="goal-board">
+                <div class="empty goal-intro" role="note">这里不是用来逼自己打分的地方。写下一个生活方向、为什么重要、想看到的变化，再定一个可以开始的下一步。</div>
+                <div class="goal-grid" id="goalGrid"></div>
+              </div>
             </div>
           </section>
         </div>
@@ -5707,6 +5781,33 @@
         }
       }
 
+      function normalizeGoal(goal) {
+        const source = goal && typeof goal === "object" ? goal : {};
+        const checkIns = Array.isArray(source.checkIns)
+          ? source.checkIns
+            .filter((entry) => entry && typeof entry === "object")
+            .map((entry) => ({
+              id: String(entry.id || uid()),
+              date: String(entry.date || todayKey()),
+              text: String(entry.text || entry.detail || "").trim(),
+              nextStep: String(entry.nextStep || "").trim()
+            }))
+            .filter((entry) => entry.text || entry.nextStep)
+          : [];
+        return {
+          id: String(source.id || uid()),
+          area: String(source.area || "生活"),
+          title: String(source.title || source.name || "").trim(),
+          why: String(source.why || "").trim(),
+          outcome: String(source.outcome || "").trim(),
+          status: ["active", "paused", "done"].includes(source.status) ? source.status : "active",
+          nextStep: String(source.nextStep || source.note || "").trim(),
+          linkedTaskIds: Array.isArray(source.linkedTaskIds) ? source.linkedTaskIds.map(String) : [],
+          linkedHabitIds: Array.isArray(source.linkedHabitIds) ? source.linkedHabitIds.map(String) : [],
+          checkIns
+        };
+      }
+
       function normalizeState(parsed) {
         const source = parsed && typeof parsed === "object" ? parsed : {};
         const clean = emptyState();
@@ -5726,7 +5827,7 @@
               completions: habit?.completions && typeof habit.completions === "object" ? habit.completions : {}
             }))
             : [],
-          goals: Array.isArray(source.goals) ? source.goals : [],
+          goals: Array.isArray(source.goals) ? source.goals.map(normalizeGoal) : [],
           financeRecords: Array.isArray(source.financeRecords) ? source.financeRecords : [],
           notes: source.notes && typeof source.notes === "object" ? source.notes : {},
           dailySummaries: source.dailySummaries && typeof source.dailySummaries === "object" ? source.dailySummaries : {},
@@ -7164,38 +7265,72 @@
       }
 
       function renderGoals() {
+        const activeGoals = state.goals.filter((goal) => goal.status !== "done").length;
+        $("#goalActiveCount").textContent = state.goals.length ? `${activeGoals} 条主线` : "暂无主线";
         if (!state.goals.length) {
-          $("#goalGrid").innerHTML = `<div class="empty" role="status">还没有目标。点击“写一个目标”，写下你想在接下来几个月推进的方向。</div>`;
-          $("#goalAverage").textContent = "暂无目标";
+          $("#goalGrid").innerHTML = `<div class="empty" role="status">还没有生活主线。点击“写一条主线”，从一个你真的在意的方向开始。</div>`;
           return;
         }
         $("#goalGrid").innerHTML = state.goals.map((goal) => {
-          const linkedTasks = state.tasks.filter((task) => (goal.linkedTaskIds || []).includes(task.id));
-          const completed = linkedTasks.filter((task) => task.done).length;
-          const progress = linkedTasks.length ? Math.round((completed / linkedTasks.length) * 100) : Math.max(0, Math.min(100, Number(goal.progress) || 0));
+          const normalized = normalizeGoal(goal);
+          Object.assign(goal, normalized);
+          const linkedTasks = state.tasks.filter((task) => normalized.linkedTaskIds.includes(task.id));
+          const linkedHabits = state.habits.filter((habit) => normalized.linkedHabitIds.includes(habit.id));
+          const openLinked = linkedTasks.filter((task) => !task.done);
+          const latestCheckIn = normalized.checkIns[normalized.checkIns.length - 1];
+          const statusLabel = { active: "推进中", paused: "先放一放", done: "已完成" }[normalized.status] || "推进中";
+          const linkParts = [];
+          if (openLinked.length) linkParts.push(`关联计划：${openLinked.slice(0, 2).map((task) => escapeHtml(task.title)).join("、")}${openLinked.length > 2 ? ` 等 ${openLinked.length} 项` : ""}`);
+          if (linkedHabits.length) linkParts.push(`关联习惯：${linkedHabits.map((habit) => escapeHtml(habit.title)).slice(0, 2).join("、")}${linkedHabits.length > 2 ? ` 等 ${linkedHabits.length} 项` : ""}`);
+          const linkSummary = linkParts.length ? linkParts.join(" · ") : "还没有关联计划或习惯打卡";
           return `
-            <article class="goal-card">
+            <article class="goal-card" data-status="${escapeHtml(normalized.status)}">
               <header>
-                <h3>${escapeHtml(goal.title)}</h3>
-                <small>${progress}%</small>
+                <div>
+                  <h3>${escapeHtml(normalized.title || "未命名主线")}</h3>
+                  <small>${escapeHtml(normalized.area)} · ${statusLabel}</small>
+                </div>
+                <button class="btn secondary small" type="button" data-action="log-goal" data-id="${normalized.id}">记录进展</button>
               </header>
-              <div class="progress" aria-label="${escapeHtml(goal.title)} 进度 ${progress}%">
-                <span style="--value:${progress}%"></span>
+              <div class="goal-section">
+                <span>为什么这件事重要</span>
+                <p>${escapeHtml(normalized.why || "还没有写原因。可以写：它会让我的生活变成什么样。")}</p>
               </div>
-              <p>${escapeHtml(goal.area)} · 下一步：${escapeHtml(goal.note || "还没写，先补一个小动作")}</p>
-              <p>${linkedTasks.length ? `关联计划 ${completed}/${linkedTasks.length} 已完成` : (goal.progress ? "还没有关联计划，显示旧进度" : "还没有关联计划，进度暂不计算")}</p>
+              <div class="goal-section">
+                <span>我想看到的变化</span>
+                <p>${escapeHtml(normalized.outcome || "还没有写想看到的变化。可以写一个能被自己感受到的结果。")}</p>
+              </div>
+              <div class="goal-section goal-next">
+                <span>下一步</span>
+                <p>${escapeHtml(normalized.nextStep || "先补一个今天或本周能开始的小动作。")}</p>
+                <small class="goal-step-date">${linkSummary}</small>
+              </div>
+              <div class="goal-section">
+                <span>最近推进</span>
+                ${latestCheckIn ? `<div class="goal-latest"><time>${escapeHtml(reviewDateLabel(latestCheckIn.date, false))}</time><p>${escapeHtml(latestCheckIn.text || latestCheckIn.nextStep)}</p></div>` : `<p>还没有推进记录。做过一点点之后，回来写一句就够。</p>`}
+              </div>
               <div class="goal-actions">
-                <button class="btn secondary small" type="button" data-action="edit-goal" data-id="${goal.id}">编辑与关联</button>
-                <button class="btn ghost small" type="button" data-action="delete-goal" data-id="${goal.id}">删除</button>
+                <button class="btn secondary small" type="button" data-action="link-goal" data-id="${normalized.id}">关联</button>
+                <button class="btn secondary small" type="button" data-action="view-goal-progress" data-id="${normalized.id}">查看成果</button>
+                <button class="btn secondary small" type="button" data-action="edit-goal" data-id="${normalized.id}">编辑主线</button>
+                <button class="btn ghost small" type="button" data-action="delete-goal" data-id="${normalized.id}">删除</button>
               </div>
             </article>
           `;
         }).join("");
-        const average = Math.round(state.goals.reduce((sum, goal) => {
-          const linked = state.tasks.filter((task) => (goal.linkedTaskIds || []).includes(task.id));
-          return sum + (linked.length ? linked.filter((task) => task.done).length / linked.length * 100 : Number(goal.progress) || 0);
-        }, 0) / state.goals.length);
-        $("#goalAverage").textContent = `平均 ${average}%`;
+      }
+
+      function goalLinkFieldset(seed = {}) {
+        const taskOptions = state.tasks.length
+          ? state.tasks.map((task) => `<label><input type="checkbox" name="linkedTasks" value="${task.id}"${(seed.linkedTaskIds || []).includes(task.id) ? " checked" : ""}><span>${escapeHtml(task.title)} · ${escapeHtml(task.date || todayKey())}</span></label>`).join("")
+          : '<p class="muted">先在近期计划中写下行动，再回来关联。</p>';
+        const habitOptions = state.habits.length
+          ? state.habits.map((habit) => `<label><input type="checkbox" name="linkedHabits" value="${habit.id}"${(seed.linkedHabitIds || []).includes(habit.id) ? " checked" : ""}><span>${escapeHtml(habit.title)} · ${escapeHtml(habit.area || "生活")}</span></label>`).join("")
+          : '<p class="muted">先在习惯页添加打卡项，再回来关联。</p>';
+        return `
+          <fieldset class="task-link-field"><legend>关联计划</legend>${taskOptions}</fieldset>
+          <fieldset class="task-link-field"><legend>关联习惯</legend>${habitOptions}</fieldset>
+        `;
       }
 
       function monthlyFinance(month = todayKey().slice(0, 7)) {
@@ -7641,7 +7776,7 @@
 
       function openEditor(type, seed = {}) {
         editorType = type;
-        if (type === "goal") editingGoalId = seed.id || null;
+        if (["goal", "goal-checkin", "goal-links"].includes(type)) editingGoalId = seed.id || null;
         if (type === "block") editingBlockId = seed.id || null;
         const defaultStart = seed.start || currentTimeValue();
         const defaultEnd = seed.end || addMinutes(defaultStart, Number(seed.duration) || 60);
@@ -7672,12 +7807,34 @@
             `
           },
           goal: {
-            title: seed.id ? "编辑生活目标" : "写一个生活目标",
+            title: seed.id ? "编辑生活主线" : "写一条生活主线",
             fields: `
-              <div class="field"><label for="editorName">我想推进什么</label><input id="editorName" name="name" value="${escapeHtml(seed.title || "")}" required autocomplete="off" placeholder="例如：稳定运动、完成作品集"></div>
-              <div class="field"><label for="editorArea">它属于哪方面</label><select id="editorArea" name="area">${areaOptions(seed.area || "成长")}</select></div>
-              <div class="field"><label for="editorDetail">下一步动作</label><input id="editorDetail" name="detail" value="${escapeHtml(seed.note || "")}" autocomplete="off" placeholder="例如：周三走路 30 分钟"></div>
-              <fieldset class="task-link-field"><legend>关联近期计划</legend>${state.tasks.length ? state.tasks.map((task) => `<label><input type="checkbox" name="linkedTasks" value="${task.id}"${(seed.linkedTaskIds || []).includes(task.id) ? " checked" : ""}><span>${escapeHtml(task.title)} · ${escapeHtml(task.date || todayKey())}</span></label>`).join("") : '<p class="muted">先在近期计划中写下行动，再回来关联。</p>'}</fieldset>
+              <div class="field"><label for="editorName">生活主线</label><input id="editorName" name="name" value="${escapeHtml(seed.title || "")}" required autocomplete="off" placeholder="例如：让身体更稳定、完成作品集"></div>
+              <div class="dual"><div class="field"><label for="editorArea">领域</label><select id="editorArea" name="area">${areaOptions(seed.area || "成长")}</select></div><div class="field"><label for="editorStatus">当前状态</label><select id="editorStatus" name="status"><option value="active"${(seed.status || "active") === "active" ? " selected" : ""}>推进中</option><option value="paused"${seed.status === "paused" ? " selected" : ""}>先放一放</option><option value="done"${seed.status === "done" ? " selected" : ""}>已完成</option></select></div></div>
+              <div class="field"><label for="editorWhy">为什么这件事重要</label><textarea id="editorWhy" name="why" placeholder="写给自己看的原因，不需要宏大。">${escapeHtml(seed.why || "")}</textarea></div>
+              <div class="field"><label for="editorOutcome">我想看到的变化</label><textarea id="editorOutcome" name="outcome" placeholder="例如：睡眠稳定、衣服穿得舒服、能交出一个作品。">${escapeHtml(seed.outcome || "")}</textarea></div>
+              <div class="field"><label for="editorDetail">下一步</label><input id="editorDetail" name="detail" value="${escapeHtml(seed.nextStep || seed.note || "")}" autocomplete="off" placeholder="只写一个可以开始的小动作"></div>
+            `
+          },
+          "goal-links": {
+            title: "管理关联",
+            fields: `
+              <p class="helper">把这条生活主线和实际行动连起来。计划和习惯都可以同时选，平时不需要就留空。</p>
+              ${goalLinkFieldset(seed)}
+            `
+          },
+          "goal-checkin": {
+            title: "记录进展",
+            fields: `
+              <div class="field"><label for="editorDate">日期</label><input id="editorDate" name="date" type="date" value="${escapeHtml(todayKey())}" required></div>
+              <div class="field"><label for="editorDetail">这次推进了什么</label><textarea id="editorDetail" name="detail" required placeholder="一句话就够：做了什么、卡在哪里、有什么变化。"></textarea></div>
+              <div class="field"><label for="editorNextStep">下一步是否调整</label><input id="editorNextStep" name="nextStep" autocomplete="off" placeholder="不填就保留原来的下一步"></div>
+            `
+          },
+          "goal-progress": {
+            title: "推进成果",
+            fields: `
+              <div class="goal-progress-list">${(seed.checkIns || []).length ? seed.checkIns.slice().reverse().map((entry) => `<article class="goal-progress-entry"><time>${escapeHtml(reviewDateLabel(entry.date, false))}</time><p>${escapeHtml(entry.text || "这次没有写具体内容")}</p>${entry.nextStep ? `<p class="muted">下一步：${escapeHtml(entry.nextStep)}</p>` : ""}</article>`).join("") : '<div class="empty" role="status">还没有推进成果。先记录一次进展，这里会按时间保存。</div>'}</div>
             `
           }
         };
@@ -7940,11 +8097,37 @@
               id: goal?.id || uid(),
               area: form.get("area"),
               title: String(form.get("name")).trim(),
-              note: String(form.get("detail") || "").trim(),
-              linkedTaskIds: form.getAll("linkedTasks").map(String)
+              why: String(form.get("why") || "").trim(),
+              outcome: String(form.get("outcome") || "").trim(),
+              status: String(form.get("status") || "active"),
+              nextStep: String(form.get("detail") || "").trim(),
+              linkedTaskIds: goal?.linkedTaskIds || [],
+              linkedHabitIds: goal?.linkedHabitIds || [],
+              checkIns: goal?.checkIns || []
             };
             if (goal) Object.assign(goal, nextGoal);
             else state.goals.push(nextGoal);
+          }
+          if (editorType === "goal-links") {
+            const goal = state.goals.find((item) => item.id === editingGoalId);
+            if (goal) {
+              goal.linkedTaskIds = form.getAll("linkedTasks").map(String);
+              goal.linkedHabitIds = form.getAll("linkedHabits").map(String);
+            }
+          }
+          if (editorType === "goal-checkin") {
+            const goal = state.goals.find((item) => item.id === editingGoalId);
+            if (goal) {
+              const nextStep = String(form.get("nextStep") || "").trim();
+              goal.checkIns = [...(goal.checkIns || []), {
+                id: uid(),
+                date: String(form.get("date") || todayKey()),
+                text: String(form.get("detail") || "").trim(),
+                nextStep
+              }];
+              if (nextStep) goal.nextStep = nextStep;
+              goal.status = goal.status || "active";
+            }
           }
           closeEditor();
           render();
@@ -8102,6 +8285,21 @@
         if (action === "edit-goal") {
           const goal = state.goals.find((item) => item.id === id);
           if (goal) openEditor("goal", goal);
+          return;
+        }
+        if (action === "log-goal") {
+          const goal = state.goals.find((item) => item.id === id);
+          if (goal) openEditor("goal-checkin", goal);
+          return;
+        }
+        if (action === "link-goal") {
+          const goal = state.goals.find((item) => item.id === id);
+          if (goal) openEditor("goal-links", goal);
+          return;
+        }
+        if (action === "view-goal-progress") {
+          const goal = state.goals.find((item) => item.id === id);
+          if (goal) openEditor("goal-progress", goal);
           return;
         }
         if (action === "delete-goal") state.goals = state.goals.filter((item) => item.id !== id);
