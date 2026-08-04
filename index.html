@@ -1175,21 +1175,6 @@
       gap: 0.75rem;
     }
 
-    .wellbeing-history {
-      display: grid;
-      gap: 0.5rem;
-      margin-top: 1rem;
-    }
-
-    .wellbeing-entry {
-      display: grid;
-      grid-template-columns: 7rem minmax(0, 1fr) auto;
-      gap: 0.75rem;
-      align-items: start;
-      padding: 0.7rem;
-      border-top: 1px solid var(--line);
-    }
-
     .meal-section {
       display: grid;
       gap: 0.9rem;
@@ -1309,28 +1294,6 @@
       margin: 0;
       color: var(--muted);
       font-size: 0.7rem;
-    }
-
-    .meal-history {
-      display: grid;
-      gap: 0.45rem;
-    }
-
-    .meal-history-entry {
-      display: grid;
-      grid-template-columns: 7rem minmax(0, 1fr) auto;
-      gap: 0.75rem;
-      align-items: center;
-      padding: 0.65rem 0;
-      border-top: 1px solid var(--line);
-    }
-
-    .meal-history-entry span {
-      overflow: hidden;
-      color: var(--muted);
-      font-size: 0.78rem;
-      text-overflow: ellipsis;
-      white-space: nowrap;
     }
 
     .habit-item {
@@ -1931,17 +1894,35 @@
       margin-top: 0.8rem;
     }
 
-    .review-day-panel textarea {
-      min-height: 7rem;
-      margin-top: 0.7rem;
+    .review-day-hint {
+      margin-top: 0.65rem;
     }
 
-    .review-day-actions {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 0.5rem;
-      margin-top: 0.6rem;
+    .review-day-details {
+      display: grid;
+      gap: 0.55rem;
+      margin-top: 0.75rem;
+    }
+
+    .review-detail {
+      display: grid;
+      gap: 0.25rem;
+      padding: 0.65rem 0.7rem;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: rgba(255, 255, 255, 0.55);
+    }
+
+    .review-detail strong {
+      color: var(--berry);
+      font-size: 0.78rem;
+    }
+
+    .review-detail span {
+      color: var(--ink);
+      font-size: 0.82rem;
+      line-height: 1.55;
+      white-space: pre-wrap;
     }
 
     .review-ai {
@@ -2162,22 +2143,9 @@
         grid-template-columns: 1fr;
       }
 
-      .wellbeing-entry {
-        grid-template-columns: 1fr;
-      }
-
       .meal-grid,
       .nutrition-grid {
         grid-template-columns: 1fr;
-      }
-
-      .meal-history-entry {
-        grid-template-columns: 1fr auto;
-      }
-
-      .meal-history-entry span {
-        grid-column: 1 / -1;
-        grid-row: 2;
       }
 
       .period-review {
@@ -3460,13 +3428,11 @@
       }
 
       .gratitude-actions,
-      .wellbeing-actions,
-      .review-day-actions {
+      .wellbeing-actions {
         align-items: stretch;
         flex-direction: column;
       }
 
-      .review-day-actions > div,
       #timeblocks .panel-header > div:last-child,
       #goals .panel-header > div:last-child {
         width: 100%;
@@ -3875,8 +3841,7 @@
       }
 
       .nutrition-mode,
-      .nutrition-disclaimer,
-      .meal-history-entry span {
+      .nutrition-disclaimer {
         color: #a99da0;
       }
 
@@ -4821,7 +4786,6 @@
                 <div class="field"><label for="wellbeingNext">明天最重要的一步</label><input id="wellbeingNext" name="nextStep" autocomplete="off" placeholder="只写一个具体动作"></div>
                 <div class="wellbeing-actions"><span class="save-caption" id="wellbeingSaveStatus" aria-live="polite">记录会保存在本机</span><button class="btn" type="submit">保存今日状态</button></div>
               </form>
-              <div class="wellbeing-history" id="wellbeingHistory"></div>
               <section class="meal-section" aria-labelledby="mealSectionTitle">
                 <header class="meal-section-header">
                   <div>
@@ -4853,7 +4817,6 @@
                   <p class="nutrition-summary" id="mealNutritionSummary"></p>
                   <p class="nutrition-disclaimer">仅为粗略估算，请尽量填写份量。未识别的内容不会计入总量；烹饪用油、调味料和品牌差异仍可能带来误差，不替代医生或营养师建议。</p>
                 </section>
-                <div class="meal-history" id="mealHistory"></div>
               </section>
             </div>
           </section>
@@ -4912,7 +4875,7 @@
             <header class="panel-header">
               <div>
                 <h2>日历与复盘</h2>
-                <p class="muted">点开任意一天，补记录；再用周、月、年视角回看变化。</p>
+                <p class="muted">点开任意一天查看已有记录，再用周、月、年视角回看变化。</p>
               </div>
             </header>
             <div class="panel-body">
@@ -4934,13 +4897,8 @@
                       <strong id="reviewDateLabel">今天</strong>
                       <span class="pill status-note" id="reviewDayMetric">0 项计划</span>
                     </div>
-                    <textarea id="dailyNote" placeholder="写下这一天最重要的推进、消耗、感激和下一步。"></textarea>
-                    <div class="review-day-actions">
-                      <span class="save-caption" id="reviewSaveStatus" aria-live="polite">记录会保存在本机</span>
-                      <div>
-                        <button class="btn secondary small" id="saveNoteBtn" type="button">保存这天</button>
-                      </div>
-                    </div>
+                    <p class="muted review-day-hint">从复盘日历点选日期，这里会显示当天详情。</p>
+                    <div class="review-day-details" id="reviewDayDetails"></div>
                     <div class="review-ai" id="reviewAiCard">
                       <strong>当日 AI 总结</strong>
                       <p class="ai-summary-text" id="reviewAiText">在当天的“今日”页面生成后，这里会保留结果。</p>
@@ -5215,7 +5173,6 @@
       $("#todayLabel").textContent = formatDateLabel();
       $("#budgetInput").value = state.settings.monthlyBudget;
       $("#savingInput").value = state.settings.monthlySaving;
-      $("#dailyNote").value = state.notes[today] || "";
       renderFilters();
       renderTasks();
       renderTimeline();
@@ -5519,12 +5476,6 @@
     $("#savingInput").addEventListener("change", (event) => {
       state.settings.monthlySaving = Number(event.target.value) || 0;
       render();
-    });
-
-    $("#saveNoteBtn").addEventListener("click", () => {
-      state.notes[todayKey()] = $("#dailyNote").value;
-      render();
-      showToast("复盘已保存");
     });
 
     $("#addHabitBtn").addEventListener("click", () => {
@@ -6410,7 +6361,6 @@
       function render() {
         applyAppearanceTheme();
         $("#todayLabel").textContent = formatDateLabel();
-        $("#dailyNote").value = state.notes[reviewDate] || "";
         renderFilters();
         renderTasks();
         renderTimeline();
@@ -6563,6 +6513,54 @@
         renderPeriodReview();
       }
 
+      function reviewDayDetails(key) {
+        const details = [];
+        const tasks = state.tasks.filter((task) => task.date === key);
+        const blocks = state.timeBlocks
+          .filter((block) => (block.date || todayKey()) === key)
+          .sort((first, second) => String(first.start || first.time || "").localeCompare(String(second.start || second.time || "")));
+        const wellbeing = state.wellbeing[key];
+        const meals = state.mealRecords[key];
+        const gratitude = state.gratitude[key];
+        const thoughts = state.thoughts.filter((thought) => thought.date === key && (thought.title || thought.body));
+
+        if (tasks.length) {
+          details.push(`<div class="review-detail"><strong>近期计划</strong><span>${escapeHtml(tasks.map((task) => `${task.done ? "已完成" : "未完成"}：${task.title}`).join("\n"))}</span></div>`);
+        }
+        if (blocks.length) {
+          details.push(`<div class="review-detail"><strong>今日时间轴</strong><span>${escapeHtml(blocks.map((block) => `${block.start || block.time || ""}-${block.end || ""}：${block.title}${block.category ? `（${block.category}）` : ""}`).join("\n"))}</span></div>`);
+        }
+        if (wellbeing) {
+          const wellbeingLines = [
+            `心情 ${wellbeing.mood ?? "-"}/5，精力 ${wellbeing.energy ?? "-"}/5，睡眠 ${wellbeing.sleep || "-"} 小时`,
+            wellbeing.body && `身体：${wellbeing.body}`,
+            wellbeing.highlight && `最有成就：${wellbeing.highlight}`,
+            wellbeing.drain && `最消耗：${wellbeing.drain}`,
+            wellbeing.nextStep && `明天计划：${wellbeing.nextStep}`
+          ].filter(Boolean);
+          details.push(`<div class="review-detail"><strong>身心</strong><span>${escapeHtml(wellbeingLines.join("\n"))}</span></div>`);
+        }
+        if (meals) {
+          const mealLines = [
+            meals.breakfast && `早餐：${meals.breakfast}`,
+            meals.lunch && `午餐：${meals.lunch}`,
+            meals.dinner && `晚餐：${meals.dinner}`,
+            meals.nutrition && `营养估算：${meals.nutrition.calories} 千卡，蛋白质 ${meals.nutrition.protein} 克`
+          ].filter(Boolean);
+          details.push(`<div class="review-detail"><strong>一日三餐</strong><span>${escapeHtml(mealLines.join("\n"))}</span></div>`);
+        }
+        if (gratitude?.text) {
+          details.push(`<div class="review-detail"><strong>感恩日记</strong><span>${escapeHtml(gratitude.text)}</span></div>`);
+        }
+        if (thoughts.length) {
+          details.push(`<div class="review-detail"><strong>随想</strong><span>${escapeHtml(thoughts.map((thought) => thought.title || "写给自己的信").join("、"))}</span></div>`);
+        }
+        if (state.notes[key]?.trim()) {
+          details.push(`<div class="review-detail"><strong>旧日记录</strong><span>${escapeHtml(state.notes[key])}</span></div>`);
+        }
+        return details.length ? details.join("") : `<div class="empty" role="status">这一天还没有可回看的记录。</div>`;
+      }
+
       function renderReviewCalendar() {
         const year = calendarCursor.getFullYear();
         const month = calendarCursor.getMonth();
@@ -6592,11 +6590,10 @@
         $("#reviewDateLabel").textContent = reviewDateLabel(reviewDate);
         $("#reviewDayMetric").textContent = tasks.length
           ? `${completed}/${tasks.length} 项计划完成`
-          : (hasWrittenReview(reviewDate) ? "有文字记录" : "暂无记录");
-        $("#dailyNote").value = state.notes[reviewDate] || "";
+          : (hasReviewData(reviewDate) ? "有记录" : "暂无记录");
+        $("#reviewDayDetails").innerHTML = reviewDayDetails(reviewDate);
         const summary = state.aiSummaries[reviewDate];
         $("#reviewAiText").textContent = summary ? summary.text : "在当天的“今日”页面生成后，这里会保留结果。";
-        $("#reviewSaveStatus").textContent = state.notes[reviewDate] ? "已有记录，可继续修改" : "记录会保存在本机";
       }
 
       function renderPeriodReview() {
@@ -7306,13 +7303,6 @@
         $("#wellbeingNext").value = entry.nextStep || "";
         $("#wellbeingSaveStatus").textContent = entry.updatedAt ? "这一天已有记录" : "记录会保存在本机";
 
-        const entries = Object.entries(state.wellbeing)
-          .filter(([, value]) => value && typeof value === "object")
-          .sort(([a], [b]) => b.localeCompare(a))
-          .slice(0, 7);
-        $("#wellbeingHistory").innerHTML = entries.length
-          ? entries.map(([date, value]) => `<article class="wellbeing-entry"><strong>${escapeHtml(date)}</strong><span>心情 ${value.mood ?? "-"}/5 · 精力 ${value.energy ?? "-"}/5 · 睡眠 ${value.sleep || "-"} 小时</span><button class="btn ghost small" type="button" data-action="open-wellbeing" data-date="${date}">查看</button></article>`).join("")
-          : `<div class="empty" role="status">还没有身心记录。先从今天开始，不需要写得完整。</div>`;
       }
 
       const MEAL_NUTRIENTS = [
@@ -7504,16 +7494,6 @@
           $("#mealNutritionMode").textContent = nutrition.mode || "本地营养估算";
         }
 
-        const entries = Object.entries(state.mealRecords)
-          .filter(([, value]) => value && typeof value === "object")
-          .sort(([a], [b]) => b.localeCompare(a))
-          .slice(0, 7);
-        $("#mealHistory").innerHTML = entries.length
-          ? entries.map(([date, value]) => {
-            const meals = [value.breakfast, value.lunch, value.dinner].filter(Boolean).join(" · ");
-            return `<article class="meal-history-entry"><strong>${escapeHtml(date)}</strong><span>${escapeHtml(meals || "未填写三餐内容")}</span><button class="btn ghost small" type="button" data-action="open-meal" data-date="${date}">查看</button></article>`;
-          }).join("")
-          : `<div class="empty" role="status">还没有餐饮记录。</div>`;
       }
 
       function mealFormValues() {
@@ -8029,18 +8009,6 @@
           renderReview();
           return;
         }
-        if (action === "open-wellbeing") {
-          $("#wellbeingDate").value = target.dataset.date;
-          renderWellbeing();
-          $("#wellbeingForm").scrollIntoView({ behavior: scrollBehavior, block: "start" });
-          return;
-        }
-        if (action === "open-meal") {
-          $("#mealDate").value = target.dataset.date;
-          renderMealRecord();
-          $("#mealForm").scrollIntoView({ behavior: scrollBehavior, block: "start" });
-          return;
-        }
         if (action === "toggle-task") {
           const task = state.tasks.find((item) => item.id === id);
           if (task) task.done = !task.done;
@@ -8138,18 +8106,6 @@
       $("#dialogCancelBtn").addEventListener("click", closeEditor);
       $("#editorDialog").addEventListener("click", (event) => {
         if (event.target === $("#editorDialog")) closeEditor();
-      });
-
-      $("#saveNoteBtn").addEventListener("click", () => {
-        state.notes[reviewDate] = $("#dailyNote").value.trim();
-        render();
-        showToast(`${reviewDate} 的记录已保存`);
-      });
-
-      $("#dailyNote").addEventListener("input", (event) => {
-        state.notes[reviewDate] = event.target.value;
-        saveState();
-        $("#reviewSaveStatus").textContent = "已自动保存";
       });
 
       function saveGratitude() {
