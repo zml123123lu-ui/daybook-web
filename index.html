@@ -7307,7 +7307,13 @@
 
       const MEAL_NUTRIENTS = [
         { terms: ["番茄意面"], base: 400, units: { 盘: 1, 份: 1 }, calories: 560, protein: 18, carbs: 85, fat: 16, fiber: 6 },
-        { terms: ["盖浇饭", "盖饭"], base: 450, units: { 份: 1, 碗: 1 }, calories: 650, protein: 22, carbs: 85, fat: 23, fiber: 5, skipWhenDetailed: true },
+        { terms: ["牛肉盖浇饭", "牛肉盖饭", "牛肉饭"], base: 450, units: { 份: 1, 碗: 1 }, calories: 720, protein: 28, carbs: 88, fat: 28, fiber: 4 },
+        { terms: ["盖浇饭", "盖饭", "焖饭", "拌饭", "煲仔饭", "咖喱饭"], base: 450, units: { 份: 1, 碗: 1 }, calories: 650, protein: 22, carbs: 85, fat: 23, fiber: 5, skipWhenDetailed: true, composite: true },
+        { terms: ["饭"], base: 450, units: { 份: 1, 碗: 1 }, calories: 620, protein: 23, carbs: 85, fat: 20, fiber: 4, composite: true, requiresPrefix: true },
+        { terms: ["炒饭"], base: 400, units: { 份: 1, 碗: 1, 盘: 1 }, calories: 620, protein: 16, carbs: 92, fat: 20, fiber: 3, composite: true },
+        { terms: ["炒面", "拌面", "汤面", "炒米粉", "炒粉", "米线", "米粉", "河粉"], base: 400, units: { 份: 1, 碗: 1, 盘: 1 }, calories: 580, protein: 17, carbs: 82, fat: 19, fiber: 3, composite: true },
+        { terms: ["面"], base: 400, units: { 份: 1, 碗: 1 }, calories: 550, protein: 24, carbs: 76, fat: 17, fiber: 3, composite: true, requiresPrefix: true },
+        { terms: ["牛肉面", "牛肉粉", "牛肉米线"], base: 450, units: { 份: 1, 碗: 1 }, calories: 600, protein: 30, carbs: 75, fat: 18, fiber: 3 },
         { terms: ["卤鸡蛋", "水煮蛋", "煎蛋", "鸡蛋"], base: 50, units: { 个: 1, 只: 1, 枚: 1 }, calories: 72, protein: 6.3, carbs: 0.4, fat: 4.8, fiber: 0 },
         { terms: ["鲜奶", "牛奶"], base: 250, measure: "ml", units: { 杯: 1 }, calories: 150, protein: 8, carbs: 12, fat: 8, fiber: 0 },
         { terms: ["酸奶", "优格"], base: 150, units: { 杯: 1 }, calories: 120, protein: 5.5, carbs: 17, fat: 3.5, fiber: 0 },
@@ -7315,7 +7321,8 @@
         { terms: ["燕麦", "麦片"], base: 40, units: { 碗: 1 }, calories: 152, protein: 5.2, carbs: 27, fat: 2.8, fiber: 4 },
         { terms: ["米饭", "白饭", "饭"], base: 150, units: { 碗: 1, 份: 1 }, calories: 174, protein: 3.9, carbs: 38.9, fat: 0.5, fiber: 0.5 },
         { terms: ["稀饭", "白粥", "粥"], base: 300, units: { 碗: 1 }, calories: 138, protein: 3.3, carbs: 29.7, fat: 0.9, fiber: 0.9 },
-        { terms: ["意面", "面条", "米粉", "河粉"], base: 250, units: { 碗: 1 }, calories: 345, protein: 11.3, carbs: 62.5, fat: 5.3, fiber: 3 },
+        { terms: ["粥"], base: 300, units: { 碗: 1 }, calories: 260, protein: 12, carbs: 42, fat: 5, fiber: 1.5, composite: true, requiresPrefix: true },
+        { terms: ["意面", "面条"], base: 250, units: { 碗: 1 }, calories: 345, protein: 11.3, carbs: 62.5, fat: 5.3, fiber: 3 },
         { terms: ["鸡胸肉", "鸡腿肉", "鸡肉", "鸡腿"], base: 100, units: { 份: 1 }, calories: 165, protein: 31, carbs: 0, fat: 3.6, fiber: 0 },
         { terms: ["牛肉"], base: 100, units: { 份: 1 }, calories: 250, protein: 26, carbs: 0, fat: 15, fiber: 0 },
         { terms: ["排骨", "猪肉"], base: 100, units: { 份: 1 }, calories: 242, protein: 27, carbs: 0, fat: 14, fiber: 0 },
@@ -7337,7 +7344,7 @@
         { terms: ["奶茶"], base: 500, measure: "ml", units: { 杯: 1 }, calories: 350, protein: 3, carbs: 58, fat: 12, fiber: 0 },
         { terms: ["含糖饮料", "可乐"], base: 500, measure: "ml", units: { 瓶: 1, 杯: 0.5 }, calories: 210, protein: 0, carbs: 53, fat: 0, fiber: 0 }
       ];
-      const NUTRITION_ESTIMATOR_VERSION = 3;
+      const NUTRITION_ESTIMATOR_VERSION = 7;
 
       function parseMealAmount(raw) {
         const value = String(raw || "").trim();
@@ -7377,6 +7384,21 @@
         return { multiplier: amount * (food.units?.[unit] ?? 1), explicit: true };
       }
 
+      function mealCompositeMatch(text, food, term, start, end) {
+        if (!food.composite) return null;
+        if (food.skipWhenDetailed && /^\s*[（(]/.test(text.slice(end))) return null;
+        const before = text.slice(0, start);
+        const boundary = Math.max(before.lastIndexOf("，"), before.lastIndexOf(","), before.lastIndexOf("；"), before.lastIndexOf(";"), before.lastIndexOf("\n"));
+        const segment = before.slice(boundary + 1);
+        const quantity = segment.match(/^(?:半|[一二两三四五六七八九十]+|\d+(?:\.\d+)?)\s*(?:千克|公斤|kg|KG|克|g|G|毫升|ml|ML|个|只|枚|碗|杯|盘|片|份|根|把|瓶)?\s*/i);
+        const prefix = segment.slice(quantity ? quantity[0].length : 0).trim();
+        if (!prefix || prefix.length > 8 || !/[\u3400-\u9fff]/.test(prefix)) return null;
+        const ingredientTerms = MEAL_NUTRIENTS.filter((entry) => !entry.composite).flatMap((entry) => entry.terms);
+        if (!ingredientTerms.some((ingredient) => prefix.endsWith(ingredient))) return null;
+        const combinedStart = start - prefix.length;
+        return { food, term: text.slice(combinedStart, end), start: combinedStart, end };
+      }
+
       function mealFoodMatches(text) {
         const candidates = [];
         MEAL_NUTRIENTS.forEach((food) => {
@@ -7387,10 +7409,12 @@
               const previousCharacter = text[start - 1] || "";
               const nextCharacter = text[end] || "";
               const quantityBefore = /(?:半|[一二两三四五六七八九十]+|\d+(?:\.\d+)?)\s*(?:克|g|千克|公斤|kg|碗|份)\s*$/i.test(text.slice(Math.max(0, start - 12), start));
-              const embeddedSingleCharacter = term.length === 1 && /[\u3400-\u9fff]/.test(previousCharacter + nextCharacter) && !quantityBefore;
+              const embeddedSingleCharacter = term.length === 1 && /[\u3400-\u9fff]/.test(previousCharacter + nextCharacter) && !quantityBefore && !food.composite;
               const followedByIngredientDetails = food.skipWhenDetailed && /^\s*[（(]/.test(text.slice(end));
               if (!embeddedSingleCharacter && !followedByIngredientDetails) {
-                candidates.push({ food, term, start, end });
+                if (!food.requiresPrefix) candidates.push({ food, term, start, end });
+                const composite = mealCompositeMatch(text, food, term, start, end);
+                if (composite) candidates.push(composite);
               }
               start = text.indexOf(term, start + term.length);
             }
