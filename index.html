@@ -7487,6 +7487,12 @@
         { terms: ["坚果", "杏仁", "核桃", "花生"], base: 30, units: { 把: 1, 份: 1 }, calories: 180, protein: 6, carbs: 6, fat: 16, fiber: 3 },
         { terms: ["豆浆"], base: 250, measure: "ml", units: { 杯: 1 }, calories: 83, protein: 7, carbs: 4, fat: 4, fiber: 1.5 },
         { terms: ["奶茶"], base: 500, measure: "ml", units: { 杯: 1 }, calories: 350, protein: 3, carbs: 58, fat: 12, fiber: 0 },
+        { terms: ["焦糖玛奇朵", "玛奇朵"], base: 350, measure: "ml", units: { 杯: 1 }, calories: 260, protein: 8, carbs: 32, fat: 11, fiber: 0 },
+        { terms: ["拿铁咖啡", "咖啡拿铁", "拿铁"], base: 350, measure: "ml", units: { 杯: 1 }, calories: 190, protein: 10, carbs: 18, fat: 8, fiber: 0 },
+        { terms: ["卡布奇诺"], base: 300, measure: "ml", units: { 杯: 1 }, calories: 130, protein: 6, carbs: 10, fat: 6, fiber: 0 },
+        { terms: ["摩卡咖啡", "咖啡摩卡", "摩卡"], base: 350, measure: "ml", units: { 杯: 1 }, calories: 300, protein: 9, carbs: 38, fat: 12, fiber: 0 },
+        { terms: ["美式咖啡", "美式", "黑咖啡", "冷萃咖啡", "冷萃"], base: 350, measure: "ml", units: { 杯: 1, 瓶: 1 }, calories: 10, protein: 0, carbs: 2, fat: 0, fiber: 0 },
+        { terms: ["咖啡"], base: 350, measure: "ml", units: { 杯: 1 }, calories: 50, protein: 2, carbs: 6, fat: 2, fiber: 0 },
         { terms: ["双层脆鸡堡", "双层鸡肉堡", "双层鸡腿堡"], base: 1, units: { 个: 1, 份: 1 }, calories: 690, protein: 30, carbs: 55, fat: 39, fiber: 3 },
         { terms: ["脆鸡堡", "鸡肉堡", "鸡腿堡", "炸鸡汉堡"], base: 1, units: { 个: 1, 份: 1 }, calories: 510, protein: 22, carbs: 48, fat: 26, fiber: 2 },
         { terms: ["汉堡包", "汉堡"], base: 1, units: { 个: 1, 份: 1 }, calories: 480, protein: 20, carbs: 45, fat: 24, fiber: 2 },
@@ -7495,7 +7501,7 @@
         { terms: ["薯条"], base: 120, units: { 份: 1, 盒: 1 }, calories: 365, protein: 4, carbs: 48, fat: 17, fiber: 4 },
         { terms: ["含糖饮料", "可乐"], base: 500, measure: "ml", units: { 瓶: 1, 杯: 0.5 }, calories: 210, protein: 0, carbs: 53, fat: 0, fiber: 0 }
       ];
-      const NUTRITION_ESTIMATOR_VERSION = 8;
+      const NUTRITION_ESTIMATOR_VERSION = 9;
 
       function parseMealAmount(raw) {
         const value = String(raw || "").trim();
