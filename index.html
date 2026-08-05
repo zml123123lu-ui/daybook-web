@@ -1596,6 +1596,13 @@
       display: grid;
       grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr);
       gap: 0.8rem;
+      align-items: start;
+    }
+
+    .review-calendar-column {
+      display: grid;
+      gap: 0.8rem;
+      min-width: 0;
     }
 
     .thought-panel .panel-body {
@@ -1972,7 +1979,8 @@
     }
 
     .review-day-panel {
-      margin-top: 0.8rem;
+      margin-top: 0;
+      align-self: start;
     }
 
     .review-day-hint {
@@ -2044,7 +2052,7 @@
     }
 
     .period-review {
-      grid-column: 1 / -1;
+      grid-column: auto;
     }
 
     .period-header {
@@ -4722,7 +4730,21 @@
       font-size: 0.8rem;
     }
 
-    .search-dialog-form { width: min(42rem, calc(100vw - 2rem)); }
+    #globalSearchDialog {
+      width: min(42rem, calc(100vw - 2rem));
+      max-width: calc(100vw - 2rem);
+    }
+
+    .search-dialog-form {
+      width: 100%;
+      max-width: 100%;
+      min-width: 0;
+    }
+
+    .search-dialog-form .dialog-fields,
+    .global-search-results {
+      min-width: 0;
+    }
     .global-search-results { display: grid; gap: 0.45rem; max-height: min(28rem, 60vh); overflow-y: auto; }
     .global-search-result {
       display: grid;
@@ -4916,10 +4938,6 @@
                 <button class="btn secondary small" id="generateAiSummaryBtn" type="button">生成总结</button>
               </header>
               <div class="panel-body">
-                <div class="summary-time-distribution">
-                  <strong>时间分布</strong>
-                  <div class="time-category-chart" id="timeCategoryChart" aria-label="所选日期各分类用时柱状图"></div>
-                </div>
                 <div class="ai-summary-card empty" id="aiSummaryCard">
                   <div>
                     <p class="ai-summary-text" id="aiSummaryText">今天还没有生成总结。</p>
@@ -5152,6 +5170,7 @@
             </header>
             <div class="panel-body">
               <div class="review-layout">
+                <div class="review-calendar-column">
                 <div class="calendar-panel">
                     <div class="calendar-toolbar">
                       <strong id="calendarMonthLabel">月历</strong>
@@ -5164,23 +5183,6 @@
                     <div class="calendar-weekdays" aria-hidden="true"><span>一</span><span>二</span><span>三</span><span>四</span><span>五</span><span>六</span><span>日</span></div>
                     <div class="calendar-grid" id="reviewCalendar" role="grid" aria-label="日历"></div>
                 </div>
-                <div class="review-day-panel">
-                    <div class="review-day-header">
-                      <strong id="reviewDateLabel">今天</strong>
-                      <span class="pill status-note" id="reviewDayMetric">0 项计划</span>
-                    </div>
-                    <p class="muted review-day-hint">从复盘日历点选日期，这里会显示当天详情。</p>
-                    <div class="review-day-details" id="reviewDayDetails"></div>
-                    <section class="review-distribution" id="reviewTimeDistribution" hidden>
-                      <div class="review-distribution-header">
-                        <strong>时间分布</strong>
-                        <span class="muted" id="reviewTimeDistributionHint"></span>
-                      </div>
-                      <div class="time-category-chart" id="reviewTimeCategoryChart" aria-label="当天各分类用时柱状图"></div>
-                    </section>
-                    <div class="review-ai ai-summary-card" id="reviewDayAi" aria-live="polite"></div>
-                </div>
-
                 <div class="period-review">
                   <div class="period-header">
                     <div>
@@ -5200,6 +5202,24 @@
                     <p class="ai-summary-meta" id="periodInsightMeta">点击“AI 复盘本周期”，生成更完整的总结与下一步建议。</p>
                   </div>
                 </div>
+                </div>
+                <div class="review-day-panel">
+                    <div class="review-day-header">
+                      <strong id="reviewDateLabel">今天</strong>
+                      <span class="pill status-note" id="reviewDayMetric">0 项计划</span>
+                    </div>
+                    <p class="muted review-day-hint">从复盘日历点选日期，这里会显示当天详情。</p>
+                    <div class="review-day-details" id="reviewDayDetails"></div>
+                    <section class="review-distribution" id="reviewTimeDistribution" hidden>
+                      <div class="review-distribution-header">
+                        <strong>时间分布</strong>
+                        <span class="muted" id="reviewTimeDistributionHint"></span>
+                      </div>
+                      <div class="time-category-chart" id="reviewTimeCategoryChart" aria-label="当天各分类用时柱状图"></div>
+                    </section>
+                    <div class="review-ai ai-summary-card" id="reviewDayAi" aria-live="polite"></div>
+                </div>
+
               </div>
             </div>
           </section>
@@ -6761,7 +6781,6 @@
         renderFilters();
         renderTasks();
         renderTimeline();
-        renderTimeCategoryChart();
         renderAiSummary();
         syncTimelineHeight();
         renderHabits();
