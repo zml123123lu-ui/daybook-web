@@ -2012,6 +2012,14 @@
       border-top: 1px solid var(--line);
     }
 
+    .review-ai-title {
+      display: block;
+      margin-bottom: 0.55rem;
+      color: var(--berry);
+      font-size: 0.8rem;
+      letter-spacing: 0.02em;
+    }
+
     .period-review {
       grid-column: 1 / -1;
     }
@@ -5108,6 +5116,7 @@
                     </div>
                     <p class="muted review-day-hint">从复盘日历点选日期，这里会显示当天详情。</p>
                     <div class="review-day-details" id="reviewDayDetails"></div>
+                    <div class="review-ai ai-summary-card" id="reviewDayAi" aria-live="polite"></div>
                 </div>
 
                 <div class="period-review">
@@ -6884,10 +6893,16 @@
         if (state.notes[key]?.trim()) {
           details.push(`<div class="review-detail"><strong>旧日记录</strong><span>${escapeHtml(state.notes[key])}</span></div>`);
         }
-        if (state.aiSummaries[key]?.text) {
-          details.push(`<div class="review-detail"><strong>每日 AI 总结</strong><span>${escapeHtml(state.aiSummaries[key].text)}</span></div>`);
-        }
         return details.length ? details.join("") : `<div class="empty" role="status">这一天还没有可回看的记录。</div>`;
+      }
+
+      function reviewDayAi(key) {
+        const summary = state.aiSummaries[key];
+        if (!summary?.text) {
+          return `<p class="ai-summary-text">这一天还没有 AI 建议。</p><p class="ai-summary-meta">去“今日”页面补充记录并生成总结后，这里只显示针对下一步的建议。</p>`;
+        }
+        const generatedAt = new Date(summary.generatedAt);
+        return `<strong class="review-ai-title">AI 建议</strong><p class="ai-summary-text">${escapeHtml(summary.text)}</p><p class="ai-summary-meta">${escapeHtml(summary.mode)} · ${generatedAt.toLocaleTimeString("zh-CN", { hour: "2-digit", minute: "2-digit" })}</p>`;
       }
 
       function renderReviewCalendar() {
@@ -6921,6 +6936,9 @@
           ? `${completed}/${tasks.length} 项计划完成`
           : (hasReviewData(reviewDate) ? "有记录" : "暂无记录");
         $("#reviewDayDetails").innerHTML = reviewDayDetails(reviewDate);
+        const reviewAi = $("#reviewDayAi");
+        reviewAi.hidden = !state.aiSummaries[reviewDate]?.text;
+        reviewAi.innerHTML = reviewDayAi(reviewDate);
       }
 
       function renderPeriodReview() {
@@ -7288,24 +7306,16 @@
 
       function localStructuredSummary(context) {
         if (!context.tasks.length && !context.blocks.length && !context.completedHabits.length && !context.wellbeing && !context.mealRecord && !context.gratitude && !context.thoughts.length) {
-          return "今天还没有足够的计划或行动记录。先在近期计划中添加事项，并将它放入今日时间轴，稍后再生成总结。";
+          return "先留下一个最小记录：写下一件明天真正要做的事，并为它留出一段明确时间。";
         }
-        const completedNames = context.doneTasks.slice(0, 3).map((task) => task.title).join("、");
-        const pendingNames = context.pendingTasks.slice(0, 3).map((task) => task.title).join("、");
         const lines = [
-          `今天安排了 ${context.tasks.length} 项计划，完成 ${context.doneTasks.length} 项。`,
-          `时间分类：${categoryDurationText(context.blocks)}。`
+          "值得留意：今天的记录已经形成了可回看的线索，明天优先保持一个清晰的主线。"
         ];
-        if (completedNames) lines.push(`主要完成：${completedNames}。`);
-        if (pendingNames) lines.push(`仍需继续：${pendingNames}。`);
-        if (context.completedHabits.length) lines.push(`完成的习惯包括：${context.completedHabits.map((habit) => habit.title).join("、")}。`);
-        if (context.wellbeing) lines.push(`状态记录：心情 ${context.wellbeing.mood}/5，精力 ${context.wellbeing.energy}/5，睡眠 ${context.wellbeing.sleep || "-"} 小时。`);
-        if (context.mealRecord) lines.push(`餐饮记录：早餐 ${context.mealRecord.breakfast || "未记"}，午餐 ${context.mealRecord.lunch || "未记"}，晚餐 ${context.mealRecord.dinner || "未记"}。`);
-        if (context.gratitude) lines.push(`感恩日记：${context.gratitude}。`);
-        if (context.thoughts.length) lines.push(`写给自己的信：${context.thoughts.map((thought) => thought.title).join("、")}。`);
-        lines.push(context.pendingTasks.length
-          ? "明天建议先处理一项未完成计划，再安排新的时间块。"
-          : "今天的计划收束得比较完整，明天可以继续保持清晰的时间边界。");
+        if (context.pendingTasks.length) lines.push("建议一：先处理一项未完成计划，再安排新的时间块。" );
+        else lines.push("建议一：保持现在的节奏，只给明天安排一项最重要的推进。" );
+        if (context.wellbeing && Number(context.wellbeing.energy) <= 2) lines.push("建议二：把低能量时段留给轻量事项，并提前安排休息。" );
+        else if (context.mealRecord && !context.mealRecord.dinner) lines.push("建议二：补记晚餐或提前准备一份简单、完整的晚餐。" );
+        else lines.push("建议二：为结束一天留出一个短暂的收束时间，避免把未完成事项带进睡前。" );
         return lines.join("\n\n");
       }
 
@@ -7327,7 +7337,7 @@
                 length: "medium"
               });
               text = await summarizer.summarize(context.text, {
-                context: "请用温和、具体、不过度评价的中文，按工作、学习、生活、健康、社交、娱乐和休息等分类分析今天的时间投入，再总结完成情况和明日建议。不要给出任务总时间。"
+                context: "请只输出温和、具体、不过度评价的行动建议。先指出一个最值得留意的模式，再给出明天 1-3 条可执行建议。不要复述时间轴、餐饮、身心或计划的原始内容，不要输出任务总时间，不要写成流水账。"
               });
               mode = "浏览器本地 AI";
               summarizer.destroy?.();
