@@ -4702,6 +4702,119 @@
 
     .task-form-row {
       grid-template-columns: minmax(0, 1fr) 9.5rem 7.5rem auto;
+      align-items: start;
+    }
+
+    .task-form-row .field {
+      min-width: 0;
+    }
+
+    .task-form-row .field > label {
+      min-height: 1.05rem;
+      line-height: 1.05rem;
+    }
+
+    .task-form-row input,
+    .task-form-row select,
+    .task-form-row .btn {
+      box-sizing: border-box;
+      min-height: 2.65rem;
+      height: 2.65rem;
+      align-self: end;
+      line-height: 1.2;
+    }
+
+    .task-form-row input,
+    .task-form-row select {
+      padding-top: 0;
+      padding-bottom: 0;
+      line-height: 2.65rem;
+      font-size: 1rem;
+      font-weight: 500;
+    }
+
+    .task-form-row input[type="date"] {
+      -webkit-appearance: none;
+      appearance: none;
+    }
+
+    .optional-date-field {
+      position: relative;
+      min-width: 0;
+    }
+
+    .optional-date-field input[type="date"] {
+      position: relative;
+      z-index: 1;
+      color: transparent;
+      caret-color: transparent;
+    }
+
+    .optional-date-field input[type="date"]::-webkit-calendar-picker-indicator {
+      opacity: 0.55;
+      cursor: pointer;
+    }
+
+    .optional-date-field input[type="date"]::-webkit-datetime-edit,
+    .optional-date-field input[type="date"]::-webkit-datetime-edit-fields-wrapper,
+    .optional-date-field input[type="date"]::-webkit-datetime-edit-text,
+    .optional-date-field input[type="date"]::-webkit-datetime-edit-month-field,
+    .optional-date-field input[type="date"]::-webkit-datetime-edit-day-field,
+    .optional-date-field input[type="date"]::-webkit-datetime-edit-year-field {
+      color: transparent !important;
+      text-shadow: none;
+    }
+
+    .optional-date-label {
+      position: absolute;
+      z-index: 2;
+      inset: 0 2.2rem 0 0.7rem;
+      display: flex;
+      align-items: center;
+      overflow: hidden;
+      color: var(--muted);
+      font-size: 1rem;
+      font-weight: 500;
+      line-height: 2.65rem;
+      pointer-events: none;
+      white-space: nowrap;
+      transform: translateY(1px);
+    }
+
+    .optional-date-field.has-value .optional-date-label {
+      color: var(--ink);
+    }
+
+    .task-form-row select {
+      line-height: 2.4rem;
+    }
+
+    .task-form-row input[type="date"]::-webkit-datetime-edit,
+    .task-form-row input[type="date"]::-webkit-datetime-edit-fields-wrapper,
+    .task-form-row input[type="date"]::-webkit-datetime-edit-text,
+    .task-form-row input[type="date"]::-webkit-datetime-edit-month-field,
+    .task-form-row input[type="date"]::-webkit-datetime-edit-day-field,
+    .task-form-row input[type="date"]::-webkit-datetime-edit-year-field {
+      font-size: 1rem;
+      line-height: 2.65rem;
+      padding: 0;
+      transform: none;
+    }
+
+    .task-form-row input[type="date"]::-webkit-datetime-edit-text {
+      color: var(--muted);
+    }
+
+    .task-form-row input[type="date"]::-webkit-datetime-edit-month-field,
+    .task-form-row input[type="date"]::-webkit-datetime-edit-day-field,
+    .task-form-row input[type="date"]::-webkit-datetime-edit-year-field {
+      color: var(--ink);
+    }
+
+    .plan-form-hint {
+      margin: 0.35rem 0 0.8rem;
+      color: var(--muted);
+      font-size: 0.74rem;
     }
 
     .meal-entry-heading {
@@ -4866,29 +4979,25 @@
               <span class="pill status-note" id="openTaskLabel">0 个打开项</span>
             </header>
             <div class="panel-body">
-              <form class="quick-grid" id="quickForm">
+              <form class="form-row task-form-row" id="planForm">
                 <div class="field">
-                  <label for="quickText">快速捕捉</label>
-                  <input id="quickText" name="quickText" autocomplete="off" placeholder="例如：预约体检、整理衣柜、给爸妈打电话">
-                </div>
-                <button class="btn" type="submit">添加</button>
-              </form>
-
-              <form class="form-row task-form-row" id="taskForm">
-                <div class="field">
-                  <label for="taskTitle">计划事项</label>
-                  <input id="taskTitle" name="taskTitle" autocomplete="off" required placeholder="写下一个可执行动作">
+                  <label for="taskTitle">想做什么</label>
+                  <input id="taskTitle" name="taskTitle" autocomplete="off" required placeholder="写下要做的事">
                 </div>
                 <div class="field">
-                  <label for="taskDate">计划日期</label>
-                  <input id="taskDate" name="taskDate" type="date" required>
+                  <label for="taskDate">安排日期（可选）</label>
+                  <div class="optional-date-field" id="taskDateField">
+                    <input id="taskDate" name="taskDate" type="date" aria-label="安排日期，可选">
+                    <span class="optional-date-label" id="taskDateLabel" aria-hidden="true">选择日期</span>
+                  </div>
                 </div>
                 <div class="field">
                   <label for="taskRepeat">重复</label>
                   <select id="taskRepeat" name="repeat"><option value="none">不重复</option><option value="daily">每天</option><option value="weekly">每周</option><option value="monthly">每月</option></select>
                 </div>
-                <button class="btn" type="submit">加入</button>
+                <button class="btn" type="submit">加入计划</button>
               </form>
+              <p class="form-hint plan-form-hint">不设日期会先放在“未安排日期”，之后再安排也可以。</p>
 
               <div class="filters" id="filters" aria-label="任务筛选"></div>
               <div class="task-list" id="taskList" role="list"></div>
@@ -6532,9 +6641,20 @@
         return TIME_CATEGORIES.map((category) => `<option value="${category}"${category === selected ? " selected" : ""}>${category}</option>`).join("");
       }
 
+      function syncTaskDateField() {
+        const input = $("#taskDate");
+        const field = $("#taskDateField");
+        const label = $("#taskDateLabel");
+        if (!input || !field || !label) return;
+        const value = input.value || "";
+        field.classList.toggle("has-value", Boolean(value));
+        label.textContent = value ? value.replaceAll("-", "/") : "选择日期";
+      }
+
       function fillSelects() {
         $("#activeDate").value = activeDate;
-        $("#taskDate").value = activeDate;
+        $("#taskDate").value = "";
+        syncTaskDateField();
         $("#wellbeingDate").value = todayKey();
         $("#mealDate").value = todayKey();
       }
@@ -6585,7 +6705,8 @@
         const normalized = /^\d{4}-\d{2}-\d{2}$/.test(String(key || "")) ? String(key) : todayKey();
         activeDate = normalized;
         $("#activeDate").value = activeDate;
-        $("#taskDate").value = activeDate;
+        $("#taskDate").value = "";
+        syncTaskDateField();
         delete $("#timeline").dataset.positioned;
         render();
       }
@@ -7101,9 +7222,13 @@
         return state.tasks.filter((task) => (includeArchived || !task.archived) && taskOccursOn(task, date));
       }
 
+      function isUnscheduledTask(task) {
+        return !String(task?.date || "").trim();
+      }
+
       function filteredTasks() {
         if (state.filter === "归档") return state.tasks.filter((task) => task.archived);
-        const tasks = state.tasks.filter((task) => !task.archived && (task.repeat === "none" || taskOccursOn(task, activeDate)));
+        const tasks = state.tasks.filter((task) => !task.archived && (isUnscheduledTask(task) || task.repeat === "none" || taskOccursOn(task, activeDate)));
         if (state.filter === "全部") return tasks;
         if (state.filter === "已完成") return tasks.filter((task) => taskDoneOnDate(task, task.repeat === "none" ? task.date : activeDate));
         return tasks;
@@ -7125,7 +7250,7 @@
           const dateOrder = String(a.date || todayKey()).localeCompare(String(b.date || todayKey()));
           return dateOrder;
         });
-        const openCount = state.tasks.filter((task) => !task.archived && (task.repeat === "none" || taskOccursOn(task, activeDate)) && !taskDoneOnDate(task, task.repeat === "none" ? task.date : activeDate)).length;
+        const openCount = state.tasks.filter((task) => !task.archived && (isUnscheduledTask(task) || task.repeat === "none" || taskOccursOn(task, activeDate)) && !taskDoneOnDate(task, activeDate)).length;
         $("#openTaskLabel").textContent = `${openCount} 个打开项`;
         if (!tasks.length) {
           $("#taskList").innerHTML = `<div class="empty" role="status">还没有计划，先写下想做的事吧。</div>`;
@@ -7141,7 +7266,8 @@
             <div>
               <div class="task-title">${escapeHtml(task.title)}</div>
               <div class="task-meta">
-                <span class="pill">${repeatLabel ? `${repeatLabel} · 起始 ${escapeHtml(task.date)}` : `计划 ${escapeHtml(task.date || todayKey())}`}</span>
+              <span class="pill">${repeatLabel ? `${repeatLabel} · 起始 ${escapeHtml(task.date)}` : `计划 ${escapeHtml(task.date || todayKey())}`}</span>
+               <span class="pill">${repeatLabel ? `${repeatLabel} · 起始 ${escapeHtml(task.date)}` : (isUnscheduledTask(task) ? "未安排日期" : `计划 ${escapeHtml(task.date)}`)}</span>
                 ${task.archived ? '<span class="pill">已归档</span>' : ""}
               </div>
             </div>
@@ -8147,19 +8273,20 @@
           : "还没有记录心情与精力。";
       }
 
-      function addTask({ title, date = activeDate, area = "生活", priority = "medium", repeat = "none" }) {
+      function addTask({ title, date = "", area = "生活", priority = "medium", repeat = "none" }) {
         const trimmed = title.trim();
         if (!trimmed) return false;
+        const plannedDate = String(date || "").trim();
         state.tasks.push({
           id: uid(),
           title: trimmed,
           area,
           priority,
-          repeat: ["daily", "weekly", "monthly"].includes(repeat) ? repeat : "none",
+          repeat: plannedDate && ["daily", "weekly", "monthly"].includes(repeat) ? repeat : "none",
           completions: {},
           archived: false,
           done: false,
-          date
+          date: plannedDate
         });
         render();
         return true;
@@ -8414,15 +8541,7 @@
       }
 
       document.addEventListener("submit", (event) => {
-        if (event.target.id === "quickForm") {
-          event.preventDefault();
-          if (addTask({ title: $("#quickText").value, date: activeDate })) {
-            event.target.reset();
-            showToast("已加入近期计划");
-          }
-        }
-
-        if (event.target.id === "taskForm") {
+        if (event.target.id === "planForm") {
           event.preventDefault();
           if (addTask({
             title: $("#taskTitle").value,
@@ -8430,7 +8549,7 @@
             repeat: $("#taskRepeat").value
           })) {
             event.target.reset();
-            $("#taskDate").value = activeDate;
+            syncTaskDateField();
             showToast("计划已加入");
           }
         }
@@ -9004,6 +9123,7 @@
         timelineHeightObserver.observe(summaryPanel);
       }
       window.addEventListener("resize", syncTimelineHeight);
+      $("#taskDate").addEventListener("change", syncTaskDateField);
       render();
       setView(location.hash.slice(1));
       syncDirty = false;
