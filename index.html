@@ -2006,6 +2006,29 @@
       white-space: pre-wrap;
     }
 
+    .review-distribution {
+      margin-top: 0.75rem;
+      padding: 0.75rem 0.7rem;
+      border-top: 1px solid var(--line);
+    }
+
+    .review-distribution-header {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 0.6rem;
+      margin-bottom: 0.6rem;
+    }
+
+    .review-distribution-header strong {
+      color: var(--berry);
+      font-size: 0.8rem;
+    }
+
+    .review-distribution-header .muted {
+      font-size: 0.7rem;
+    }
+
     .review-ai {
       margin-top: 0.7rem;
       padding-top: 0.7rem;
@@ -2249,9 +2272,13 @@
         grid-template-columns: 1fr;
       }
 
-      .summary {
+     .summary {
+       grid-template-columns: repeat(2, minmax(0, 1fr));
+       gap: 0.5rem;
+     }
+
+      .today-glance {
         grid-template-columns: repeat(2, minmax(0, 1fr));
-        gap: 0.5rem;
       }
 
       .metric {
@@ -4609,33 +4636,61 @@
     }
 
     .today-glance {
-      display: flex;
-      gap: 0;
-      overflow-x: auto;
-      border: 1px solid var(--line);
-      border-radius: var(--radius);
-      background: var(--surface);
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 0.55rem;
+      overflow: visible;
+      border: 0;
+      border-radius: 0;
+      background: transparent;
     }
 
     .today-glance .metric {
-      flex: 1 0 10rem;
       display: grid;
-      grid-template-columns: auto auto;
-      align-items: baseline;
+      grid-template-columns: auto 1fr;
+      grid-template-rows: auto auto;
+      align-items: center;
       column-gap: 0.55rem;
-      padding: 0.65rem 0.8rem;
-      border: 0;
-      border-right: 1px solid var(--line);
-      border-radius: 0;
-      background: transparent;
+      min-height: 4.7rem;
+      padding: 0.7rem 0.8rem;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: color-mix(in srgb, var(--surface) 84%, var(--theme-accent, var(--berry)) 4%);
       box-shadow: none;
     }
 
-    .today-glance .metric:last-child { border-right: 0; }
     .today-glance .metric::before { display: none; }
-    .today-glance .metric small { margin: 0; }
-    .today-glance .metric strong { font-size: 1rem; }
-    .today-glance .metric span { grid-column: 1 / -1; margin-top: 0.18rem; font-size: 0.7rem; }
+    .today-glance .metric small {
+      grid-column: 2;
+      margin: 0;
+      font-size: 0.72rem;
+      font-weight: 750;
+      letter-spacing: 0.04em;
+    }
+    .today-glance .metric strong {
+      grid-column: 2;
+      font-family: var(--serif);
+      font-size: 1.2rem;
+      line-height: 1.15;
+    }
+    .today-glance .metric span {
+      grid-column: 1 / -1;
+      margin-top: 0.14rem;
+      font-size: 0.69rem;
+    }
+    .today-glance .metric::after {
+      content: "";
+      grid-row: 1 / 3;
+      grid-column: 1;
+      width: 0.46rem;
+      height: 0.46rem;
+      border-radius: 50%;
+      background: var(--berry);
+      box-shadow: 0 0 0 0.28rem color-mix(in srgb, var(--berry) 12%, transparent);
+    }
+    .today-glance .metric:nth-child(2)::after { background: var(--green); box-shadow: 0 0 0 0.28rem color-mix(in srgb, var(--green) 12%, transparent); }
+    .today-glance .metric:nth-child(3)::after { background: var(--gold); box-shadow: 0 0 0 0.28rem color-mix(in srgb, var(--gold) 12%, transparent); }
+    .today-glance .metric:nth-child(4)::after { background: var(--blue); box-shadow: 0 0 0 0.28rem color-mix(in srgb, var(--blue) 12%, transparent); }
 
     .task-form-row {
       grid-template-columns: minmax(0, 1fr) 9.5rem 7.5rem auto;
@@ -5116,6 +5171,13 @@
                     </div>
                     <p class="muted review-day-hint">从复盘日历点选日期，这里会显示当天详情。</p>
                     <div class="review-day-details" id="reviewDayDetails"></div>
+                    <section class="review-distribution" id="reviewTimeDistribution" hidden>
+                      <div class="review-distribution-header">
+                        <strong>时间分布</strong>
+                        <span class="muted" id="reviewTimeDistributionHint"></span>
+                      </div>
+                      <div class="time-category-chart" id="reviewTimeCategoryChart" aria-label="当天各分类用时柱状图"></div>
+                    </section>
                     <div class="review-ai ai-summary-card" id="reviewDayAi" aria-live="polite"></div>
                 </div>
 
@@ -6938,6 +7000,7 @@
           ? `${completed}/${tasks.length} 项计划完成`
           : (hasReviewData(reviewDate) ? "有记录" : "暂无记录");
         $("#reviewDayDetails").innerHTML = reviewDayDetails(reviewDate);
+        renderReviewTimeDistribution();
         const reviewAi = $("#reviewDayAi");
         reviewAi.hidden = !state.aiSummaries[reviewDate]?.text;
         reviewAi.innerHTML = reviewDayAi(reviewDate);
@@ -7212,8 +7275,12 @@
           $("#timeCategoryChart").innerHTML = `<div class="empty" role="status">记录时间轴后，这里会显示各分类用时。</div>`;
           return;
         }
+        $("#timeCategoryChart").innerHTML = categoryChartMarkup(durations);
+      }
+
+      function categoryChartMarkup(durations) {
         const total = durations.reduce((sum, item) => sum + item.minutes, 0);
-        $("#timeCategoryChart").innerHTML = durations.map((item) => {
+        return durations.map((item) => {
           const share = total ? Math.max(4, Math.round((item.minutes / total) * 100)) : 0;
           return `
             <div class="category-bar-row" data-category="${escapeHtml(item.category)}">
@@ -7223,6 +7290,16 @@
             </div>
           `;
         }).join("");
+      }
+
+      function renderReviewTimeDistribution() {
+        const blocks = state.timeBlocks.filter((block) => (block.date || todayKey()) === reviewDate);
+        const durations = categoryDurationsForBlocks(blocks);
+        const section = $("#reviewTimeDistribution");
+        section.hidden = !durations.length;
+        if (!durations.length) return;
+        $("#reviewTimeDistributionHint").textContent = "按已记录时间轴统计";
+        $("#reviewTimeCategoryChart").innerHTML = categoryChartMarkup(durations);
       }
 
       function timelineSlotsForBlock(block) {
