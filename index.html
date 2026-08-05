@@ -6901,8 +6901,10 @@
         if (!summary?.text) {
           return `<p class="ai-summary-text">这一天还没有 AI 建议。</p><p class="ai-summary-meta">去“今日”页面补充记录并生成总结后，这里只显示针对下一步的建议。</p>`;
         }
+        const legacySummary = /今日时间轴|时间分类|状态记录|餐饮记录|一日三餐|完成的习惯/.test(summary.text);
+        const advice = legacySummary ? localStructuredSummary(summaryContext(key)) : summary.text;
         const generatedAt = new Date(summary.generatedAt);
-        return `<strong class="review-ai-title">AI 建议</strong><p class="ai-summary-text">${escapeHtml(summary.text)}</p><p class="ai-summary-meta">${escapeHtml(summary.mode)} · ${generatedAt.toLocaleTimeString("zh-CN", { hour: "2-digit", minute: "2-digit" })}</p>`;
+        return `<strong class="review-ai-title">AI 建议</strong><p class="ai-summary-text">${escapeHtml(advice)}</p><p class="ai-summary-meta">${escapeHtml(summary.mode)} · ${generatedAt.toLocaleTimeString("zh-CN", { hour: "2-digit", minute: "2-digit" })}</p>`;
       }
 
       function renderReviewCalendar() {
@@ -7309,13 +7311,16 @@
           return "先留下一个最小记录：写下一件明天真正要做的事，并为它留出一段明确时间。";
         }
         const lines = [
-          "值得留意：今天的记录已经形成了可回看的线索，明天优先保持一个清晰的主线。"
+          "值得留意：今天已经留下了足够的线索。明天先守住一个清晰的主线，再决定是否增加新的安排。",
+          context.pendingTasks.length
+            ? "建议一：先处理一项未完成计划，把它拆成一个 20 分钟内可以开始的动作。"
+            : "建议一：保持现在的节奏，明天只设定一项最重要的推进，完成后再加码。",
+          context.wellbeing && Number(context.wellbeing.energy) <= 2
+            ? "建议二：把低能量时段留给轻量事项，给休息和恢复预留明确边界。"
+            : "建议二：在主要安排之间留出缓冲，不要让时间块连续挤满。",
+          "建议三：结束一天前花几分钟收束，把还没完成的事情移到明天，而不是继续堆在脑中。",
+          "建议四：明天晚上只需要记录一个最有成就的瞬间和一个最消耗的瞬间，帮助下一次建议更贴合你。"
         ];
-        if (context.pendingTasks.length) lines.push("建议一：先处理一项未完成计划，再安排新的时间块。" );
-        else lines.push("建议一：保持现在的节奏，只给明天安排一项最重要的推进。" );
-        if (context.wellbeing && Number(context.wellbeing.energy) <= 2) lines.push("建议二：把低能量时段留给轻量事项，并提前安排休息。" );
-        else if (context.mealRecord && !context.mealRecord.dinner) lines.push("建议二：补记晚餐或提前准备一份简单、完整的晚餐。" );
-        else lines.push("建议二：为结束一天留出一个短暂的收束时间，避免把未完成事项带进睡前。" );
         return lines.join("\n\n");
       }
 
@@ -7334,10 +7339,10 @@
               const summarizer = await window.Summarizer.create({
                 type: "key-points",
                 format: "plain-text",
-                length: "medium"
+                length: "long"
               });
               text = await summarizer.summarize(context.text, {
-                context: "请只输出温和、具体、不过度评价的行动建议。先指出一个最值得留意的模式，再给出明天 1-3 条可执行建议。不要复述时间轴、餐饮、身心或计划的原始内容，不要输出任务总时间，不要写成流水账。"
+                context: "请只输出温和、具体、不过度评价的行动建议，篇幅稍长一些。先用一小段指出最值得留意的模式，再给出 3-5 条明天可执行的建议。不要复述时间轴、餐饮、身心、感恩、随想或计划的原始内容，不要输出任务总时间，不要写成流水账。"
               });
               mode = "浏览器本地 AI";
               summarizer.destroy?.();
