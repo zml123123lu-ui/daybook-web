@@ -1384,6 +1384,115 @@
       align-items: center;
     }
 
+    .maintenance-form {
+      display: grid;
+      grid-template-columns: minmax(0, 1.5fr) 5rem 7rem 5rem auto;
+      gap: 0.55rem;
+      align-items: end;
+      margin-bottom: 0.85rem;
+    }
+
+    .maintenance-form .btn {
+      min-height: 2.65rem;
+    }
+
+    .maintenance-hint {
+      margin: 0 0 1rem;
+      color: var(--muted);
+      font-size: 0.78rem;
+      line-height: 1.45;
+    }
+
+    .maintenance-toolbar {
+      display: flex;
+      align-items: end;
+      justify-content: space-between;
+      gap: 0.75rem;
+      margin-bottom: 1rem;
+      padding-bottom: 0.85rem;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .maintenance-log-date {
+      width: 10rem;
+    }
+
+    .maintenance-list {
+      display: grid;
+      gap: 0.65rem;
+    }
+
+    .maintenance-item {
+      display: grid;
+      gap: 0.75rem;
+      padding: 0.85rem;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--surface);
+    }
+
+    .maintenance-item header,
+    .maintenance-item-meta,
+    .maintenance-item-actions {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.65rem;
+    }
+
+    .maintenance-item h3 {
+      font-size: 0.98rem;
+      line-height: 1.35;
+      overflow-wrap: anywhere;
+    }
+
+    .maintenance-item small,
+    .maintenance-item-meta {
+      color: var(--muted);
+      font-size: 0.78rem;
+      line-height: 1.45;
+    }
+
+    .maintenance-progress {
+      display: grid;
+      gap: 0.35rem;
+    }
+
+    .maintenance-progress-track {
+      height: 0.42rem;
+      overflow: hidden;
+      border-radius: 999px;
+      background: var(--surface-2);
+    }
+
+    .maintenance-progress-fill {
+      display: block;
+      width: var(--maintenance-progress, 0%);
+      height: 100%;
+      border-radius: inherit;
+      background: var(--theme-accent, var(--berry));
+    }
+
+    .maintenance-status {
+      color: var(--theme-accent, var(--berry));
+      font-weight: 800;
+    }
+
+    .maintenance-history {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.3rem;
+    }
+
+    .maintenance-history span {
+      padding: 0.18rem 0.4rem;
+      border-radius: 999px;
+      background: var(--surface-2);
+      color: var(--muted);
+      font-size: 0.7rem;
+      font-variant-numeric: tabular-nums;
+    }
+
     .habit-chart-card {
       display: grid;
       gap: 0.8rem;
@@ -4882,6 +4991,13 @@
       .task-form-row { grid-template-columns: 1fr 1fr; }
       .task-form-row .field:first-child { grid-column: 1 / -1; }
       .task-form-row .btn { grid-column: 1 / -1; }
+      .maintenance-form { grid-template-columns: 1fr 1fr; }
+      .maintenance-form .field:first-child { grid-column: 1 / -1; }
+      .maintenance-form .btn { grid-column: 1 / -1; }
+      .maintenance-toolbar { align-items: stretch; flex-direction: column; }
+      .maintenance-log-date { width: 100%; }
+      .maintenance-item header,
+      .maintenance-item-actions { align-items: flex-start; flex-direction: column; }
     }
   </style>
 </head>
@@ -4901,6 +5017,7 @@
         <a href="#today" data-view="today" aria-label="今日"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M7 3v3M17 3v3M4 9h16M5 5h14a1 1 0 0 1 1 1v14H4V6a1 1 0 0 1 1-1Z"/></svg></span><span class="nav-label">今日</span><span class="nav-balance" aria-hidden="true"></span></a>
         <a href="#goals" data-view="goals" aria-label="方向"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/><path d="m14 10 5-5"/></svg></span><span class="nav-label">方向</span><span class="nav-balance" aria-hidden="true"></span></a>
         <a href="#habits" data-view="habits" aria-label="习惯"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M6 4v4M18 4v4M4 10h16M5 6h14a1 1 0 0 1 1 1v13H4V7a1 1 0 0 1 1-1Z"/><path d="m8 15 2 2 5-5"/></svg></span><span class="nav-label">习惯</span><span class="nav-balance" aria-hidden="true"></span></a>
+        <a href="#maintenance" data-view="maintenance" aria-label="维护"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m14 6 4 4M5 19l7-7M3 21l3-3M13 4l2-2 5 5-2 2M8 10l3-3 6 6-3 3"/></svg></span><span class="nav-label">维护</span><span class="nav-balance" aria-hidden="true"></span></a>
         <a href="#money" data-view="money" aria-label="财务"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 9h18M16 14h2"/></svg></span><span class="nav-label">财务</span><span class="nav-balance" aria-hidden="true"></span></a>
         <a href="#health" data-view="health" aria-label="身心"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M20 8c0 5-8 11-8 11S4 13 4 8a4 4 0 0 1 7-2.6A4 4 0 0 1 20 8Z"/><path d="M8 11h2l1-2 2 5 1-3h2"/></svg></span><span class="nav-label">身心</span><span class="nav-balance" aria-hidden="true"></span></a>
         <a href="#thoughts" data-view="thoughts" aria-label="随想"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 4h14v16H5zM8 8h8M8 12h8M8 16h5"/></svg></span><span class="nav-label">随想</span><span class="nav-balance" aria-hidden="true"></span></a>
@@ -5115,6 +5232,49 @@
                 </div>
               </section>
               <div class="habit-list" id="habitList"></div>
+            </div>
+          </section>
+
+          <section class="panel view-panel" id="maintenance" data-panel="maintenance" hidden>
+            <header class="panel-header">
+              <div>
+                <h2>生活维护</h2>
+                <p class="muted">记录那些不必每天做，却需要按时照顾的生活事项。</p>
+              </div>
+              <span class="pill status-note" id="maintenanceActiveCount">0 个事项</span>
+            </header>
+            <div class="panel-body">
+              <form class="maintenance-form" id="maintenanceForm">
+                <div class="field">
+                  <label for="maintenanceTitle">要维护什么</label>
+                  <input id="maintenanceTitle" name="title" autocomplete="off" required placeholder="例如：拖地、换牙刷、换洗床单">
+                </div>
+                <div class="field">
+                  <label for="maintenanceInterval">每隔</label>
+                  <input id="maintenanceInterval" name="interval" type="number" min="1" max="99" step="1" value="1" required>
+                </div>
+                <div class="field">
+                  <label for="maintenanceUnit">周期单位</label>
+                  <select id="maintenanceUnit" name="unit"><option value="week">周</option><option value="month">月</option><option value="year">年</option></select>
+                </div>
+                <div class="field">
+                  <label for="maintenanceTargetCount">周期次数</label>
+                  <input id="maintenanceTargetCount" name="targetCount" type="number" min="1" max="31" step="1" value="1" required>
+                </div>
+                <button class="btn" type="submit">加入维护</button>
+              </form>
+              <p class="maintenance-hint">例如：拖地设为“每隔 1 周、周期次数 2”；换牙刷设为“每隔 3 月、周期次数 1”。</p>
+              <div class="maintenance-toolbar">
+                <div>
+                  <strong>记录完成日期</strong>
+                  <p class="muted">可以补记前一天，点击事项里的按钮记录一次。</p>
+                </div>
+                <div class="field maintenance-log-date">
+                  <label for="maintenanceLogDate">完成日期</label>
+                  <input id="maintenanceLogDate" type="date">
+                </div>
+              </div>
+              <div class="maintenance-list" id="maintenanceList"></div>
             </div>
           </section>
 
@@ -6055,6 +6215,11 @@
           heading: "习惯节律",
           description: "小而稳定的动作，会替你守住状态。"
         },
+        maintenance: {
+          title: "把生活里需要照顾的事，交给提醒。",
+          heading: "生活维护",
+          description: "记录完成日期，知道本周期还差几次，也知道下次何时到。"
+        },
         money: {
           title: "清楚钱去了哪里，也清楚自己在选择什么。",
           heading: "财务摘要",
@@ -6100,6 +6265,7 @@
           tasks: [],
           timeBlocks: [],
           habits: [],
+          maintenance: [],
           goals: [],
           financeRecords: [],
           notes: {},
@@ -6152,6 +6318,23 @@
         };
       }
 
+      function normalizeMaintenance(item) {
+        const source = item && typeof item === "object" ? item : {};
+        const completions = Array.isArray(source.completions)
+          ? [...new Set(source.completions.map(String).filter((date) => /^\d{4}-\d{2}-\d{2}$/.test(date)))].sort()
+          : [];
+        return {
+          id: String(source.id || uid()),
+          title: String(source.title || source.name || "").trim(),
+          interval: Math.max(1, Math.min(99, Number(source.interval) || 1)),
+          unit: ["week", "month", "year"].includes(source.unit) ? source.unit : "week",
+          targetCount: Math.max(1, Math.min(31, Number(source.targetCount) || 1)),
+          anchorDate: /^\d{4}-\d{2}-\d{2}$/.test(String(source.anchorDate || "")) ? String(source.anchorDate) : todayKey(),
+          completions,
+          createdAt: String(source.createdAt || new Date().toISOString())
+        };
+      }
+
       function normalizeState(parsed) {
         const source = parsed && typeof parsed === "object" ? parsed : {};
         const clean = emptyState();
@@ -6177,6 +6360,9 @@
               ...habit,
               completions: habit?.completions && typeof habit.completions === "object" ? habit.completions : {}
             }))
+            : [],
+          maintenance: Array.isArray(source.maintenance)
+            ? source.maintenance.map(normalizeMaintenance).filter((item) => item.title)
             : [],
           goals: Array.isArray(source.goals) ? source.goals.map(normalizeGoal) : [],
           financeRecords: Array.isArray(source.financeRecords) ? source.financeRecords : [],
@@ -6657,6 +6843,7 @@
         syncTaskDateField();
         $("#wellbeingDate").value = todayKey();
         $("#mealDate").value = todayKey();
+        $("#maintenanceLogDate").value = todayKey();
       }
 
       function setView(requestedView, updateHistory = false) {
@@ -6685,6 +6872,7 @@
           renderMealRecord();
         }
         if (view === "habits") $("#habitCheckDate").value = activeDate;
+        if (view === "maintenance") $("#maintenanceLogDate").value = $("#maintenanceLogDate").value || activeDate;
         document.title = `${meta.heading} · 日序`;
         if (updateHistory) {
           history.pushState({ view }, "", `#${view}`);
@@ -6905,6 +7093,7 @@
         renderAiSummary();
         syncTimelineHeight();
         renderHabits();
+        renderMaintenance();
         renderGoals();
         renderFinance();
         renderWellbeing();
@@ -6924,6 +7113,7 @@
           || tasksForDate(key).length
           || state.timeBlocks.some((block) => (block.date || todayKey()) === key)
           || state.habits.some((habit) => habit.completions?.[key])
+          || state.maintenance.some((item) => item.completions?.includes(key))
           || state.financeRecords.some((record) => record.date === key)
           || state.wellbeing[key]
           || state.mealRecords[key]
@@ -7771,6 +7961,125 @@
         }).join("");
       }
 
+      function maintenanceDateObject(dateKey) {
+        const [year, month, day] = String(dateKey || "").split("-").map(Number);
+        return new Date(year || 1970, (month || 1) - 1, day || 1, 12);
+      }
+
+      function maintenanceDateKey(date) {
+        return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+      }
+
+      function maintenanceAddUnits(dateKey, amount, unit) {
+        const date = maintenanceDateObject(dateKey);
+        const value = Number(amount) || 0;
+        if (unit === "week") date.setDate(date.getDate() + value * 7);
+        if (unit === "month") {
+          const day = date.getDate();
+          date.setDate(1);
+          date.setMonth(date.getMonth() + value);
+          const lastDay = new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
+          date.setDate(Math.min(day, lastDay));
+        }
+        if (unit === "year") {
+          const month = date.getMonth();
+          const day = date.getDate();
+          date.setDate(1);
+          date.setFullYear(date.getFullYear() + value);
+          date.setMonth(month);
+          const lastDay = new Date(date.getFullYear(), month + 1, 0).getDate();
+          date.setDate(Math.min(day, lastDay));
+        }
+        return maintenanceDateKey(date);
+      }
+
+      function maintenanceDaysBetween(startKey, endKey) {
+        return Math.max(1, Math.round((maintenanceDateObject(endKey) - maintenanceDateObject(startKey)) / 86400000));
+      }
+
+      function maintenancePeriodProgress(item, dateKey) {
+        const currentKey = /^\d{4}-\d{2}-\d{2}$/.test(String(dateKey || "")) ? String(dateKey) : todayKey();
+        const anchorKey = /^\d{4}-\d{2}-\d{2}$/.test(String(item?.anchorDate || "")) ? String(item.anchorDate) : currentKey;
+        const interval = Math.max(1, Number(item?.interval) || 1);
+        const unit = ["week", "month", "year"].includes(item?.unit) ? item.unit : "week";
+        let cycleIndex = 0;
+        if (currentKey > anchorKey) {
+          const anchor = maintenanceDateObject(anchorKey);
+          const current = maintenanceDateObject(currentKey);
+          if (unit === "week") cycleIndex = Math.floor(Math.max(0, Math.floor((current - anchor) / 86400000)) / (interval * 7));
+          if (unit === "month") cycleIndex = Math.floor(Math.max(0, (current.getFullYear() - anchor.getFullYear()) * 12 + current.getMonth() - anchor.getMonth()) / interval);
+          if (unit === "year") cycleIndex = Math.floor(Math.max(0, current.getFullYear() - anchor.getFullYear()) / interval);
+        }
+        let start = maintenanceAddUnits(anchorKey, cycleIndex * interval, unit);
+        let end = maintenanceAddUnits(start, interval, unit);
+        if (currentKey < start && cycleIndex > 0) {
+          cycleIndex -= 1;
+          start = maintenanceAddUnits(anchorKey, cycleIndex * interval, unit);
+          end = maintenanceAddUnits(start, interval, unit);
+        }
+        const dates = [...new Set(Array.isArray(item?.completions) ? item.completions.map(String) : [])]
+          .filter((date) => date >= start && date < end)
+          .sort();
+        const target = Math.max(1, Number(item?.targetCount) || 1);
+        const completed = dates.length;
+        const remaining = Math.max(0, target - completed);
+        let nextDueDate = end;
+        if (remaining > 0) {
+          if (!dates.length) nextDueDate = start;
+          else {
+            const spacing = Math.max(1, Math.floor(maintenanceDaysBetween(start, end) / target));
+            const evenlySpaced = maintenanceDateObject(dates[dates.length - 1]);
+            evenlySpaced.setDate(evenlySpaced.getDate() + spacing);
+            nextDueDate = maintenanceDateKey(evenlySpaced);
+            if (nextDueDate >= end) nextDueDate = end;
+          }
+        }
+        return { start, end, completed, target, remaining, nextDueDate, dates, progress: Math.min(100, Math.round((completed / target) * 100)) };
+      }
+
+      function maintenancePeriodLabel(item) {
+        const unit = { week: "周", month: "月", year: "年" }[item.unit] || "周";
+        return `每隔 ${item.interval} ${unit} · 每周期 ${item.targetCount} 次`;
+      }
+
+      function renderMaintenance() {
+        const logDate = $("#maintenanceLogDate").value || activeDate || todayKey();
+        $("#maintenanceLogDate").value = logDate;
+        $("#maintenanceActiveCount").textContent = `${state.maintenance.length} 个事项`;
+        if (!state.maintenance.length) {
+          $("#maintenanceList").innerHTML = '<div class="empty" role="status">还没有生活维护事项。先添加一件需要按周期照顾的事。</div>';
+          return;
+        }
+        $("#maintenanceList").innerHTML = state.maintenance.map((item) => {
+          const progress = maintenancePeriodProgress(item, logDate);
+          const logged = progress.dates.includes(logDate);
+          const status = progress.remaining ? `本周期还差 ${progress.remaining} 次` : "本周期已完成";
+          const nextText = progress.remaining ? `建议下次：${reviewDateLabel(progress.nextDueDate, false)}` : `下次提醒：${reviewDateLabel(progress.nextDueDate, false)}`;
+          const history = progress.dates.slice(-5).reverse();
+          return `
+            <article class="maintenance-item">
+              <header>
+                <div>
+                  <h3>${escapeHtml(item.title)}</h3>
+                  <small>${escapeHtml(maintenancePeriodLabel(item))}</small>
+                </div>
+                <span class="maintenance-status">${status}</span>
+              </header>
+              <div class="maintenance-progress" aria-label="${escapeHtml(item.title)} 本周期完成 ${progress.completed} 次，共 ${progress.target} 次">
+                <div class="maintenance-item-meta"><span>${progress.completed}/${progress.target} 次 · ${escapeHtml(reviewDateLabel(progress.start, false))} - ${escapeHtml(reviewDateLabel(maintenanceDateKey(new Date(maintenanceDateObject(progress.end).getTime() - 86400000)), false))}</span><span>${Math.round(progress.progress)}%</span></div>
+                <div class="maintenance-progress-track"><i class="maintenance-progress-fill" style="--maintenance-progress:${progress.progress}%"></i></div>
+              </div>
+              <div class="maintenance-item-meta"><span>${nextText}</span><span>已记录 ${item.completions.length} 次</span></div>
+              ${history.length ? `<div class="maintenance-history" aria-label="最近完成日期">${history.map((date) => `<span>${escapeHtml(reviewDateLabel(date, false))}</span>`).join("")}</div>` : ""}
+              <div class="maintenance-item-actions">
+                <button class="btn${logged ? " secondary" : ""} small" type="button" data-action="maintenance-complete" data-id="${escapeHtml(item.id)}">${logged ? "撤销这次记录" : `完成一次 · ${escapeHtml(logDate.slice(5).replace("-", "/"))}`}</button>
+                <button class="btn ghost small" type="button" data-action="delete-maintenance" data-id="${escapeHtml(item.id)}">删除事项</button>
+              </div>
+            </article>
+          `;
+        }).join("");
+      }
+
       function renderGoals() {
         const activeGoals = state.goals.filter((goal) => goal.status !== "done").length;
         $("#goalActiveCount").textContent = state.goals.length ? `${activeGoals} 个方向` : "暂无方向";
@@ -8558,6 +8867,28 @@
           }
         }
 
+        if (event.target.id === "maintenanceForm") {
+          event.preventDefault();
+          const form = new FormData(event.target);
+          const title = String(form.get("title") || "").trim();
+          if (!title) return;
+          const anchorDate = $("#maintenanceLogDate").value || activeDate || todayKey();
+          state.maintenance.push(normalizeMaintenance({
+            id: uid(),
+            title,
+            interval: Number(form.get("interval")) || 1,
+            unit: String(form.get("unit") || "week"),
+            targetCount: Number(form.get("targetCount")) || 1,
+            anchorDate,
+            completions: [],
+            createdAt: new Date().toISOString()
+          }));
+          event.target.reset();
+          $("#maintenanceLogDate").value = anchorDate;
+          render();
+          showToast("生活维护事项已加入");
+        }
+
         if (event.target.id === "wellbeingForm") {
           event.preventDefault();
           const form = new FormData(event.target);
@@ -8852,6 +9183,25 @@
           }
         }
         if (action === "delete-habit") state.habits = state.habits.filter((item) => item.id !== id);
+        if (action === "maintenance-complete") {
+          const item = state.maintenance.find((entry) => entry.id === id);
+          if (item) {
+            const date = $("#maintenanceLogDate").value || todayKey();
+            item.completions = Array.isArray(item.completions) ? item.completions : [];
+            if (item.completions.includes(date)) item.completions = item.completions.filter((entry) => entry !== date);
+            else item.completions.push(date);
+            item.completions.sort();
+            render();
+            showToast(item.completions.includes(date) ? "已记录完成日期" : "已撤销这次记录");
+          }
+          return;
+        }
+        if (action === "delete-maintenance") {
+          state.maintenance = state.maintenance.filter((item) => item.id !== id);
+          render();
+          showToast("维护事项已删除");
+          return;
+        }
         if (action === "edit-goal") {
           const goal = state.goals.find((item) => item.id === id);
           if (goal) openEditor("goal", goal);
@@ -8955,6 +9305,7 @@
       $("#mealDate").addEventListener("change", renderMealRecord);
       $("#activeDate").addEventListener("change", (event) => setActiveDate(event.target.value));
       $("#habitCheckDate").addEventListener("change", (event) => setActiveDate(event.target.value));
+      $("#maintenanceLogDate").addEventListener("change", renderMaintenance);
       $("#estimateMealNutritionBtn").addEventListener("click", generateMealNutrition);
 
       $("#financeFile").addEventListener("change", async (event) => {
