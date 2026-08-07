@@ -3680,6 +3680,53 @@
       }
     }
 
+    /* iPhone native date/time inputs keep an intrinsic width unless it is
+       explicitly reset on every dialog ancestor. */
+    @media (max-width: 560px) {
+      .today-glance {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .today-glance .metric {
+        grid-template-columns: 0.46rem minmax(0, 1fr);
+        min-width: 0;
+        padding: 0.75rem;
+      }
+
+      .today-glance .metric small,
+      .today-glance .metric strong,
+      .today-glance .metric span {
+        min-width: 0;
+        overflow-wrap: anywhere;
+      }
+
+      .today-glance .metric strong {
+        font-size: 1.15rem;
+      }
+
+      #editorDialog {
+        width: calc(100vw - 1.25rem);
+        max-width: calc(100vw - 1.25rem);
+      }
+
+      #editorDialog .dialog-fields,
+      #editorForm,
+      #editorDialog .dual,
+      #editorDialog .field {
+        min-width: 0;
+        max-width: 100%;
+      }
+
+      #editorDialog input[type="date"],
+      #editorDialog input[type="time"] {
+        display: block;
+        inline-size: 100%;
+        min-inline-size: 0;
+        max-inline-size: 100%;
+        font-size: 16px;
+      }
+    }
+
     @media (max-width: 430px) {
       .page-title {
         font-size: 1.05rem;
@@ -7722,17 +7769,50 @@
         if (!context.tasks.length && !context.blocks.length && !context.completedHabits.length && !context.wellbeing && !context.mealRecord && !context.gratitude && !context.thoughts.length) {
           return "先留下一个最小记录：写下一件明天真正要做的事，并为它留出一段明确时间。";
         }
+        const doneNames = context.doneTasks.slice(0, 3).map((task) => task.title);
+        const pendingNames = context.pendingTasks.slice(0, 3).map((task) => task.title);
+        const blockNames = context.blocks.slice(0, 3).map((block) => block.title);
+        const habitNames = context.completedHabits.slice(0, 3).map((habit) => habit.title);
+        const observations = [];
+        const advice = [];
+
+        if (context.tasks.length) {
+          observations.push(`计划完成 ${context.doneTasks.length}/${context.tasks.length}${doneNames.length ? `，推进了${doneNames.join("、")}` : ""}${pendingNames.length ? `；还挂着${pendingNames.join("、")}` : ""}。`);
+        }
+        if (context.blocks.length) {
+          observations.push(`时间主要安排在${categoryDurationText(context.blocks)}${blockNames.length ? `，包括${blockNames.join("、")}` : ""}。`);
+        }
+        if (habitNames.length) observations.push(`完成了${habitNames.join("、")}等 ${context.completedHabits.length} 个习惯打卡。`);
+        if (context.wellbeing) {
+          const wellbeing = context.wellbeing;
+          observations.push(`身心记录是心情 ${wellbeing.mood}/5、精力 ${wellbeing.energy}/5${wellbeing.sleep ? `、睡眠 ${wellbeing.sleep} 小时` : ""}${wellbeing.highlight ? `；你最有成就的是“${wellbeing.highlight}”` : ""}${wellbeing.drain ? `，最消耗的是“${wellbeing.drain}”` : ""}。`);
+        }
+        if (context.mealRecord) {
+          const meals = [context.mealRecord.breakfast, context.mealRecord.lunch, context.mealRecord.dinner].filter(Boolean).length;
+          observations.push(`今天记录了 ${meals} 餐${context.mealRecord.nutrition ? `，估算约 ${context.mealRecord.nutrition.calories} 千卡` : ""}。`);
+        }
+        if (context.gratitude) observations.push(`感恩日记里留下了“${context.gratitude.slice(0, 42)}${context.gratitude.length > 42 ? "…" : ""}”。`);
+        if (context.thoughts.length) observations.push(`还写下了${context.thoughts.map((thought) => `《${thought.title}》`).join("、")}。`);
+
+        if (pendingNames.length) {
+          advice.push(`明天先给“${pendingNames[0]}”留一个明确时间块；只决定开始的 20 分钟，不要求一次做完。`);
+        } else if (context.tasks.length) {
+          advice.push("今天的计划已经收束得不错，明天只保留一件真正重要的推进，避免又把空白填满。");
+        }
+        if (context.wellbeing && Number(context.wellbeing.energy) <= 2) {
+          advice.push("精力偏低时，把需要专注的事情放在相对清醒的时段，其余时间允许自己做轻量事项或休息。");
+        } else if (!context.blocks.length) {
+          advice.push("明天可以先给最重要的一件事留出一个时间块，让计划从文字变成可执行的安排。");
+        } else {
+          advice.push("保留时间块之间的缓冲；今天已有安排时，明天不必再靠加满日程来证明自己在推进。");
+        }
+        if (context.wellbeing?.drain) advice.push(`对于“${context.wellbeing.drain}”带来的消耗，明天试着提前设一个停止点或更小的完成标准。`);
+        else if (!context.gratitude) advice.push("睡前记下一件具体的小事，明天回看时会更容易看见真实的进展。 ");
+
         const lines = [
-          "值得留意：今天已经留下了足够的线索。明天先守住一个清晰的主线，再决定是否增加新的安排。",
-          context.pendingTasks.length
-            ? "建议一：先处理一项未完成计划，把它拆成一个 20 分钟内可以开始的动作。"
-            : "建议一：保持现在的节奏，明天只设定一项最重要的推进，完成后再加码。",
-          context.wellbeing && Number(context.wellbeing.energy) <= 2
-            ? "建议二：把低能量时段留给轻量事项，给休息和恢复预留明确边界。"
-            : "建议二：在主要安排之间留出缓冲，不要让时间块连续挤满。",
-          "建议三：结束一天前花几分钟收束，把还没完成的事情移到明天，而不是继续堆在脑中。",
-          "建议四：明天晚上只需要记录一个最有成就的瞬间和一个最消耗的瞬间，帮助下一次建议更贴合你。"
-        ];
+          observations.join(" "),
+          ...advice.slice(0, 3).map((item, index) => `建议 ${index + 1}：${item}`)
+        ].filter(Boolean);
         return lines.join("\n\n");
       }
 
