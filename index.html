@@ -3710,11 +3710,17 @@
       }
 
       #editorDialog .dialog-fields,
+      #editorDialog form,
       #editorForm,
       #editorDialog .dual,
       #editorDialog .field {
         min-width: 0;
         max-width: 100%;
+      }
+
+      #editorDialog form {
+        inline-size: 100%;
+        overflow-x: hidden;
       }
 
       #editorDialog input[type="date"],
@@ -3724,6 +3730,22 @@
         min-inline-size: 0;
         max-inline-size: 100%;
         font-size: 16px;
+      }
+
+      #editorDialog input[type="date"]::-webkit-date-and-time-value,
+      #editorDialog input[type="time"]::-webkit-date-and-time-value {
+        display: block;
+        inline-size: 100%;
+        min-inline-size: 0;
+        max-inline-size: 100%;
+        margin-inline: 0;
+      }
+
+      #editorDialog input[type="date"]::-webkit-datetime-edit,
+      #editorDialog input[type="time"]::-webkit-datetime-edit {
+        inline-size: 100%;
+        min-inline-size: 0;
+        max-inline-size: 100%;
       }
     }
 
