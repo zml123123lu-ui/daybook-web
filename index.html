@@ -278,6 +278,46 @@
       gap: 0.5rem;
     }
 
+    .top-statuses,
+    .top-commands {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    .data-menu {
+      position: relative;
+    }
+
+    .data-menu > summary {
+      list-style: none;
+    }
+
+    .data-menu > summary::-webkit-details-marker {
+      display: none;
+    }
+
+    .data-menu-panel {
+      position: absolute;
+      z-index: 4;
+      top: calc(100% + 0.45rem);
+      right: 0;
+      display: grid;
+      gap: 0.35rem;
+      min-width: 10.5rem;
+      padding: 0.45rem;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--surface);
+      box-shadow: var(--shadow);
+    }
+
+    .data-menu-panel .btn {
+      width: 100%;
+      justify-content: flex-start;
+    }
+
     .btn {
       min-height: 2.4rem;
       padding: 0.62rem 0.82rem;
@@ -2150,6 +2190,16 @@
       margin-top: 0.7rem;
       padding-top: 0.7rem;
       border-top: 1px solid var(--line);
+    }
+
+    .review-ai-list {
+      display: grid;
+      gap: 0.55rem;
+      margin: 0;
+      padding-left: 1.2rem;
+      color: var(--ink);
+      font-size: 0.86rem;
+      line-height: 1.6;
     }
 
     .review-ai-title {
@@ -4526,6 +4576,11 @@
 
     html[data-appearance-theme] .panel,
     html[data-appearance-theme] .metric,
+    html[data-appearance-theme] .task,
+    html[data-appearance-theme] .timeline-item,
+    html[data-appearance-theme] .habit-item,
+    html[data-appearance-theme] .expense-item,
+    html[data-appearance-theme] .contact-item,
     html[data-appearance-theme] .goal-card,
     html[data-appearance-theme] .finance-stat,
     html[data-appearance-theme] .finance-chart-card,
@@ -5071,6 +5126,33 @@
       .maintenance-item header,
       .maintenance-item-actions { align-items: flex-start; flex-direction: column; }
     }
+
+    @media (max-width: 560px) {
+      .top-actions {
+        display: grid;
+        grid-template-columns: 1fr;
+        align-items: stretch;
+      }
+
+      .top-statuses {
+        justify-content: flex-start;
+      }
+
+      .top-commands {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .top-commands > .btn,
+      .top-commands > .data-menu,
+      .data-menu > summary {
+        width: 100%;
+      }
+
+      .data-menu-panel {
+        width: min(13rem, calc(100vw - 1.7rem));
+      }
+    }
   </style>
 </head>
 <body>
@@ -5107,16 +5189,25 @@
           <p class="eyebrow">PERSONAL DAYBOOK</p>
           <h2 class="page-title" id="pageTitle">安排今天，也校准长期生活。</h2>
         </div>
-        <div class="top-actions" aria-label="数据操作">
-          <span class="pill status-note" id="storageStatus" role="status">本机保存中</span>
-          <span class="pill status-note" id="syncStatus" data-state="offline" role="status">仅本机</span>
-          <button class="btn secondary" id="globalSearchButton" type="button" aria-haspopup="dialog">搜索</button>
-          <button class="btn secondary" id="appearanceButton" type="button" aria-haspopup="dialog">外观</button>
-          <button class="btn secondary" id="syncButton" type="button">云端同步</button>
-          <input class="sr-only" id="backupFile" type="file" accept=".json,application/json">
-          <label class="btn secondary" for="backupFile">导入备份</label>
-          <button class="btn secondary" id="exportBtn" type="button">导出备份</button>
-          <button class="btn danger" id="clearBtn" type="button">清空数据</button>
+        <div class="top-actions" aria-label="工作台操作">
+          <div class="top-statuses" aria-label="保存与同步状态">
+            <span class="pill status-note" id="storageStatus" role="status">本机保存中</span>
+            <span class="pill status-note" id="syncStatus" data-state="offline" role="status">仅本机</span>
+          </div>
+          <div class="top-commands">
+            <button class="btn secondary" id="globalSearchButton" type="button" aria-haspopup="dialog">搜索</button>
+            <button class="btn secondary" id="appearanceButton" type="button" aria-haspopup="dialog">外观</button>
+            <button class="btn secondary" id="syncButton" type="button">云端同步</button>
+            <details class="data-menu" id="dataMenu">
+              <summary class="btn secondary">数据</summary>
+              <div class="data-menu-panel">
+                <input class="sr-only" id="backupFile" type="file" accept=".json,application/json">
+                <label class="btn secondary small" for="backupFile">导入备份</label>
+                <button class="btn secondary small" id="exportBtn" type="button">导出备份</button>
+                <button class="btn danger small" id="clearBtn" type="button">清空数据</button>
+              </div>
+            </details>
+          </div>
         </div>
       </header>
 
@@ -7360,15 +7451,25 @@
         return details.length ? details.join("") : `<div class="empty" role="status">这一天还没有可回看的记录。</div>`;
       }
 
+      function summaryAdviceFromText(text) {
+        const lines = String(text || "")
+          .split(/\n\s*\n|\n/)
+          .map((line) => line.trim())
+          .filter(Boolean);
+        const marked = lines.filter((line) => /^(建议|下一步|可以)/.test(line));
+        return (marked.length ? marked : lines.slice(-3)).slice(0, 3);
+      }
+
       function reviewDayAi(key) {
         const summary = state.aiSummaries[key];
         if (!summary?.text) {
           return `<p class="ai-summary-text">这一天还没有 AI 建议。</p><p class="ai-summary-meta">去“今日”页面补充记录并生成总结后，这里只显示针对下一步的建议。</p>`;
         }
-        const legacySummary = /今日时间轴|时间分类|状态记录|餐饮记录|一日三餐|完成的习惯/.test(summary.text);
-        const advice = legacySummary ? localStructuredSummary(summaryContext(key)) : summary.text;
+        const advice = Array.isArray(summary.advice) && summary.advice.length
+          ? summary.advice
+          : summaryAdviceFromText(summary.text);
         const generatedAt = new Date(summary.generatedAt);
-        return `<strong class="review-ai-title">AI 建议</strong><p class="ai-summary-text">${escapeHtml(advice)}</p><p class="ai-summary-meta">${escapeHtml(summary.mode)} · ${generatedAt.toLocaleTimeString("zh-CN", { hour: "2-digit", minute: "2-digit" })}</p>`;
+        return `<strong class="review-ai-title">AI 下一步建议</strong><ul class="review-ai-list">${advice.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}</ul><p class="ai-summary-meta">${escapeHtml(summary.mode)} · ${generatedAt.toLocaleTimeString("zh-CN", { hour: "2-digit", minute: "2-digit" })}</p>`;
       }
 
       function renderReviewCalendar() {
@@ -7496,6 +7597,13 @@
         return tasks;
       }
 
+      function taskScheduleLabel(task) {
+        const repeatLabel = { daily: "每天", weekly: "每周", monthly: "每月" }[task.repeat];
+        if (repeatLabel) return `${repeatLabel} · 起始 ${task.date}`;
+        if (isUnscheduledTask(task)) return "未安排日期";
+        return `计划 ${task.date}`;
+      }
+
       function priorityText(priority) {
         return { high: "高", medium: "中", low: "低" }[priority] || "中";
       }
@@ -7521,15 +7629,13 @@
         $("#taskList").innerHTML = tasks.map((task) => {
           const occurrenceDate = task.repeat === "none" ? task.date : activeDate;
           const done = taskDoneOnDate(task, occurrenceDate);
-          const repeatLabel = { daily: "每天", weekly: "每周", monthly: "每月" }[task.repeat];
           return `
           <article class="task${done ? " done" : ""}" role="listitem">
             <button class="check" type="button" aria-label="${done ? "标记未完成" : "标记完成"}" aria-pressed="${done}" data-action="toggle-task" data-id="${task.id}">${done ? "✓" : ""}</button>
             <div>
               <div class="task-title">${escapeHtml(task.title)}</div>
               <div class="task-meta">
-              <span class="pill">${repeatLabel ? `${repeatLabel} · 起始 ${escapeHtml(task.date)}` : `计划 ${escapeHtml(task.date || todayKey())}`}</span>
-               <span class="pill">${repeatLabel ? `${repeatLabel} · 起始 ${escapeHtml(task.date)}` : (isUnscheduledTask(task) ? "未安排日期" : `计划 ${escapeHtml(task.date)}`)}</span>
+                <span class="pill">${escapeHtml(taskScheduleLabel(task))}</span>
                 ${task.archived ? '<span class="pill">已归档</span>' : ""}
               </div>
             </div>
@@ -7871,6 +7977,7 @@
         if (!text) text = localStructuredSummary(context);
         state.aiSummaries[date] = {
           text,
+          advice: summaryAdviceFromText(text),
           mode,
           generatedAt: new Date().toISOString()
         };
