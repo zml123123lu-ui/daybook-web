@@ -2855,6 +2855,47 @@
       margin-bottom: 1rem;
     }
 
+    .finance-entry-card {
+      display: grid;
+      gap: 0.75rem;
+      margin-bottom: 1rem;
+      padding: 0.9rem;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--surface);
+    }
+
+    .finance-entry-card h3 {
+      margin: 0;
+      font-family: "Songti SC", "STSong", serif;
+      font-size: 1rem;
+    }
+
+    .finance-entry-form {
+      display: grid;
+      grid-template-columns: 6.5rem minmax(6.5rem, 0.75fr) minmax(8rem, 1fr) minmax(8rem, 1fr) auto;
+      gap: 0.55rem;
+      align-items: end;
+    }
+
+    .finance-entry-form .field {
+      min-width: 0;
+    }
+
+    .finance-entry-form .field-date {
+      grid-column: 1 / span 2;
+    }
+
+    .finance-entry-form .field-note {
+      grid-column: 3 / span 3;
+    }
+
+    .finance-entry-form > .btn {
+      height: 2.65rem;
+      min-width: 6.5rem;
+      justify-self: stretch;
+    }
+
     .finance-stat {
       padding: 0.85rem;
       border: 1px solid #e3d8d5;
@@ -2883,6 +2924,135 @@
       border: 1px solid #e3d8d5;
       border-radius: var(--radius);
       background: rgba(255, 255, 255, 0.62);
+    }
+
+    .finance-records-card {
+      margin: 0;
+      padding: 0;
+    }
+
+    .finance-records-launch {
+      display: flex;
+      justify-content: flex-end;
+      margin: 0.25rem 0 1rem;
+    }
+
+    .finance-records-header {
+      display: flex;
+      align-items: end;
+      justify-content: space-between;
+      gap: 0.75rem;
+      margin-bottom: 0.55rem;
+    }
+
+    .finance-records-header h3 {
+      margin: 0;
+      font-family: "Songti SC", "STSong", serif;
+      font-size: 1rem;
+    }
+
+    .finance-records-header p {
+      margin: 0.2rem 0 0;
+      font-size: 0.78rem;
+    }
+
+    .finance-record-filter {
+      display: grid;
+      grid-template-columns: 3rem minmax(0, 1fr);
+      align-items: center;
+      gap: 0.45rem;
+      padding: 0.55rem 0.65rem;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--surface-2);
+    }
+
+    .finance-record-filter label {
+      color: var(--muted);
+      font-size: 0.78rem;
+      white-space: nowrap;
+    }
+
+    .finance-record-list {
+      margin-top: 0.8rem;
+      max-height: 28rem;
+      overflow: auto;
+      border-top: 1px solid var(--line);
+    }
+
+    .finance-record-day-divider {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      padding: 0.65rem 0.1rem 0.35rem;
+      color: var(--muted);
+      font-size: 0.78rem;
+      font-weight: 750;
+    }
+
+    .finance-record-day-divider::after {
+      height: 1px;
+      flex: 1;
+      background: var(--line);
+      content: "";
+    }
+
+    .finance-record-day-count {
+      color: var(--muted);
+      font-size: 0.74rem;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    #financeRecordsDialog {
+      width: min(42rem, calc(100vw - 2rem));
+      max-height: calc(100vh - 2rem);
+    }
+
+    #financeRecordsDialog .dialog-fields {
+      overflow: hidden;
+      padding-bottom: 0.9rem;
+    }
+
+    #financeRecordsDialog .dialog-footer {
+      padding-block: 0.8rem;
+    }
+
+    .finance-record-row {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 0.8rem;
+      align-items: center;
+      padding: 0.75rem 0.1rem;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .finance-record-copy {
+      display: grid;
+      gap: 0.2rem;
+      min-width: 0;
+    }
+
+    .finance-record-copy strong {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .finance-record-meta {
+      color: var(--muted);
+      font-size: 0.78rem;
+    }
+
+    .finance-record-amount {
+      color: var(--accent);
+      font-variant-numeric: tabular-nums;
+      font-weight: 750;
+      white-space: nowrap;
+    }
+
+    .finance-record-amount.income {
+      color: var(--theme-contrast);
     }
 
     .finance-chart-header,
@@ -3662,6 +3832,22 @@
         grid-template-columns: 1fr;
       }
 
+      .finance-entry-form {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .finance-entry-form .field-note {
+        grid-column: 2;
+      }
+
+      .finance-entry-form .field-date {
+        grid-column: 1;
+      }
+
+      .finance-entry-form .btn {
+        grid-column: 1 / -1;
+      }
+
       input[type="date"] {
         display: block;
         min-width: 0;
@@ -3686,6 +3872,15 @@
       .finance-chart-header {
         align-items: flex-start;
         flex-direction: column;
+      }
+
+      .finance-records-header {
+        align-items: stretch;
+        flex-direction: column;
+      }
+
+      .finance-record-filter {
+        grid-template-columns: auto minmax(0, 1fr);
       }
 
       #money .panel-header {
@@ -5445,7 +5640,7 @@
             <header class="panel-header">
               <div>
                 <h2>账单摘要</h2>
-                <p class="muted">从现有记账软件导入。</p>
+                <p class="muted">手动记一笔，或从现有记账软件导入。</p>
               </div>
               <div>
                 <input class="sr-only" id="financeFile" type="file" accept=".csv,.tsv,.json,text/csv,text/tab-separated-values,application/json">
@@ -5453,6 +5648,40 @@
               </div>
             </header>
             <div class="panel-body">
+              <section class="finance-entry-card" aria-labelledby="financeEntryTitle">
+                <h3 id="financeEntryTitle">手动记一笔</h3>
+                <form class="finance-entry-form" id="financeEntryForm">
+                  <div class="field">
+                    <label for="financeEntryType">收支</label>
+                    <select id="financeEntryType" name="type">
+                      <option value="expense">支出</option>
+                      <option value="income">收入</option>
+                    </select>
+                  </div>
+                  <div class="field">
+                    <label for="financeEntryAmount">金额</label>
+                    <input id="financeEntryAmount" name="amount" type="number" inputmode="decimal" min="0.01" step="0.01" required placeholder="0.00">
+                  </div>
+                  <div class="field">
+                    <label for="financeEntryCategory">分类</label>
+                    <input id="financeEntryCategory" name="category" list="financeCategories" required autocomplete="off" placeholder="餐饮">
+                  </div>
+                  <div class="field">
+                    <label for="financeEntryName">内容</label>
+                    <input id="financeEntryName" name="name" required autocomplete="off" placeholder="午餐">
+                  </div>
+                  <button class="btn" type="submit">记一笔</button>
+                  <div class="field field-date">
+                    <label for="financeEntryDate">日期</label>
+                    <input id="financeEntryDate" name="date" type="date" required>
+                  </div>
+                  <div class="field field-note">
+                    <label for="financeEntryNote">备注（可选）</label>
+                    <input id="financeEntryNote" name="note" autocomplete="off" placeholder="例如：和朋友一起">
+                  </div>
+                </form>
+                <datalist id="financeCategories"><option value="餐饮"><option value="交通"><option value="购物"><option value="居住"><option value="医疗健康"><option value="娱乐"><option value="学习"><option value="工资"><option value="其他"></datalist>
+              </section>
               <div class="finance-overview">
                 <article class="finance-stat"><span>本月支出</span><strong id="financeExpense">¥0</strong></article>
                 <article class="finance-stat"><span>本月收入</span><strong id="financeIncome">¥0</strong></article>
@@ -5478,6 +5707,7 @@
                 </div>
                 <div id="financeCategoryChart" aria-label="已导入支出分类饼状图"></div>
               </section>
+              <div class="finance-records-launch"><button class="btn secondary small" id="financeRecordsButton" type="button">查看账单记录</button></div>
               <p class="muted" id="financeImportStatus">尚未导入</p>
               <p class="muted" id="financeSyncNote">这里只保留摘要，账单明细请回到原记账软件查看。</p>
             </div>
@@ -5703,6 +5933,30 @@
         <div class="global-search-results" id="globalSearchResults"></div>
       </div>
     </div>
+  </dialog>
+
+  <dialog id="financeRecordsDialog" aria-labelledby="financeRecordsTitle">
+    <header class="dialog-header">
+      <div>
+        <h2 id="financeRecordsTitle">账单记录</h2>
+        <p class="muted" id="financeRecordCount">还没有账单记录</p>
+      </div>
+      <button class="icon-close" id="financeRecordsCloseBtn" type="button" aria-label="关闭账单记录">×</button>
+    </header>
+    <div class="dialog-fields">
+      <section class="finance-records-card">
+        <div class="finance-record-filter">
+          <label for="financeRecordSourceFilter">显示</label>
+          <select id="financeRecordSourceFilter">
+            <option value="all">全部记录</option>
+            <option value="manual">手动录入</option>
+            <option value="import">导入账单</option>
+          </select>
+        </div>
+        <div class="finance-record-list" id="financeRecordList" role="list"></div>
+      </section>
+    </div>
+    <footer class="dialog-footer"><button class="btn" id="financeRecordsDoneBtn" type="button">完成</button></footer>
   </dialog>
 
   <dialog id="syncDialog" aria-labelledby="syncDialogTitle">
@@ -6563,6 +6817,7 @@
       let habitChartAnchor = new Date();
       let financeChartScope = "month";
       let financeChartMonth = todayKey().slice(0, 7);
+      let financeRecordSourceFilter = "all";
       let selectedThoughtId = null;
       let thoughtSearch = "";
       let thoughtSaveTimer = 0;
@@ -8389,6 +8644,40 @@
           .sort((a, b) => b.amount - a.amount || a.category.localeCompare(b.category, "zh-CN"));
       }
 
+      function financeRecordsForList(records, sourceFilter) {
+        return records
+          .filter((record) => sourceFilter === "all" || (sourceFilter === "manual" ? record.source === "手动记账" : record.source !== "手动记账"))
+          .sort((first, second) => String(second.date).localeCompare(String(first.date)));
+      }
+
+      function renderFinanceRecords() {
+        const list = $("#financeRecordList");
+        const records = financeRecordsForList(state.financeRecords, financeRecordSourceFilter);
+        $("#financeRecordSourceFilter").value = financeRecordSourceFilter;
+        $("#financeRecordCount").textContent = records.length ? `共 ${records.length} 笔记录` : "还没有账单记录";
+        if (!records.length) {
+          list.innerHTML = '<div class="empty" role="status">在上方手动记一笔，或导入账单后，这里会按日期显示。</div>';
+          return;
+        }
+        const dailyCounts = records.reduce((counts, record) => {
+          const date = String(record.date || "未标日期");
+          counts.set(date, (counts.get(date) || 0) + 1);
+          return counts;
+        }, new Map());
+        let previousDate = "";
+        list.innerHTML = records.map((record) => {
+          const income = record.type === "income";
+          const source = record.source === "手动记账" ? "手动录入" : "导入账单";
+          const date = String(record.date || "未标日期");
+          const dateLabel = /^\d{4}-\d{2}-\d{2}$/.test(date)
+            ? `${Number(date.slice(5, 7))}月${Number(date.slice(8, 10))}日`
+            : date;
+          const divider = date === previousDate ? "" : `<div class="finance-record-day-divider"><time datetime="${escapeHtml(record.date || "")}">${escapeHtml(dateLabel)}</time><span class="finance-record-day-count">${dailyCounts.get(date)} 笔</span></div>`;
+          previousDate = date;
+          return `${divider}<article class="finance-record-row" role="listitem"><div class="finance-record-copy"><strong>${escapeHtml(record.name || "未命名")}</strong><span class="finance-record-meta">${escapeHtml(record.category || "未分类")} · ${source}</span></div><span class="finance-record-amount${income ? " income" : ""}">${income ? "+" : "-"}${currency.format(Number(record.amount) || 0)}</span></article>`;
+        }).join("");
+      }
+
       function renderFinanceCategoryChart() {
         const chart = $("#financeCategoryChart");
         const records = financeRecordsForChart(state.financeRecords, financeChartScope, financeChartMonth);
@@ -8430,6 +8719,7 @@
       }
 
       function renderFinance() {
+        if (!$("#financeEntryDate").value) $("#financeEntryDate").value = todayKey();
         const current = monthlyFinance();
         const spending = current.filter((record) => record.type === "expense").reduce((sum, record) => sum + record.amount, 0);
         const income = current.filter((record) => record.type === "income").reduce((sum, record) => sum + record.amount, 0);
@@ -8443,6 +8733,7 @@
           ? `最近一次同步：${state.lastImport?.at ? new Date(state.lastImport.at).toLocaleString("zh-CN") : "已有历史记录"}。重复导入会覆盖相同记录。`
           : "这里只保留摘要，账单明细请回到原记账软件查看。";
         renderFinanceCategoryChart();
+        renderFinanceRecords();
       }
 
       function renderWellbeing() {
@@ -9008,6 +9299,26 @@
         };
       }
 
+      function manualFinanceRecord(input) {
+        const amount = Number(input?.amount);
+        const category = String(input?.category || "").trim();
+        const name = String(input?.name || "").trim();
+        if (!Number.isFinite(amount) || amount <= 0 || !category || !name) return null;
+        const suppliedDate = String(input?.date || "");
+        const date = /^\d{4}-\d{2}-\d{2}$/.test(suppliedDate) ? suppliedDate : todayKey();
+        return {
+          key: `manual:${uid()}`,
+          externalId: "",
+          type: input?.type === "income" ? "income" : "expense",
+          amount,
+          category,
+          name,
+          date,
+          note: String(input?.note || "").trim(),
+          source: "手动记账"
+        };
+      }
+
       async function importFinance(file) {
         const text = await file.text();
         let rows;
@@ -9066,6 +9377,20 @@
             syncTaskDateField();
             showToast("计划已加入");
           }
+        }
+
+        if (event.target.id === "financeEntryForm") {
+          event.preventDefault();
+          const record = manualFinanceRecord(Object.fromEntries(new FormData(event.target)));
+          if (!record) {
+            showToast("请填写金额、分类和内容");
+            return;
+          }
+          state.financeRecords.unshift(record);
+          event.target.reset();
+          $("#financeEntryDate").value = todayKey();
+          render();
+          showToast(`${record.type === "income" ? "收入" : "支出"}已记入`);
         }
 
         if (event.target.id === "maintenanceForm") {
@@ -9508,6 +9833,24 @@
       $("#habitCheckDate").addEventListener("change", (event) => setActiveDate(event.target.value));
       $("#maintenanceLogDate").addEventListener("change", renderMaintenance);
       $("#estimateMealNutritionBtn").addEventListener("click", generateMealNutrition);
+      $("#financeRecordsButton").addEventListener("click", () => {
+        renderFinanceRecords();
+        $("#financeRecordsDialog").showModal();
+        $("#financeRecordsCloseBtn").focus();
+      });
+      const closeFinanceRecords = () => {
+        $("#financeRecordsDialog").close();
+        $("#financeRecordsButton").focus();
+      };
+      $("#financeRecordsCloseBtn").addEventListener("click", closeFinanceRecords);
+      $("#financeRecordsDoneBtn").addEventListener("click", closeFinanceRecords);
+      $("#financeRecordsDialog").addEventListener("click", (event) => {
+        if (event.target === $("#financeRecordsDialog")) closeFinanceRecords();
+      });
+      $("#financeRecordSourceFilter").addEventListener("change", (event) => {
+        financeRecordSourceFilter = event.target.value;
+        renderFinanceRecords();
+      });
 
       $("#financeFile").addEventListener("change", async (event) => {
         const file = event.target.files?.[0];
