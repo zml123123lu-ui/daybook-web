@@ -2977,24 +2977,21 @@
       margin-top: 0.8rem;
       max-height: 28rem;
       overflow: auto;
+      scrollbar-gutter: stable;
       border-top: 1px solid var(--line);
     }
 
     .finance-record-day-divider {
-      display: flex;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
       align-items: center;
       gap: 0.6rem;
-      padding: 0.65rem 0.1rem 0.35rem;
+      margin-top: 0.55rem;
+      padding: 0.5rem 0.15rem;
+      border-bottom: 1px solid var(--line);
       color: var(--muted);
       font-size: 0.78rem;
       font-weight: 750;
-    }
-
-    .finance-record-day-divider::after {
-      height: 1px;
-      flex: 1;
-      background: var(--line);
-      content: "";
     }
 
     .finance-record-day-count {
