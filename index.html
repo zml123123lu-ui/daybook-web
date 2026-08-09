@@ -3754,6 +3754,10 @@
         font-size: 1.15rem;
       }
 
+      .today-glance .metric:last-child {
+        grid-column: 1 / -1;
+      }
+
       #editorDialog {
         width: calc(100vw - 1.25rem);
         max-width: calc(100vw - 1.25rem);
@@ -4881,7 +4885,7 @@
 
     .today-glance {
       display: grid;
-      grid-template-columns: repeat(4, minmax(0, 1fr));
+      grid-template-columns: repeat(3, minmax(0, 1fr));
       gap: 0.55rem;
       overflow: visible;
       border: 0;
@@ -4934,7 +4938,6 @@
     }
     .today-glance .metric:nth-child(2)::after { background: var(--green); box-shadow: 0 0 0 0.28rem color-mix(in srgb, var(--green) 12%, transparent); }
     .today-glance .metric:nth-child(3)::after { background: var(--gold); box-shadow: 0 0 0 0.28rem color-mix(in srgb, var(--gold) 12%, transparent); }
-    .today-glance .metric:nth-child(4)::after { background: var(--blue); box-shadow: 0 0 0 0.28rem color-mix(in srgb, var(--blue) 12%, transparent); }
 
     .task-form-row {
       grid-template-columns: minmax(0, 1fr) 9.5rem 7.5rem auto;
@@ -5113,6 +5116,8 @@
       .view-heading { align-items: stretch; flex-direction: column; }
       .day-navigator { width: 100%; }
       .day-navigator input { flex: 1; width: auto; }
+      #dayNavigator .btn { width: auto; }
+      #dayNavigator input { flex: 1 1 8rem; min-width: 0; }
       .habit-entry-actions { width: 100%; flex-wrap: wrap; }
       .habit-entry-actions input { flex: 1; width: auto; }
       .task-form-row { grid-template-columns: 1fr 1fr; }
@@ -5227,11 +5232,6 @@
           <strong id="habitMetric">0/0</strong>
           <span id="habitHint">今天的基础节律</span>
         </article>
-        <article class="metric">
-          <small>本月支出</small>
-          <strong id="moneyMetric">¥0</strong>
-          <span id="moneyHint">预算占用 0%</span>
-        </article>
       </section>
 
       <section class="view-heading" id="viewHeading" aria-live="polite">
@@ -5287,7 +5287,7 @@
           <section class="panel view-panel" id="timeblocks" data-panel="today">
             <header class="panel-header">
               <div>
-                <h2>今日时间轴</h2>
+                <h2>时间轴</h2>
                 <p class="muted">直接点击时间刻度上的加号安排事项。</p>
               </div>
               <div>
@@ -5305,14 +5305,14 @@
               <header class="panel-header">
                 <div>
                   <h2>感恩日记</h2>
-                  <p class="muted">记下一件今天值得感谢的人、事或小瞬间。</p>
+                  <p class="muted">记下一件值得感谢的人、事或小瞬间。</p>
                 </div>
                 <span class="pill status-note" id="gratitudeStatus">自动保存</span>
               </header>
               <div class="panel-body">
-                <textarea id="gratitudeNote" placeholder="今天我感谢……"></textarea>
+                <textarea id="gratitudeNote" placeholder="我感谢……"></textarea>
                 <div class="gratitude-actions">
-                  <span class="save-caption" id="gratitudeSaveStatus" aria-live="polite">会按今天保存</span>
+                  <span class="save-caption" id="gratitudeSaveStatus" aria-live="polite">会按所选日期保存</span>
                   <button class="btn secondary small" id="saveGratitudeBtn" type="button">保存感恩日记</button>
                 </div>
               </div>
@@ -5321,7 +5321,7 @@
             <section class="panel" id="daySummaryTimeline">
               <header class="panel-header">
                 <div>
-                  <h2>AI 每日总结</h2>
+                  <h2>每日总结</h2>
                   <p class="muted">根据计划、身心记录、感恩日记和时间轴自动生成。</p>
                 </div>
                 <button class="btn secondary small" id="generateAiSummaryBtn" type="button">生成总结</button>
@@ -6098,19 +6098,13 @@
       const taskScore = todayTasks.length ? doneTasks / todayTasks.length : 0;
       const habitScore = state.habits.length ? habitDone / state.habits.length : 0;
       const score = Math.round(((taskScore * 0.62) + (habitScore * 0.38)) * 100);
-      const spend = monthlyExpenses().reduce((sum, expense) => sum + Number(expense.amount || 0), 0);
-      const budget = Number(state.settings.monthlyBudget || 0);
-      const budgetUse = budget > 0 ? Math.round((spend / budget) * 100) : 0;
-
       $("#scoreMetric").textContent = `${score}%`;
       $("#scoreHint").textContent = score >= 80 ? "今天节奏稳定" : "先完成一个高优先级项";
       $("#taskMetric").textContent = String(todayTasks.filter((task) => !task.done).length);
       $("#taskHint").textContent = `${doneTasks}/${todayTasks.length} 已完成`;
       $("#habitMetric").textContent = `${habitDone}/${state.habits.length}`;
       $("#habitHint").textContent = habitDone === state.habits.length ? "基础节律已完成" : "还可以补一个小动作";
-      $("#moneyMetric").textContent = currency.format(spend);
-      $("#moneyHint").textContent = `预算占用 ${budgetUse}%`;
-      $("#balanceNote").textContent = `今日 ${score}% · 预算 ${budgetUse}% · 目标平均 ${$("#goalAverage").textContent.replace("平均 ", "")}`;
+      $("#balanceNote").textContent = `今日 ${score}% · 目标平均 ${$("#goalAverage").textContent.replace("平均 ", "")}`;
     }
 
     function addTask({ title, area, priority = "medium", duration = 30 }) {
@@ -7077,7 +7071,7 @@
         Object.entries(state.wellbeing).forEach(([date, entry]) => add({ type: "身心", title: entry?.highlight || entry?.body || "身心记录", detail: `${entry?.drain || ""} ${entry?.nextStep || ""}`, date, view: "health" }));
         Object.entries(state.mealRecords).forEach(([date, entry]) => add({ type: "餐饮", title: [entry?.breakfast, entry?.lunch, entry?.dinner].filter(Boolean).join("、") || "餐饮记录", date, view: "health" }));
         state.thoughts.forEach((thought) => add({ type: "随想", title: thought.title || "未命名的信", detail: thought.body || "", date: thought.date, view: "thoughts", id: thought.id }));
-        Object.entries(state.aiSummaries).forEach(([date, entry]) => add({ type: "每日 AI 总结", title: entry?.text?.slice(0, 80) || "每日总结", detail: entry?.text || "", date, view: "review" }));
+        Object.entries(state.aiSummaries).forEach(([date, entry]) => add({ type: "每日总结", title: entry?.text?.slice(0, 80) || "每日总结", detail: entry?.text || "", date, view: "review" }));
         Object.entries(state.periodSummaries).forEach(([key, entry]) => add({ type: "阶段 AI 复盘", title: entry?.text?.slice(0, 80) || "阶段复盘", detail: entry?.text || "", date: key.split(":")[1], view: "review" }));
         return entries.slice(0, 60);
       }
@@ -7469,7 +7463,7 @@
           ? summary.advice
           : summaryAdviceFromText(summary.text);
         const generatedAt = new Date(summary.generatedAt);
-        return `<strong class="review-ai-title">AI 下一步建议</strong><ul class="review-ai-list">${advice.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}</ul><p class="ai-summary-meta">${escapeHtml(summary.mode)} · ${generatedAt.toLocaleTimeString("zh-CN", { hour: "2-digit", minute: "2-digit" })}</p>`;
+        return `<strong class="review-ai-title">下一步建议</strong><ul class="review-ai-list">${advice.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}</ul><p class="ai-summary-meta">${escapeHtml(summary.mode)} · ${generatedAt.toLocaleTimeString("zh-CN", { hour: "2-digit", minute: "2-digit" })}</p>`;
       }
 
       function renderReviewCalendar() {
@@ -8782,17 +8776,12 @@
         const doneTasks = todayTasks.filter((task) => taskDoneOnDate(task, today)).length;
         const habitDone = state.habits.filter((habit) => habit.completions[today]).length;
         const wellbeing = state.wellbeing[today];
-        const spending = monthlyFinance()
-          .filter((record) => record.type === "expense")
-          .reduce((sum, record) => sum + record.amount, 0);
         $("#scoreMetric").textContent = wellbeing ? `${wellbeing.mood}/5 · ${wellbeing.energy}/5` : "未记录";
         $("#scoreHint").textContent = wellbeing ? "心情 · 精力" : "去身心页填写";
         $("#taskMetric").textContent = String(todayTasks.filter((task) => !taskDoneOnDate(task, today)).length);
         $("#taskHint").textContent = `${doneTasks}/${todayTasks.length} 已完成`;
         $("#habitMetric").textContent = `${habitDone}/${state.habits.length}`;
         $("#habitHint").textContent = state.habits.length ? "今天的基础节律" : "还没有设置习惯";
-        $("#moneyMetric").textContent = currency.format(spending);
-        $("#moneyHint").textContent = state.financeRecords.length ? `${state.financeRecords.length} 笔已导入账单` : "尚未导入账单";
         $("#balanceNote").textContent = wellbeing
           ? `心情 ${wellbeing.mood}/5 · 精力 ${wellbeing.energy}/5 · 睡眠 ${wellbeing.sleep || "-"} 小时`
           : "还没有记录心情与精力。";
