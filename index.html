@@ -1865,13 +1865,53 @@
     }
 
     .thought-empty-editor > div {
-      max-width: 24rem;
+      width: min(100%, 34rem);
     }
 
     .thought-empty-editor p {
       margin: 0.45rem 0 1rem;
       font-size: 0.86rem;
       line-height: 1.6;
+    }
+
+    .thought-template-picker {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 0.55rem;
+      margin-top: 1.2rem;
+      text-align: left;
+    }
+
+    .thought-template-option {
+      min-height: 4.6rem;
+      padding: 0.7rem 0.75rem;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: transparent;
+      color: var(--ink);
+      text-align: left;
+    }
+
+    .thought-template-option:hover,
+    .thought-template-option:focus-visible {
+      border-color: var(--coral);
+      background: var(--surface-2);
+    }
+
+    .thought-template-option strong,
+    .thought-template-option span {
+      display: block;
+    }
+
+    .thought-template-option strong {
+      font-size: 0.86rem;
+    }
+
+    .thought-template-option span {
+      margin-top: 0.2rem;
+      color: var(--muted);
+      font-size: 0.74rem;
+      line-height: 1.4;
     }
 
     .thought-editor-meta {
@@ -1909,12 +1949,39 @@
       direction: rtl;
     }
 
+    #thoughtMemoDate {
+      width: 100%;
+      min-height: 0;
+      padding: 0.4rem 0;
+      border: 0;
+      border-bottom: 1px solid var(--line);
+      border-radius: 0;
+      background: transparent;
+      color: var(--ink);
+      font-family: var(--serif);
+      font-size: 1rem;
+      text-align: right;
+      text-align-last: right;
+      direction: rtl;
+    }
+
     #thoughtDate::-webkit-date-and-time-value {
       width: 100%;
       text-align: right;
     }
 
     #thoughtDate::-webkit-datetime-edit {
+      display: block;
+      width: 100%;
+      text-align: right;
+    }
+
+    #thoughtMemoDate::-webkit-date-and-time-value {
+      width: 100%;
+      text-align: right;
+    }
+
+    #thoughtMemoDate::-webkit-datetime-edit {
       display: block;
       width: 100%;
       text-align: right;
@@ -1944,7 +2011,8 @@
     #thoughtTitle:focus-visible,
     #thoughtBody:focus-visible,
     #thoughtSignature:focus-visible,
-    #thoughtDate:focus-visible {
+    #thoughtDate:focus-visible,
+    #thoughtMemoDate:focus-visible {
       outline: none;
       box-shadow: none;
     }
@@ -1962,11 +2030,25 @@
       color: var(--coral);
     }
 
+    #thoughtMemoDate:focus-visible {
+      color: var(--coral);
+    }
+
     .thought-letter-ending {
       display: grid;
       justify-items: end;
       gap: 0.35rem;
       margin-top: 0.75rem;
+    }
+
+    .thought-memo-ending {
+      display: flex;
+      justify-content: flex-end;
+      margin-top: 0.75rem;
+    }
+
+    .thought-memo-ending .thought-date-line {
+      width: min(100%, 15rem);
     }
 
     .thought-closing,
@@ -1990,6 +2072,12 @@
 
     #thoughtSignature,
     #thoughtDate {
+      color: var(--ink);
+      font-family: var(--serif);
+      font-size: 1rem;
+    }
+
+    #thoughtMemoDate {
       color: var(--ink);
       font-family: var(--serif);
       font-size: 1rem;
@@ -3746,6 +3834,10 @@
 
       .thought-editor-pane {
         padding: 1rem;
+      }
+
+      .thought-template-picker {
+        grid-template-columns: 1fr;
       }
 
       #thoughtBody {
@@ -5777,11 +5869,11 @@
               <div class="thought-workspace">
                 <aside class="thought-list-pane" aria-label="随想记录列表">
                   <div class="thought-list-header">
-                    <h3>我的信件</h3>
+                    <h3>记录</h3>
                     <button class="btn small" id="newThoughtBtn" type="button">新建</button>
                   </div>
                   <div class="thought-search field">
-                    <label class="sr-only" for="thoughtSearch">搜索信件</label>
+                    <label class="sr-only" for="thoughtSearch">搜索记录</label>
                     <input id="thoughtSearch" type="search" autocomplete="off" placeholder="搜索标题或内容">
                   </div>
                   <div class="thought-list" id="thoughtList"></div>
@@ -5789,30 +5881,38 @@
                 <section class="thought-editor-pane" aria-label="随想编辑器">
                   <div class="thought-empty-editor" id="thoughtEmptyEditor">
                     <div>
-                      <strong>这里还没有信</strong>
-                      <p>不需要想好主题，先写下一句此刻真正想对自己说的话。</p>
-                      <button class="btn" id="firstThoughtBtn" type="button">写第一封信</button>
+                      <strong>新建一条记录</strong>
+                      <p>从空白开始，或选择一个适合此刻的写作方式。</p>
+                      <div class="thought-template-picker" id="thoughtTemplatePicker" aria-label="选择记录模板">
+                        <button class="thought-template-option" type="button" data-action="create-thought-template" data-thought-template="blank"><strong>空白记录</strong><span>不预设任何内容</span></button>
+                        <button class="thought-template-option" type="button" data-action="create-thought-template" data-thought-template="letter"><strong>写给自己的信</strong><span>留下一段想对自己说的话</span></button>
+                        <button class="thought-template-option" type="button" data-action="create-thought-template" data-thought-template="dream"><strong>梦境记录</strong><span>记下醒来前的画面和感受</span></button>
+                        <button class="thought-template-option" type="button" data-action="create-thought-template" data-thought-template="reflection"><strong>情绪整理</strong><span>把此刻的念头慢慢理清</span></button>
+                        <button class="thought-template-option" type="button" data-action="create-thought-template" data-thought-template="idea"><strong>灵感清单</strong><span>收集暂时不必完成的想法</span></button>
+                        <button class="thought-template-option" type="button" data-action="create-thought-template" data-thought-template="reading"><strong>读书摘录</strong><span>留下句子、感受和要带走的事</span></button>
+                      </div>
                     </div>
                   </div>
                   <form id="thoughtForm" hidden>
                     <div class="thought-editor-meta">
                       <div class="thought-title-field field">
-                        <label class="sr-only" for="thoughtTitle">信件标题</label>
-                        <input id="thoughtTitle" name="title" autocomplete="off" placeholder="这封信的标题">
+                        <label class="sr-only" for="thoughtTitle">记录标题</label>
+                        <input id="thoughtTitle" name="title" autocomplete="off" placeholder="记录标题（可不填）">
                       </div>
                     </div>
-                    <p class="thought-salutation">亲爱的自己：</p>
-                    <label class="sr-only" for="thoughtBody">信件正文</label>
-                    <textarea id="thoughtBody" name="body" placeholder="慢慢写，不必急着得出答案。"></textarea>
-                    <div class="thought-letter-ending">
+                    <p class="thought-salutation" id="thoughtSalutation">亲爱的自己：</p>
+                    <label class="sr-only" for="thoughtBody">记录正文</label>
+                    <textarea id="thoughtBody" name="body" placeholder="从这里开始写。"></textarea>
+                    <div class="thought-letter-ending" id="thoughtLetterEnding">
                       <label class="thought-closing" for="thoughtSignature"><span>写信的我</span><input id="thoughtSignature" name="signature" autocomplete="off" placeholder="落款（可不填）"></label>
                       <label class="thought-date-line" for="thoughtDate"><span>写于</span><input id="thoughtDate" name="date" type="date" required></label>
                     </div>
+                    <div class="thought-memo-ending" id="thoughtMemoEnding" hidden><label class="thought-date-line" for="thoughtMemoDate"><span>记录于</span><input id="thoughtMemoDate" type="date" tabindex="-1" aria-label="记录日期"></label></div>
                     <footer class="thought-editor-footer">
                       <div class="thought-editor-status" aria-live="polite"><span id="thoughtWordCount">0 字</span><span id="thoughtSaveStatus">已自动保存</span></div>
                       <div class="thought-editor-actions">
                         <button class="btn secondary small" id="thoughtPinBtn" type="button" data-action="toggle-thought-pin">置顶</button>
-                        <button class="btn secondary small" id="exportThoughtBtn" type="button">导出这封信</button>
+                        <button class="btn secondary small" id="exportThoughtBtn" type="button">导出记录</button>
                         <button class="btn danger small" type="button" data-action="delete-thought">删除</button>
                       </div>
                     </footer>
@@ -6641,9 +6741,9 @@
           description: "心情、睡眠、身体感受和三餐都会进入 AI 复盘。"
         },
         thoughts: {
-          title: "把没有答案的心事，慢慢写给自己。",
-          heading: "写给自己的信",
-          description: "长日记、随笔和未说完的话，都可以留在这里。"
+          title: "把想法留下来，给每一种记录一个合适的入口。",
+          heading: "随想备忘录",
+          description: "空白、书信、梦境和灵感，都可以留在这里。"
         },
         review: {
           title: "把每一天存下来，才看得见自己的变化。",
@@ -6659,6 +6759,19 @@
         currency: "CNY",
         maximumFractionDigits: 2
       });
+
+      const THOUGHT_TEMPLATES = {
+        blank: { id: "blank", name: "空白记录", title: "", body: "", placeholder: "从这里开始写。" },
+        letter: { id: "letter", name: "写给自己的信", title: "", body: "", placeholder: "慢慢写，不必急着得出答案。" },
+        dream: { id: "dream", name: "梦境记录", title: "梦境记录", body: "梦境片段：\n\n醒来时的感受：\n\n我记得的细节：", placeholder: "记录醒来前还记得的画面。" },
+        reflection: { id: "reflection", name: "情绪整理", title: "情绪整理", body: "现在的感受：\n\n发生了什么：\n\n我真正需要的是：", placeholder: "不必判断对错，先把感受写下来。" },
+        idea: { id: "idea", name: "灵感清单", title: "灵感清单", body: "- ", placeholder: "一条一条记下突然出现的想法。" },
+        reading: { id: "reading", name: "读书摘录", title: "读书摘录", body: "书名：\n\n摘录：\n\n我的想法：\n\n想带走的一件事：", placeholder: "记下一句值得留下的话，或你因此想到的事。" }
+      };
+
+      function thoughtTemplateFor(id) {
+        return THOUGHT_TEMPLATES[id] || THOUGHT_TEMPLATES.letter;
+      }
 
       function todayKey(date = new Date()) {
         const local = new Date(date.getTime() - date.getTimezoneOffset() * 60000);
@@ -6788,16 +6901,17 @@
             : { theme: "mist-rose" },
           thoughts: Array.isArray(source.thoughts)
             ? source.thoughts
-              .filter((thought) => thought && typeof thought === "object")
-              .map((thought) => ({
-                id: String(thought.id || uid()),
-                title: String(thought.title || ""),
-                body: String(thought.body || ""),
-                date: String(thought.date || todayKey()),
-                signature: String(thought.signature || ""),
-                pinned: Boolean(thought.pinned),
-                createdAt: String(thought.createdAt || thought.updatedAt || new Date().toISOString()),
-                updatedAt: String(thought.updatedAt || thought.createdAt || new Date().toISOString())
+              .filter((entry) => entry && typeof entry === "object")
+              .map((source) => ({
+                id: String(source.id || uid()),
+                template: thoughtTemplateFor(source.template).id,
+                title: String(source.title || ""),
+                body: String(source.body || ""),
+                date: String(source.date || todayKey()),
+                signature: String(source.signature || ""),
+                pinned: Boolean(source.pinned),
+                createdAt: String(source.createdAt || source.updatedAt || new Date().toISOString()),
+                updatedAt: String(source.updatedAt || source.createdAt || new Date().toISOString())
               }))
             : []
         };
@@ -7373,19 +7487,20 @@
         const query = thoughtSearch.trim().toLocaleLowerCase("zh-CN");
         const thoughts = sortedThoughts().filter((thought) => !query || `${thought.title || ""}\n${thought.body || ""}`.toLocaleLowerCase("zh-CN").includes(query));
         if (!state.thoughts.length) {
-          $("#thoughtList").innerHTML = '<div class="empty" role="status">还没有随想。新建后，这里会按最近修改时间排列。</div>';
+          $("#thoughtList").innerHTML = '<div class="empty" role="status">还没有记录。新建后，这里会按最近修改时间排列。</div>';
           return;
         }
         if (!thoughts.length) {
-          $("#thoughtList").innerHTML = '<div class="empty" role="status">没有找到匹配的信。</div>';
+          $("#thoughtList").innerHTML = '<div class="empty" role="status">没有找到匹配的记录。</div>';
           return;
         }
         $("#thoughtList").innerHTML = thoughts.map((thought) => {
           const active = thought.id === selectedThoughtId ? " active" : "";
-          const title = thought.title?.trim() || "未命名的信";
+          const template = thoughtTemplateFor(thought.template);
+          const title = thought.title?.trim() || template.name;
           const preview = thought.body?.trim().replace(/\s+/g, " ") || "还没有正文";
           const pin = thought.pinned ? "置顶 · " : "";
-          return `<button class="thought-list-item${active}" type="button" data-action="select-thought" data-id="${escapeHtml(thought.id)}" aria-pressed="${thought.id === selectedThoughtId}"><span class="thought-list-title">${escapeHtml(title)}</span><span class="thought-list-preview">${escapeHtml(preview.slice(0, 72))}</span><span class="thought-list-meta">${pin}${escapeHtml(thought.date || "未标日期")}</span></button>`;
+          return `<button class="thought-list-item${active}" type="button" data-action="select-thought" data-id="${escapeHtml(thought.id)}" aria-pressed="${thought.id === selectedThoughtId}"><span class="thought-list-title">${escapeHtml(title)}</span><span class="thought-list-preview">${escapeHtml(preview.slice(0, 72))}</span><span class="thought-list-meta">${pin}${escapeHtml(template.name)} · ${escapeHtml(thought.date || "未标日期")}</span></button>`;
         }).join("");
       }
 
@@ -7395,9 +7510,16 @@
         $("#thoughtForm").hidden = !thought;
         if (!thought) return;
         $("#thoughtTitle").value = thought.title || "";
+        const template = thoughtTemplateFor(thought.template);
         $("#thoughtDate").value = thought.date || todayKey();
+        $("#thoughtMemoDate").value = thought.date || todayKey();
         $("#thoughtBody").value = thought.body || "";
         $("#thoughtSignature").value = thought.signature || "";
+        $("#thoughtBody").placeholder = template.placeholder;
+        $("#thoughtSalutation").hidden = template.id !== "letter";
+        $("#thoughtLetterEnding").hidden = template.id !== "letter";
+        $("#thoughtMemoEnding").hidden = template.id === "letter";
+        $("#exportThoughtBtn").textContent = template.id === "letter" ? "导出这封信" : "导出记录";
         $("#thoughtWordCount").textContent = `${thoughtCharacterCount(thought.body)} 字`;
         $("#thoughtSaveStatus").textContent = "已自动保存";
         $("#thoughtPinBtn").textContent = thought.pinned ? "取消置顶" : "置顶";
@@ -7406,14 +7528,20 @@
 
       function renderThoughts() {
         if (selectedThoughtId && !currentThought()) selectedThoughtId = null;
-        if (!selectedThoughtId && state.thoughts.length) selectedThoughtId = sortedThoughts()[0].id;
         renderThoughtList();
         renderThoughtEditor();
       }
 
-      function createThought() {
+      function openThoughtTemplatePicker() {
+        saveThoughtFromEditor();
+        selectedThoughtId = null;
+        renderThoughts();
+      }
+
+      function createThought(templateId = "blank") {
+        const template = thoughtTemplateFor(templateId);
         const now = new Date().toISOString();
-        const thought = { id: uid(), title: "", body: "", date: todayKey(), signature: "", pinned: false, createdAt: now, updatedAt: now };
+        const thought = { id: uid(), template: template.id, title: template.title, body: template.body, date: todayKey(), signature: "", pinned: false, createdAt: now, updatedAt: now };
         state.thoughts.push(thought);
         selectedThoughtId = thought.id;
         saveState();
@@ -7426,7 +7554,7 @@
         if (!thought || $("#thoughtForm").hidden) return false;
         clearTimeout(thoughtSaveTimer);
         thought.title = $("#thoughtTitle").value;
-        thought.date = $("#thoughtDate").value || todayKey();
+        thought.date = (thought.template === "letter" ? $("#thoughtDate").value : $("#thoughtMemoDate").value) || todayKey();
         thought.body = $("#thoughtBody").value;
         thought.signature = $("#thoughtSignature").value;
         thought.updatedAt = new Date().toISOString();
@@ -7457,7 +7585,7 @@
         if (!thought || !confirm(`确定删除“${thought.title?.trim() || "未命名的信"}”吗？删除后无法恢复。`)) return;
         clearTimeout(thoughtSaveTimer);
         state.thoughts = state.thoughts.filter((item) => item.id !== thought.id);
-        selectedThoughtId = sortedThoughts()[0]?.id || null;
+        selectedThoughtId = null;
         saveState();
         renderThoughts();
         showToast("这封信已删除");
@@ -7478,8 +7606,11 @@
         saveThoughtFromEditor();
         const thought = currentThought();
         if (!thought) return;
-        const title = thought.title?.trim() || "未命名的信";
-        const content = `${title}\n${thought.date || ""}\n\n亲爱的自己：\n\n${thought.body || ""}\n\n写信的我${thought.signature ? `：${thought.signature}` : ""}\n`;
+        const template = thoughtTemplateFor(thought.template);
+        const title = thought.title?.trim() || template.name;
+        const content = template.id === "letter"
+          ? `${title}\n${thought.date || ""}\n\n亲爱的自己：\n\n${thought.body || ""}\n\n写信的我${thought.signature ? `：${thought.signature}` : ""}\n`
+          : `${title}\n${thought.date || ""}\n\n${thought.body || ""}\n`;
         const blob = new Blob([content], { type: "text/plain;charset=utf-8" });
         const url = URL.createObjectURL(blob);
         const link = document.createElement("a");
@@ -9606,6 +9737,10 @@
           selectThought(id);
           return;
         }
+        if (action === "create-thought-template") {
+          createThought(target.dataset.thoughtTemplate || "blank");
+          return;
+        }
         if (action === "toggle-thought-pin") {
           toggleThoughtPin();
           return;
@@ -9802,13 +9937,12 @@
       });
       $("#saveGratitudeBtn").addEventListener("click", saveGratitude);
 
-      $("#newThoughtBtn").addEventListener("click", createThought);
-      $("#firstThoughtBtn").addEventListener("click", createThought);
+      $("#newThoughtBtn").addEventListener("click", openThoughtTemplatePicker);
       $("#thoughtSearch").addEventListener("input", (event) => {
         thoughtSearch = event.target.value;
         renderThoughtList();
       });
-      ["#thoughtTitle", "#thoughtDate", "#thoughtBody", "#thoughtSignature"].forEach((selector) => {
+      ["#thoughtTitle", "#thoughtDate", "#thoughtMemoDate", "#thoughtBody", "#thoughtSignature"].forEach((selector) => {
         $(selector).addEventListener("input", scheduleThoughtAutosave);
         $(selector).addEventListener("change", scheduleThoughtAutosave);
       });
