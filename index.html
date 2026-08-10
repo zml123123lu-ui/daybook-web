@@ -8225,16 +8225,28 @@
       function renderAiSummary() {
         const summary = state.aiSummaries[activeDate];
         const card = $("#aiSummaryCard");
-        $("#generateAiSummaryBtn").textContent = summary ? "重新生成" : "生成总结";
         card.classList.toggle("empty", !summary);
         if (!summary) {
+          $("#generateAiSummaryBtn").textContent = "生成总结";
           $("#aiSummaryText").textContent = `${activeDate === todayKey() ? "今天" : reviewDateLabel(activeDate, false)}还没有生成总结。`;
           $("#aiSummaryMeta").textContent = "补充这一天的记录后，可以在这里生成一次正式总结。";
           return;
         }
         $("#aiSummaryText").textContent = summary.text;
         const generatedAt = new Date(summary.generatedAt);
-        $("#aiSummaryMeta").textContent = `${summary.mode} · ${generatedAt.toLocaleTimeString("zh-CN", { hour: "2-digit", minute: "2-digit" })}`;
+        const currentSignature = summarySourceSignature(summaryContext(activeDate));
+        const stale = summary.sourceSignature !== currentSignature;
+        $("#generateAiSummaryBtn").textContent = stale ? "更新总结" : "重新生成";
+        $("#aiSummaryMeta").textContent = `${summary.mode} · ${generatedAt.toLocaleTimeString("zh-CN", { hour: "2-digit", minute: "2-digit" })}${stale ? " · 记录已更新，建议重新生成" : ""}`;
+      }
+
+      function summarySourceSignature(context) {
+        let hash = 2166136261;
+        for (const character of String(context.text || "")) {
+          hash ^= character.codePointAt(0);
+          hash = Math.imul(hash, 16777619);
+        }
+        return (hash >>> 0).toString(16);
       }
 
       function summaryContext(date = todayKey()) {
@@ -8248,6 +8260,7 @@
         const wellbeing = state.wellbeing[date] || null;
         const mealRecord = state.mealRecords[date] || null;
         const gratitude = state.gratitude[date]?.text || "";
+        const notes = String(state.notes[date] || "").trim();
         const thoughts = state.thoughts
           .filter((thought) => thought.date === date && thought.body?.trim())
           .map((thought) => ({ title: thought.title?.trim() || "未命名的信", excerpt: thought.body.trim().slice(0, 500) }));
@@ -8260,6 +8273,7 @@
           wellbeing,
           mealRecord,
           gratitude,
+          notes,
           thoughts,
           text: [
             `日期：${date}`,
@@ -8270,13 +8284,14 @@
             `身心状态：${wellbeing ? `心情${wellbeing.mood}/5，精力${wellbeing.energy}/5，睡眠${wellbeing.sleep || "-"}小时，身体${wellbeing.body || "无"}，开心${wellbeing.highlight || "无"}，消耗${wellbeing.drain || "无"}，下一步${wellbeing.nextStep || "无"}` : "未记录"}`,
             `三餐：${mealRecord ? `早餐${mealRecord.breakfast || "无"}；午餐${mealRecord.lunch || "无"}；晚餐${mealRecord.dinner || "无"}${mealRecord.nutrition ? `；估算热量${mealRecord.nutrition.calories}千卡，蛋白质${mealRecord.nutrition.protein}克` : ""}` : "未记录"}`,
             `感恩日记：${gratitude || "未记录"}`,
+            `当天笔记：${notes || "未记录"}`,
             `写给自己的信：${thoughts.map((thought) => `${thought.title}：${thought.excerpt}`).join("；") || "未记录"}`
           ].join("\n")
         };
       }
 
       function localStructuredSummary(context) {
-        if (!context.tasks.length && !context.blocks.length && !context.completedHabits.length && !context.wellbeing && !context.mealRecord && !context.gratitude && !context.thoughts.length) {
+        if (!context.tasks.length && !context.blocks.length && !context.completedHabits.length && !context.wellbeing && !context.mealRecord && !context.gratitude && !context.notes && !context.thoughts.length) {
           return "先留下一个最小记录：写下一件明天真正要做的事，并为它留出一段明确时间。";
         }
         const doneNames = context.doneTasks.slice(0, 3).map((task) => task.title);
@@ -8302,7 +8317,11 @@
           observations.push(`今天记录了 ${meals} 餐${context.mealRecord.nutrition ? `，估算约 ${context.mealRecord.nutrition.calories} 千卡` : ""}。`);
         }
         if (context.gratitude) observations.push(`感恩日记里留下了“${context.gratitude.slice(0, 42)}${context.gratitude.length > 42 ? "…" : ""}”。`);
+        if (context.notes) observations.push(`当天笔记里记下了“${context.notes.slice(0, 42)}${context.notes.length > 42 ? "…" : ""}”。`);
         if (context.thoughts.length) observations.push(`还写下了${context.thoughts.map((thought) => `《${thought.title}》`).join("、")}。`);
+
+        const focus = pendingNames[0] || blockNames[0] || habitNames[0] || context.wellbeing?.nextStep || "照顾好今天的节奏";
+        observations.unshift(`今天最值得继续留意的是“${focus}”。`);
 
         if (pendingNames.length) {
           advice.push(`明天先给“${pendingNames[0]}”留一个明确时间块；只决定开始的 20 分钟，不要求一次做完。`);
@@ -8358,6 +8377,7 @@
           text,
           advice: summaryAdviceFromText(text),
           mode,
+          sourceSignature: summarySourceSignature(context),
           generatedAt: new Date().toISOString()
         };
         button.disabled = false;
