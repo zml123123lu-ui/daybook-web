@@ -5413,7 +5413,21 @@
       .maintenance-form .field:first-child { grid-column: 1 / -1; }
       .maintenance-form .btn { grid-column: 1 / -1; }
       .maintenance-toolbar { align-items: stretch; flex-direction: column; }
-      .maintenance-log-date { width: 100%; }
+      .maintenance-toolbar > *,
+      .maintenance-log-date {
+        width: 100%;
+        min-width: 0;
+        max-width: 100%;
+      }
+
+      #maintenanceLogDate {
+        width: 100% !important;
+        inline-size: 100% !important;
+        min-width: 0;
+        min-inline-size: 0;
+        max-width: 100%;
+        max-inline-size: 100%;
+      }
       input[type="date"] {
         display: block;
         width: 100% !important;
