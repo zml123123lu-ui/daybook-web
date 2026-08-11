@@ -5414,6 +5414,46 @@
       .maintenance-form .btn { grid-column: 1 / -1; }
       .maintenance-toolbar { align-items: stretch; flex-direction: column; }
       .maintenance-log-date { width: 100%; }
+      input[type="date"] {
+        display: block;
+        width: 100% !important;
+        inline-size: 100% !important;
+        min-width: 0;
+        min-inline-size: 0;
+        max-width: 100%;
+        max-inline-size: 100%;
+        box-sizing: border-box !important;
+        font-size: 16px;
+      }
+
+      input[type="date"]::-webkit-date-and-time-value {
+        display: block;
+        width: 100%;
+        inline-size: 100%;
+        min-width: 0;
+        min-inline-size: 0;
+        max-width: 100%;
+        max-inline-size: 100%;
+        margin-inline: 0;
+      }
+
+      input[type="date"]::-webkit-datetime-edit,
+      input[type="date"]::-webkit-datetime-edit-fields-wrapper {
+        width: 100%;
+        inline-size: 100%;
+        min-width: 0;
+        min-inline-size: 0;
+        max-width: 100%;
+        max-inline-size: 100%;
+      }
+
+      .day-navigator input,
+      .habit-entry-actions input {
+        flex: 1 1 0;
+        width: 100%;
+        min-width: 0;
+      }
+
       .maintenance-item header,
       .maintenance-item-actions { align-items: flex-start; flex-direction: column; }
     }
