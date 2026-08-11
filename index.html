@@ -5477,15 +5477,23 @@
         display: grid;
         grid-template-columns: 1fr;
         align-items: stretch;
+        gap: 0.35rem;
       }
 
       .top-statuses {
-        justify-content: flex-start;
+        gap: 0.35rem;
+        font-size: 0.72rem;
+      }
+
+      .top-statuses .status-note {
+        min-height: 1.7rem;
+        padding: 0.25rem 0.45rem;
       }
 
       .top-commands {
         display: grid;
-        grid-template-columns: repeat(2, minmax(0, 1fr));
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 0.35rem;
       }
 
       .top-commands > .btn,
@@ -5497,6 +5505,25 @@
       .data-menu-panel {
         width: min(13rem, calc(100vw - 1.7rem));
       }
+
+      .today-glance {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 0.35rem;
+      }
+
+      .today-glance .metric {
+        grid-template-columns: 1fr;
+        grid-template-rows: auto auto;
+        min-height: 0;
+        padding: 0.5rem 0.55rem;
+      }
+
+      .today-glance .metric::after { display: none; }
+      .today-glance .metric small,
+      .today-glance .metric strong,
+      .today-glance .metric span { grid-column: 1; }
+      .today-glance .metric strong { font-size: 1rem; }
+      .today-glance .metric span { display: none; }
     }
   </style>
 </head>
@@ -5542,10 +5569,10 @@
           <div class="top-commands">
             <button class="btn secondary" id="globalSearchButton" type="button" aria-haspopup="dialog">搜索</button>
             <button class="btn secondary" id="appearanceButton" type="button" aria-haspopup="dialog">外观</button>
-            <button class="btn secondary" id="syncButton" type="button">云端同步</button>
             <details class="data-menu" id="dataMenu">
               <summary class="btn secondary">数据</summary>
               <div class="data-menu-panel">
+                <button class="btn secondary small" id="syncButton" type="button">云端同步</button>
                 <input class="sr-only" id="backupFile" type="file" accept=".json,application/json">
                 <label class="btn secondary small" for="backupFile">导入备份</label>
                 <button class="btn secondary small" id="exportBtn" type="button">导出备份</button>
@@ -5661,15 +5688,15 @@
             <section class="panel" id="daySummaryTimeline">
               <header class="panel-header">
                 <div>
-                  <h2>每日总结</h2>
-                  <p class="muted">根据计划、身心记录、感恩日记和时间轴自动生成。</p>
+                  <h2>每日建议</h2>
+                  <p class="muted">根据记录整理下一步；支持时会使用浏览器本地 AI。</p>
                 </div>
-                <button class="btn secondary small" id="generateAiSummaryBtn" type="button">生成总结</button>
+                <button class="btn secondary small" id="generateAiSummaryBtn" type="button">生成建议</button>
               </header>
               <div class="panel-body">
                 <div class="ai-summary-card empty" id="aiSummaryCard">
                   <div>
-                    <p class="ai-summary-text" id="aiSummaryText">今天还没有生成总结。</p>
+                    <p class="ai-summary-text" id="aiSummaryText">今天还没有生成建议。</p>
                     <p class="ai-summary-meta" id="aiSummaryMeta">等待一天的计划与行动记录。</p>
                   </div>
                 </div>
@@ -6021,7 +6048,10 @@
                 <div class="review-day-panel">
                     <div class="review-day-header">
                       <strong id="reviewDateLabel">今天</strong>
-                      <span class="pill status-note" id="reviewDayMetric">0 项计划</span>
+                      <div class="review-day-actions">
+                        <span class="pill status-note" id="reviewDayMetric">0 项计划</span>
+                        <button class="btn secondary small" id="reviewEditDayBtn" type="button" data-action="edit-review-date">修改当天记录</button>
+                      </div>
                     </div>
                     <p class="muted review-day-hint">从复盘日历点选日期，这里会显示当天详情。</p>
                     <div class="review-day-details" id="reviewDayDetails"></div>
@@ -6156,537 +6186,6 @@
     </form>
   </dialog>
 
-  <script type="text/plain" id="legacyScript">
-    const AREAS = ["工作", "健康", "家庭", "财务", "成长", "社交", "生活"];
-    const STORAGE_KEY = "life-workbench-state-v1";
-    const VIEW_META = {
-      today: {
-        title: "今天，先把最重要的事做好。",
-        heading: "今日安排",
-        description: "任务和时间块放在同一张工作面上。"
-      },
-      goals: {
-        title: "长期方向，要有短期进展。",
-        heading: "生活目标",
-        description: "一次只检查一个领域，持续推进比同时用力更重要。"
-      },
-      habits: {
-        title: "稳定的节律，替你节省意志力。",
-        heading: "习惯节律",
-        description: "用小而明确的动作维持身体与精神状态。"
-      },
-      money: {
-        title: "钱的流向，就是生活的取舍。",
-        heading: "财务管理",
-        description: "看清预算占用和每一笔当下选择。"
-      },
-      health: {
-        title: "照顾身体，也照顾重要关系。",
-        heading: "健康与关系",
-        description: "把容易被忙碌挤掉的部分重新放回日程。"
-      },
-      review: {
-        title: "每天收尾，生活才不会失焦。",
-        heading: "晚间复盘",
-        description: "留下判断和明日第一步，不把杂念带进睡眠。"
-      }
-    };
-
-    const $ = (selector) => document.querySelector(selector);
-    const currency = new Intl.NumberFormat("zh-CN", {
-      style: "currency",
-      currency: "CNY",
-      maximumFractionDigits: 0
-    });
-
-    function todayKey(date = new Date()) {
-      const local = new Date(date.getTime() - date.getTimezoneOffset() * 60000);
-      return local.toISOString().slice(0, 10);
-    }
-
-    function uid() {
-      return Math.random().toString(36).slice(2, 10);
-    }
-
-    function sampleState() {
-      const today = todayKey();
-      return {
-        filter: "全部",
-        settings: {
-          monthlyBudget: 9000,
-          monthlySaving: 2500
-        },
-        tasks: [
-          { id: uid(), title: "完成本周最重要工作推进", area: "工作", priority: "high", duration: 90, done: false, date: today },
-          { id: uid(), title: "30 分钟力量训练或快走", area: "健康", priority: "medium", duration: 30, done: false, date: today },
-          { id: uid(), title: "整理三笔本月固定支出", area: "财务", priority: "medium", duration: 25, done: false, date: today },
-          { id: uid(), title: "给一位重要的人发消息", area: "社交", priority: "low", duration: 10, done: false, date: today }
-        ],
-        timeBlocks: [
-          { id: uid(), time: "09:00", title: "深度工作", detail: "只处理最重要的一件事" },
-          { id: uid(), time: "12:30", title: "恢复", detail: "午餐、散步、补水" },
-          { id: uid(), time: "20:30", title: "复盘", detail: "收尾任务，写下明日第一步" }
-        ],
-        habits: [
-          { id: uid(), title: "睡眠 7 小时", area: "健康", completions: {} },
-          { id: uid(), title: "喝水 2L", area: "健康", completions: {} },
-          { id: uid(), title: "阅读或学习 30 分钟", area: "成长", completions: {} },
-          { id: uid(), title: "空间归位 10 分钟", area: "生活", completions: {} }
-        ],
-        goals: [
-          { id: uid(), area: "健康", title: "稳定运动频率", progress: 45, note: "每周 3 次训练，优先守住下限。" },
-          { id: uid(), area: "工作", title: "推进核心项目", progress: 58, note: "每天一个不可替代产出。" },
-          { id: uid(), area: "财务", title: "储蓄与投资纪律", progress: 36, note: "预算内生活，月底复盘现金流。" },
-          { id: uid(), area: "家庭", title: "家庭连接", progress: 52, note: "固定关心、共同安排、减少临时性。" },
-          { id: uid(), area: "成长", title: "系统学习", progress: 40, note: "少刷信息，多做输出。" },
-          { id: uid(), area: "生活", title: "空间与秩序", progress: 30, note: "衣物、文件、数字空间分区清理。" }
-        ],
-        expenses: [
-          { id: uid(), name: "早餐和咖啡", amount: 42, category: "饮食", date: today },
-          { id: uid(), name: "线上课程", amount: 399, category: "学习", date: today }
-        ],
-        notes: {
-          [today]: ""
-        }
-      };
-    }
-
-    let state = loadState();
-
-    function loadState() {
-      try {
-        const raw = localStorage.getItem(STORAGE_KEY);
-        if (!raw) return sampleState();
-        return { ...sampleState(), ...JSON.parse(raw) };
-      } catch {
-        return sampleState();
-      }
-    }
-
-    function saveState() {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-    }
-
-    function showToast(message) {
-      const toast = $("#toast");
-      toast.textContent = message;
-      toast.classList.add("show");
-      clearTimeout(showToast.timer);
-      showToast.timer = setTimeout(() => toast.classList.remove("show"), 1800);
-    }
-
-    function setView(requestedView, updateHistory = false) {
-      const view = VIEW_META[requestedView] ? requestedView : "today";
-      const meta = VIEW_META[view];
-      document.querySelectorAll(".view-panel").forEach((panel) => {
-        panel.hidden = panel.dataset.panel !== view;
-      });
-      document.querySelectorAll("[data-view]").forEach((link) => {
-        const active = link.dataset.view === view;
-        link.classList.toggle("active", active);
-        if (active) link.setAttribute("aria-current", "page");
-        else link.removeAttribute("aria-current");
-      });
-      $("#summary").hidden = view !== "today";
-      $("#pageTitle").textContent = meta.title;
-      $("#viewHeading").querySelector("h2").textContent = meta.heading;
-      $("#viewHeading").querySelector("p").textContent = meta.description;
-      document.title = `${meta.heading} · 全方位生活工作台`;
-      if (updateHistory) {
-        history.pushState({ view }, "", `#${view}`);
-      } else if (!location.hash) {
-        history.replaceState({ view }, "", `#${view}`);
-      }
-      window.scrollTo({ top: 0, behavior: "smooth" });
-    }
-
-    function fillSelects() {
-      ["#quickArea", "#taskArea"].forEach((selector) => {
-        const select = $(selector);
-        select.innerHTML = AREAS.map((area) => `<option value="${area}">${area}</option>`).join("");
-      });
-    }
-
-    function formatDateLabel() {
-      const date = new Date();
-      return new Intl.DateTimeFormat("zh-CN", {
-        weekday: "long",
-        month: "long",
-        day: "numeric"
-      }).format(date);
-    }
-
-    function render() {
-      const today = todayKey();
-      $("#todayLabel").textContent = formatDateLabel();
-      $("#budgetInput").value = state.settings.monthlyBudget;
-      $("#savingInput").value = state.settings.monthlySaving;
-      renderFilters();
-      renderTasks();
-      renderTimeline();
-      renderHabits();
-      renderGoals();
-      renderMoney();
-      renderHealthAndContacts();
-      renderMetrics();
-      saveState();
-    }
-
-    function renderFilters() {
-      const options = ["全部", ...AREAS, "已完成"];
-      $("#filters").innerHTML = options.map((filter) => {
-        const active = state.filter === filter ? " active" : "";
-        return `<button class="chip${active}" type="button" data-filter="${filter}">${filter}</button>`;
-      }).join("");
-    }
-
-    function filteredTasks() {
-      const today = todayKey();
-      const tasks = state.tasks.filter((task) => task.date === today);
-      if (state.filter === "全部") return tasks;
-      if (state.filter === "已完成") return tasks.filter((task) => task.done);
-      return tasks.filter((task) => task.area === state.filter);
-    }
-
-    function priorityText(priority) {
-      return { high: "高", medium: "中", low: "低" }[priority] || "中";
-    }
-
-    function priorityRank(priority) {
-      return { high: 0, medium: 1, low: 2 }[priority] ?? 1;
-    }
-
-    function escapeHtml(value) {
-      return String(value)
-        .replaceAll("&", "&amp;")
-        .replaceAll("<", "&lt;")
-        .replaceAll(">", "&gt;")
-        .replaceAll('"', "&quot;")
-        .replaceAll("'", "&#039;");
-    }
-
-    function renderTasks() {
-      const tasks = filteredTasks().sort((a, b) => {
-        if (a.done !== b.done) return Number(a.done) - Number(b.done);
-        return priorityRank(a.priority) - priorityRank(b.priority);
-      });
-      $("#openTaskLabel").textContent = `${state.tasks.filter((task) => !task.done && task.date === todayKey()).length} 个打开项`;
-      const list = $("#taskList");
-      if (tasks.length === 0) {
-        list.innerHTML = `<div class="empty" role="status">当前筛选下没有任务。</div>`;
-        return;
-      }
-      list.innerHTML = tasks.map((task) => `
-        <article class="task${task.done ? " done" : ""}" role="listitem">
-          <button class="check" type="button" aria-label="${task.done ? "标记未完成" : "标记完成"}" aria-pressed="${task.done}" data-action="toggle-task" data-id="${task.id}">${task.done ? "✓" : ""}</button>
-          <div>
-            <div class="task-title">${escapeHtml(task.title)}</div>
-            <div class="task-meta">
-              <span class="pill">${escapeHtml(task.area)}</span>
-              <span class="pill ${task.priority}">优先级 ${priorityText(task.priority)}</span>
-              <span class="pill">${Number(task.duration || 0)} 分钟</span>
-            </div>
-          </div>
-          <button class="btn ghost small" type="button" data-action="delete-task" data-id="${task.id}" aria-label="删除任务">删除</button>
-        </article>
-      `).join("");
-    }
-
-    function renderTimeline() {
-      const timeline = $("#timeline");
-      const blocks = [...state.timeBlocks].sort((a, b) => a.time.localeCompare(b.time));
-      timeline.innerHTML = blocks.map((block) => `
-        <article class="timeline-item">
-          <div class="time">${escapeHtml(block.time)}</div>
-          <div>
-            <strong>${escapeHtml(block.title)}</strong>
-            <span>${escapeHtml(block.detail)}</span>
-          </div>
-        </article>
-      `).join("");
-    }
-
-    function renderHabits() {
-      const today = todayKey();
-      const list = $("#habitList");
-      list.innerHTML = state.habits.map((habit) => {
-        const done = Boolean(habit.completions[today]);
-        const lastSeven = Array.from({ length: 7 }, (_, index) => {
-          const date = new Date();
-          date.setDate(date.getDate() - index);
-          return Boolean(habit.completions[todayKey(date)]);
-        }).filter(Boolean).length;
-        return `
-          <article class="habit-item">
-            <button class="check" type="button" aria-label="${done ? "取消打卡" : "完成打卡"}" aria-pressed="${done}" data-action="toggle-habit" data-id="${habit.id}">${done ? "✓" : ""}</button>
-            <div>
-              <strong>${escapeHtml(habit.title)}</strong>
-              <span>${escapeHtml(habit.area)} · 近 7 天完成 ${lastSeven} 次</span>
-            </div>
-            <div class="mini-meter">${done ? "已完成" : "未完成"}</div>
-          </article>
-        `;
-      }).join("");
-    }
-
-    function renderGoals() {
-      const grid = $("#goalGrid");
-      grid.innerHTML = state.goals.map((goal) => `
-        <article class="goal-card">
-          <header>
-            <h3>${escapeHtml(goal.title)}</h3>
-            <small>${Math.round(goal.progress)}%</small>
-          </header>
-          <div class="progress" aria-label="${escapeHtml(goal.title)} 进度 ${Math.round(goal.progress)}%">
-            <span style="--value:${Math.max(0, Math.min(100, goal.progress))}%"></span>
-          </div>
-          <p>${escapeHtml(goal.area)} · ${escapeHtml(goal.note)}</p>
-          <div class="goal-actions">
-            <button class="btn secondary small" type="button" data-action="goal-down" data-id="${goal.id}">-5</button>
-            <button class="btn secondary small" type="button" data-action="goal-up" data-id="${goal.id}">+5</button>
-          </div>
-        </article>
-      `).join("");
-      const avg = state.goals.length
-        ? Math.round(state.goals.reduce((sum, goal) => sum + goal.progress, 0) / state.goals.length)
-        : 0;
-      $("#goalAverage").textContent = `平均 ${avg}%`;
-    }
-
-    function monthlyExpenses() {
-      const month = todayKey().slice(0, 7);
-      return state.expenses.filter((expense) => expense.date.slice(0, 7) === month);
-    }
-
-    function renderMoney() {
-      const expenses = monthlyExpenses();
-      const list = $("#expenseList");
-      if (expenses.length === 0) {
-        list.innerHTML = `<div class="empty" role="status">本月还没有支出记录。</div>`;
-        return;
-      }
-      list.innerHTML = expenses.slice().reverse().map((expense) => `
-        <article class="expense-item">
-          <div>
-            <strong>${escapeHtml(expense.name)}</strong>
-            <span>${escapeHtml(expense.category)} · ${escapeHtml(expense.date)}</span>
-          </div>
-          <div>
-            <span class="amount">${currency.format(expense.amount)}</span>
-            <button class="btn ghost small" type="button" data-action="delete-expense" data-id="${expense.id}" aria-label="删除支出">删除</button>
-          </div>
-        </article>
-      `).join("");
-    }
-
-    function renderHealthAndContacts() {
-      const healthTasks = state.tasks
-        .filter((task) => task.area === "健康" && task.date === todayKey())
-        .slice(0, 3);
-      const socialTasks = state.tasks
-        .filter((task) => ["社交", "家庭"].includes(task.area) && task.date === todayKey())
-        .slice(0, 3);
-      $("#healthList").innerHTML = makeMiniList("健康焦点", healthTasks, "今天没有健康任务。");
-      $("#contactList").innerHTML = makeMiniList("关系焦点", socialTasks, "今天没有关系任务。");
-    }
-
-    function makeMiniList(title, tasks, emptyText) {
-      const items = tasks.length
-        ? tasks.map((task) => `<strong>${escapeHtml(task.title)}</strong><span>${escapeHtml(task.area)} · ${task.done ? "已完成" : "进行中"}</span>`).join("")
-        : `<strong>${emptyText}</strong><span>可以从今日指挥台新增。</span>`;
-      return `<article class="contact-item"><div><span class="pill">${title}</span>${items}</div></article>`;
-    }
-
-    function renderMetrics() {
-      const today = todayKey();
-      const todayTasks = state.tasks.filter((task) => task.date === today);
-      const doneTasks = todayTasks.filter((task) => task.done).length;
-      const habitDone = state.habits.filter((habit) => habit.completions[today]).length;
-      const taskScore = todayTasks.length ? doneTasks / todayTasks.length : 0;
-      const habitScore = state.habits.length ? habitDone / state.habits.length : 0;
-      const score = Math.round(((taskScore * 0.62) + (habitScore * 0.38)) * 100);
-      $("#scoreMetric").textContent = `${score}%`;
-      $("#scoreHint").textContent = score >= 80 ? "今天节奏稳定" : "先完成一个高优先级项";
-      $("#taskMetric").textContent = String(todayTasks.filter((task) => !task.done).length);
-      $("#taskHint").textContent = `${doneTasks}/${todayTasks.length} 已完成`;
-      $("#habitMetric").textContent = `${habitDone}/${state.habits.length}`;
-      $("#habitHint").textContent = habitDone === state.habits.length ? "基础节律已完成" : "还可以补一个小动作";
-      $("#balanceNote").textContent = `今日 ${score}% · 目标平均 ${$("#goalAverage").textContent.replace("平均 ", "")}`;
-    }
-
-    function addTask({ title, area, priority = "medium", duration = 30 }) {
-      const trimmed = title.trim();
-      if (!trimmed) return;
-      state.tasks.push({
-        id: uid(),
-        title: trimmed,
-        area,
-        priority,
-        duration: Number(duration) || 30,
-        done: false,
-        date: todayKey()
-      });
-      render();
-    }
-
-    document.addEventListener("submit", (event) => {
-      if (event.target.id === "quickForm") {
-        event.preventDefault();
-        addTask({
-          title: $("#quickText").value,
-          area: $("#quickArea").value,
-          priority: "medium",
-          duration: 20
-        });
-        event.target.reset();
-        showToast("已加入今日任务");
-      }
-
-      if (event.target.id === "taskForm") {
-        event.preventDefault();
-        addTask({
-          title: $("#taskTitle").value,
-          area: $("#taskArea").value,
-          priority: $("#taskPriority").value,
-          duration: $("#taskDuration").value
-        });
-        event.target.reset();
-        $("#taskDuration").value = 30;
-        showToast("任务已加入");
-      }
-
-      if (event.target.id === "expenseForm") {
-        event.preventDefault();
-        const amount = Number($("#expenseAmount").value);
-        if (!Number.isFinite(amount) || amount <= 0) return;
-        state.expenses.push({
-          id: uid(),
-          name: $("#expenseName").value.trim(),
-          amount,
-          category: $("#expenseCategory").value,
-          date: todayKey()
-        });
-        event.target.reset();
-        render();
-        showToast("支出已记录");
-      }
-    });
-
-    document.addEventListener("click", (event) => {
-      const target = event.target.closest("[data-action], [data-filter]");
-      if (!target) return;
-
-      if (target.dataset.filter) {
-        state.filter = target.dataset.filter;
-        render();
-        return;
-      }
-
-      const { action, id } = target.dataset;
-      if (action === "toggle-task") {
-        const task = state.tasks.find((item) => item.id === id);
-        if (task) task.done = !task.done;
-      }
-      if (action === "delete-task") {
-        state.tasks = state.tasks.filter((item) => item.id !== id);
-      }
-      if (action === "toggle-habit") {
-        const habit = state.habits.find((item) => item.id === id);
-        if (habit) {
-          const today = todayKey();
-          if (habit.completions[today]) delete habit.completions[today];
-          else habit.completions[today] = true;
-        }
-      }
-      if (action === "goal-up" || action === "goal-down") {
-        const goal = state.goals.find((item) => item.id === id);
-        if (goal) {
-          goal.progress = Math.max(0, Math.min(100, goal.progress + (action === "goal-up" ? 5 : -5)));
-        }
-      }
-      if (action === "delete-expense") {
-        state.expenses = state.expenses.filter((item) => item.id !== id);
-      }
-      render();
-    });
-
-    $("#budgetInput").addEventListener("change", (event) => {
-      state.settings.monthlyBudget = Number(event.target.value) || 0;
-      render();
-    });
-
-    $("#savingInput").addEventListener("change", (event) => {
-      state.settings.monthlySaving = Number(event.target.value) || 0;
-      render();
-    });
-
-    $("#addHabitBtn").addEventListener("click", () => {
-      const title = prompt("新增习惯名称");
-      if (!title || !title.trim()) return;
-      const area = prompt("归属领域：工作 / 健康 / 家庭 / 财务 / 成长 / 社交 / 生活", "健康");
-      state.habits.push({
-        id: uid(),
-        title: title.trim(),
-        area: AREAS.includes(area) ? area : "生活",
-        completions: {}
-      });
-      render();
-      showToast("习惯已新增");
-    });
-
-    $("#addBlockBtn").addEventListener("click", () => {
-      openEditor("block", { start: currentTimeValue(), end: addMinutes(currentTimeValue(), 60) });
-    });
-
-    $("#exportBtn").addEventListener("click", () => {
-      const blob = new Blob([JSON.stringify(state, null, 2)], { type: "application/json" });
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.href = url;
-      link.download = `life-workbench-${todayKey()}.json`;
-      document.body.append(link);
-      link.click();
-      link.remove();
-      URL.revokeObjectURL(url);
-      showToast("数据已导出");
-    });
-
-    $("#seedBtn").addEventListener("click", () => {
-      if (!confirm("恢复示例会覆盖当前工作台数据，是否继续？")) return;
-      state = sampleState();
-      render();
-      showToast("示例数据已恢复");
-    });
-
-    $("#clearBtn").addEventListener("click", () => {
-      if (!confirm("清空后无法从工作台内恢复，是否继续？")) return;
-      localStorage.removeItem(STORAGE_KEY);
-      state = { ...sampleState(), tasks: [], expenses: [], notes: {}, timeBlocks: [], habits: [], goals: sampleState().goals };
-      render();
-      showToast("已清空任务、支出、习惯和复盘");
-    });
-
-    document.querySelectorAll("[data-view]").forEach((link) => {
-      link.addEventListener("click", (event) => {
-        event.preventDefault();
-        setView(link.dataset.view, true);
-      });
-    });
-
-    window.addEventListener("popstate", () => {
-      setView(location.hash.slice(1));
-    });
-
-    document.addEventListener("keydown", (event) => {
-      if (event.target.matches("input, select, textarea")) return;
-      const view = Object.keys(VIEW_META)[Number(event.key) - 1];
-      if (view) setView(view, true);
-    });
-
-    fillSelects();
-    render();
-    setView(location.hash.slice(1));
-  </script>
   <script src="./life-workbench-sync.js"></script>
   <script>
     (() => {
@@ -6792,7 +6291,7 @@
         health: {
           title: "记录真实状态和饮食，才能看见自己的节律。",
           heading: "身心与餐饮",
-          description: "心情、睡眠、身体感受和三餐都会进入 AI 复盘。"
+          description: "心情、睡眠、身体感受和三餐都会进入阶段回看。"
         },
         thoughts: {
           title: "把想法留下来，给每一种记录一个合适的入口。",
@@ -6853,6 +6352,7 @@
           mealRecords: {},
           gratitude: {},
           thoughts: [],
+          deletedRecords: {},
           appearance: { theme: "mist-rose" },
           lastImport: null
         };
@@ -6908,7 +6408,8 @@
           targetCount: Math.max(1, Math.min(31, Number(source.targetCount) || 1)),
           anchorDate: /^\d{4}-\d{2}-\d{2}$/.test(String(source.anchorDate || "")) ? String(source.anchorDate) : todayKey(),
           completions,
-          createdAt: String(source.createdAt || new Date().toISOString())
+          createdAt: String(source.createdAt || new Date().toISOString()),
+          updatedAt: String(source.updatedAt || source.createdAt || new Date().toISOString())
         };
       }
 
@@ -6968,7 +6469,18 @@
                 updatedAt: String(source.updatedAt || source.createdAt || new Date().toISOString())
               }))
             : []
+          ,
+          deletedRecords: source.deletedRecords && typeof source.deletedRecords === "object" ? source.deletedRecords : {}
         };
+      }
+
+      function removeRecord(collection, id) {
+        state[collection] = (state[collection] || []).filter((item) => item.id !== id);
+        state.deletedRecords = state.deletedRecords && typeof state.deletedRecords === "object" ? state.deletedRecords : {};
+        state.deletedRecords[collection] = state.deletedRecords[collection] && typeof state.deletedRecords[collection] === "object"
+          ? state.deletedRecords[collection]
+          : {};
+        state.deletedRecords[collection][id] = new Date().toISOString();
       }
 
       let state = loadState();
@@ -7252,6 +6764,23 @@
         markCloudRow(row);
       }
 
+      function mergeCloudRow(row) {
+        const localAppearance = state.appearance;
+        syncApplying = true;
+        try {
+          state = {
+            ...normalizeState(syncApi.mergeCloudStates(state, row.state)),
+            appearance: localAppearance
+          };
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+          render();
+        } finally {
+          syncApplying = false;
+        }
+        syncRevision = row.revision;
+        syncDirty = true;
+      }
+
       function showSyncConflict(row) {
         syncConflict = row;
         syncRevision = row.revision;
@@ -7292,10 +6821,11 @@
           } else {
             const existing = await syncClient.fetchState();
             if (existing) {
-              showSyncConflict(existing);
-              return;
+              mergeCloudRow(existing);
+              row = await syncClient.updateState(state, syncRevision);
+            } else {
+              row = await syncClient.createState(state);
             }
-            row = await syncClient.createState(state);
           }
           markCloudRow(row);
         } catch (error) {
@@ -7303,7 +6833,9 @@
             try {
               const latest = await syncClient.fetchState();
               if (latest) {
-                showSyncConflict(latest);
+                mergeCloudRow(latest);
+                row = await syncClient.updateState(state, syncRevision);
+                markCloudRow(row);
               } else {
                 syncRevision = 0;
                 markCloudRow(await syncClient.createState(state));
@@ -7341,8 +6873,9 @@
           await pushLocalState();
           return !syncConflict;
         }
-        showSyncConflict(cloudRow);
-        return false;
+        mergeCloudRow(cloudRow);
+        await pushLocalState();
+        return !syncConflict;
       }
 
       async function synchronizeNow() {
@@ -7361,8 +6894,10 @@
             return;
           }
           if (cloudRow.revision > syncRevision) {
-            if (syncDirty) showSyncConflict(cloudRow);
-            else applyCloudRow(cloudRow);
+            if (syncDirty) {
+              mergeCloudRow(cloudRow);
+              await pushLocalState();
+            } else applyCloudRow(cloudRow);
             return;
           }
           syncDirty = true;
@@ -7638,7 +7173,7 @@
         const thought = currentThought();
         if (!thought || !confirm(`确定删除“${thought.title?.trim() || "未命名的信"}”吗？删除后无法恢复。`)) return;
         clearTimeout(thoughtSaveTimer);
-        state.thoughts = state.thoughts.filter((item) => item.id !== thought.id);
+        removeRecord("thoughts", thought.id);
         selectedThoughtId = null;
         saveState();
         renderThoughts();
@@ -7936,6 +7471,7 @@
           ? `${completed}/${tasks.length} 项计划完成`
           : (hasReviewData(reviewDate) ? "有记录" : "暂无记录");
         $("#reviewDayDetails").innerHTML = reviewDayDetails(reviewDate);
+        $("#reviewEditDayBtn").dataset.date = reviewDate;
         renderReviewTimeDistribution();
         const reviewAi = $("#reviewDayAi");
         reviewAi.hidden = !state.aiSummaries[reviewDate]?.text;
@@ -8007,11 +7543,13 @@
       function setTaskDoneOnDate(task, date, done) {
         if ((task.repeat || "none") === "none") {
           task.done = done;
+          task.updatedAt = new Date().toISOString();
           return;
         }
         task.completions = task.completions && typeof task.completions === "object" ? task.completions : {};
         if (done) task.completions[date] = true;
         else delete task.completions[date];
+        task.updatedAt = new Date().toISOString();
       }
 
       function tasksForDate(date, { includeArchived = false } = {}) {
@@ -8045,13 +7583,26 @@
         return { high: 0, medium: 1, low: 2 }[priority] ?? 1;
       }
 
+      function taskSortKey(task) {
+        const linkedGoal = state.goals.some((goal) => goal.status === "active" && goal.linkedTaskIds?.includes(task.id));
+        return {
+          date: isUnscheduledTask(task) ? "9999-12-31" : String(task.date),
+          linkedGoal: linkedGoal ? 0 : 1,
+          priority: priorityRank(task.priority)
+        };
+      }
+
       function renderTasks() {
         const tasks = filteredTasks().sort((a, b) => {
           const aDone = taskDoneOnDate(a, a.repeat === "none" ? a.date : activeDate);
           const bDone = taskDoneOnDate(b, b.repeat === "none" ? b.date : activeDate);
           if (aDone !== bDone) return Number(aDone) - Number(bDone);
-          const dateOrder = String(a.date || todayKey()).localeCompare(String(b.date || todayKey()));
-          return dateOrder;
+          const aKey = taskSortKey(a);
+          const bKey = taskSortKey(b);
+          return aKey.date.localeCompare(bKey.date)
+            || aKey.linkedGoal - bKey.linkedGoal
+            || aKey.priority - bKey.priority
+            || String(a.title || "").localeCompare(String(b.title || ""));
         });
         const openCount = state.tasks.filter((task) => !task.archived && (isUnscheduledTask(task) || task.repeat === "none" || taskOccursOn(task, activeDate)) && !taskDoneOnDate(task, activeDate)).length;
         $("#openTaskLabel").textContent = `${openCount} 个打开项`;
@@ -8281,16 +7832,16 @@
         const card = $("#aiSummaryCard");
         card.classList.toggle("empty", !summary);
         if (!summary) {
-          $("#generateAiSummaryBtn").textContent = "生成总结";
-          $("#aiSummaryText").textContent = `${activeDate === todayKey() ? "今天" : reviewDateLabel(activeDate, false)}还没有生成总结。`;
-          $("#aiSummaryMeta").textContent = "补充这一天的记录后，可以在这里生成一次正式总结。";
+          $("#generateAiSummaryBtn").textContent = "生成建议";
+          $("#aiSummaryText").textContent = `${activeDate === todayKey() ? "今天" : reviewDateLabel(activeDate, false)}还没有生成建议。`;
+          $("#aiSummaryMeta").textContent = "补充这一天的记录后，可以在这里整理下一步建议。";
           return;
         }
         $("#aiSummaryText").textContent = summary.text;
         const generatedAt = new Date(summary.generatedAt);
         const currentSignature = summarySourceSignature(summaryContext(activeDate));
         const stale = summary.sourceSignature !== currentSignature;
-        $("#generateAiSummaryBtn").textContent = stale ? "更新总结" : "重新生成";
+        $("#generateAiSummaryBtn").textContent = stale ? "更新建议" : "重新生成建议";
         $("#aiSummaryMeta").textContent = `${summary.mode} · ${generatedAt.toLocaleTimeString("zh-CN", { hour: "2-digit", minute: "2-digit" })}${stale ? " · 记录已更新，建议重新生成" : ""}`;
       }
 
@@ -8406,7 +7957,7 @@
         button.textContent = "生成中";
         const context = summaryContext(date);
         let text = "";
-        let mode = "本地智能总结";
+        let mode = "本地记录建议";
         try {
           if ("Summarizer" in window) {
             const availability = await window.Summarizer.availability();
@@ -8435,9 +7986,9 @@
           generatedAt: new Date().toISOString()
         };
         button.disabled = false;
-        button.textContent = "重新生成";
+        button.textContent = "重新生成建议";
         render();
-        showToast(`${date === todayKey() ? "今日" : reviewDateLabel(date, false)}总结已生成`);
+        showToast(`${date === todayKey() ? "今日" : reviewDateLabel(date, false)}建议已生成`);
       }
 
       async function generatePeriodAiSummary() {
@@ -9295,7 +8846,8 @@
           completions: {},
           archived: false,
           done: false,
-          date: plannedDate
+          date: plannedDate,
+          updatedAt: new Date().toISOString()
         });
         render();
         return true;
@@ -9653,7 +9205,7 @@
           event.preventDefault();
           const form = new FormData(event.target);
           if (editorType === "habit") {
-            state.habits.push({ id: uid(), title: String(form.get("name")).trim(), area: form.get("area"), completions: {} });
+            state.habits.push({ id: uid(), title: String(form.get("name")).trim(), area: form.get("area"), completions: {}, updatedAt: new Date().toISOString() });
           }
           if (editorType === "block") {
             const start = String(form.get("start"));
@@ -9668,7 +9220,8 @@
               duration,
               title: String(form.get("name")).trim(),
               category: TIME_CATEGORIES.includes(String(form.get("category"))) ? String(form.get("category")) : "生活",
-              detail: String(form.get("detail") || "").trim()
+              detail: String(form.get("detail") || "").trim(),
+              updatedAt: new Date().toISOString()
             };
             if (block) Object.assign(block, nextBlock);
             else state.timeBlocks.push(nextBlock);
@@ -9696,7 +9249,8 @@
               nextStep: String(form.get("detail") || "").trim(),
               linkedTaskIds: goal?.linkedTaskIds || [],
               linkedHabitIds: goal?.linkedHabitIds || [],
-              checkIns: goal?.checkIns || []
+              checkIns: goal?.checkIns || [],
+              updatedAt: new Date().toISOString()
             };
             if (goal) Object.assign(goal, nextGoal);
             else state.goals.push(nextGoal);
@@ -9706,6 +9260,7 @@
             if (goal) {
               goal.linkedTaskIds = form.getAll("linkedTasks").map(String);
               goal.linkedHabitIds = form.getAll("linkedHabits").map(String);
+              goal.updatedAt = new Date().toISOString();
             }
           }
           if (editorType === "goal-checkin") {
@@ -9829,6 +9384,12 @@
           renderReview();
           return;
         }
+        if (action === "edit-review-date") {
+          activeDate = target.dataset.date || reviewDate;
+          setView("today", true);
+          render();
+          return;
+        }
         if (action === "calendar-prev" || action === "calendar-next") {
           calendarCursor.setMonth(calendarCursor.getMonth() + (action === "calendar-prev" ? -1 : 1));
           renderReviewCalendar();
@@ -9849,14 +9410,20 @@
         }
         if (action === "archive-task") {
           const task = state.tasks.find((item) => item.id === id);
-          if (task) task.archived = true;
+          if (task) {
+            task.archived = true;
+            task.updatedAt = new Date().toISOString();
+          }
         }
         if (action === "restore-task") {
           const task = state.tasks.find((item) => item.id === id);
-          if (task) task.archived = false;
+          if (task) {
+            task.archived = false;
+            task.updatedAt = new Date().toISOString();
+          }
         }
-        if (action === "delete-task") state.tasks = state.tasks.filter((item) => item.id !== id);
-        if (action === "delete-block") state.timeBlocks = state.timeBlocks.filter((item) => item.id !== id);
+        if (action === "delete-task") removeRecord("tasks", id);
+        if (action === "delete-block") removeRecord("timeBlocks", id);
         if (action === "edit-block") {
           const block = state.timeBlocks.find((item) => item.id === id);
           if (block) openEditor("block", {
@@ -9890,7 +9457,8 @@
               title: task.title,
               category: TIME_CATEGORIES.includes(task.area) ? task.area : "生活",
               detail: "来自近期计划",
-              taskId: task.id
+              taskId: task.id,
+              updatedAt: new Date().toISOString()
             });
             schedulingTaskId = null;
             render();
@@ -9914,9 +9482,10 @@
             const today = activeDate;
             if (habit.completions[today]) delete habit.completions[today];
             else habit.completions[today] = true;
+            habit.updatedAt = new Date().toISOString();
           }
         }
-        if (action === "delete-habit") state.habits = state.habits.filter((item) => item.id !== id);
+        if (action === "delete-habit") removeRecord("habits", id);
         if (action === "maintenance-complete") {
           const item = state.maintenance.find((entry) => entry.id === id);
           if (item) {
@@ -9925,13 +9494,14 @@
             if (item.completions.includes(date)) item.completions = item.completions.filter((entry) => entry !== date);
             else item.completions.push(date);
             item.completions.sort();
+            item.updatedAt = new Date().toISOString();
             render();
             showToast(item.completions.includes(date) ? "已记录完成日期" : "已撤销这次记录");
           }
           return;
         }
         if (action === "delete-maintenance") {
-          state.maintenance = state.maintenance.filter((item) => item.id !== id);
+          removeRecord("maintenance", id);
           render();
           showToast("维护事项已删除");
           return;
@@ -9956,7 +9526,7 @@
           if (goal) openEditor("goal-progress", goal);
           return;
         }
-        if (action === "delete-goal") state.goals = state.goals.filter((item) => item.id !== id);
+        if (action === "delete-goal") removeRecord("goals", id);
         render();
       });
 

@@ -39,6 +39,68 @@
     return cloudState;
   }
 
+  function recordTime(record) {
+    const value = record && typeof record === "object" ? (record.updatedAt || record.createdAt) : "";
+    const time = Date.parse(String(value || ""));
+    return Number.isFinite(time) ? time : 0;
+  }
+
+  function mergeRecords(localRecord, cloudRecord) {
+    if (!localRecord) return cloudRecord;
+    if (!cloudRecord) return localRecord;
+    return recordTime(localRecord) > recordTime(cloudRecord) ? localRecord : cloudRecord;
+  }
+
+  function mergeTombstones(localTombstones, cloudTombstones) {
+    const local = isPlainObject(localTombstones) ? localTombstones : {};
+    const cloud = isPlainObject(cloudTombstones) ? cloudTombstones : {};
+    return Object.fromEntries([...new Set([...Object.keys(cloud), ...Object.keys(local)])].map((type) => {
+      const localRecords = isPlainObject(local[type]) ? local[type] : {};
+      const cloudRecords = isPlainObject(cloud[type]) ? cloud[type] : {};
+      const ids = [...new Set([...Object.keys(cloudRecords), ...Object.keys(localRecords)])];
+      return [type, Object.fromEntries(ids.map((id) => [id, recordTime({ updatedAt: localRecords[id] }) > recordTime({ updatedAt: cloudRecords[id] }) ? localRecords[id] : cloudRecords[id]]))];
+    }));
+  }
+
+  function mergeRecordArrays(localItems, cloudItems, tombstones = {}) {
+    const localById = new Map((Array.isArray(localItems) ? localItems : [])
+      .filter((item) => isPlainObject(item) && item.id != null)
+      .map((item) => [String(item.id), item]));
+    const cloudById = new Map((Array.isArray(cloudItems) ? cloudItems : [])
+      .filter((item) => isPlainObject(item) && item.id != null)
+      .map((item) => [String(item.id), item]));
+    const ids = [...new Set([...cloudById.keys(), ...localById.keys()])];
+    return ids
+      .map((id) => mergeRecords(localById.get(id), cloudById.get(id)))
+      .filter((item) => !tombstones[String(item.id)] || recordTime({ updatedAt: tombstones[String(item.id)] }) < recordTime(item));
+  }
+
+  function mergeKeyedRecords(localRecords, cloudRecords) {
+    const local = isPlainObject(localRecords) ? localRecords : {};
+    const cloud = isPlainObject(cloudRecords) ? cloudRecords : {};
+    return Object.fromEntries([...new Set([...Object.keys(cloud), ...Object.keys(local)])]
+      .map((key) => [key, mergeRecords(local[key], cloud[key])]));
+  }
+
+  function mergeCloudStates(localState, cloudState) {
+    const local = isPlainObject(localState) ? localState : {};
+    const cloud = isPlainObject(cloudState) ? cloudState : {};
+    const merged = { ...cloud, ...local };
+    const arrayKeys = ["tasks", "timeBlocks", "habits", "maintenance", "goals", "financeRecords", "thoughts"];
+    const keyedKeys = ["notes", "dailySummaries", "aiSummaries", "periodSummaries", "wellbeing", "mealRecords", "gratitude"];
+    const tombstones = mergeTombstones(local.deletedRecords, cloud.deletedRecords);
+    arrayKeys.forEach((key) => {
+      if (key in local || key in cloud) merged[key] = mergeRecordArrays(local[key], cloud[key], tombstones[key]);
+    });
+    if (Object.keys(tombstones).length) merged.deletedRecords = tombstones;
+    keyedKeys.forEach((key) => {
+      if (key in local || key in cloud) merged[key] = mergeKeyedRecords(local[key], cloud[key]);
+    });
+    // Appearance is intentionally device-local and never sent to the cloud.
+    if (local.appearance) merged.appearance = local.appearance;
+    return merged;
+  }
+
   function stableStringify(value) {
     function sortJson(current) {
       if (Array.isArray(current)) return current.map(sortJson);
@@ -308,6 +370,7 @@
     createSyncClient,
     decideInitialSync,
     hasMeaningfulState,
+    mergeCloudStates,
     stateForCloud,
     stableStringify,
     validateCloudRow
