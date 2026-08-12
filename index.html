@@ -9024,8 +9024,8 @@
         const row = normalizeRecord(source);
         const expenseValue = pick(row, ["支出金额", "支出", "expense"]);
         const incomeValue = pick(row, ["收入金额", "收入", "income"]);
-        const generalAmount = pick(row, ["金额", "交易金额", "amount", "money"]);
-        const typeValue = String(pick(row, ["收支类型", "交易类型", "类型", "type"])).toLowerCase();
+        const generalAmount = pick(row, ["金额", "金额(元)", "交易金额", "金额元", "amount", "money"]);
+        const typeValue = String(pick(row, ["收支类型", "收支", "收/支", "交易类型", "类型", "type"])).toLowerCase();
         const rawAmount = expenseValue || incomeValue || generalAmount;
         const parsedAmount = parseAmount(rawAmount);
         if (!Number.isFinite(parsedAmount)) return null;
@@ -9034,10 +9034,10 @@
         if (incomeValue || /收入|income|credit/.test(typeValue)) type = "income";
         if (/支出|expense|debit/.test(typeValue)) type = "expense";
 
-        const rawDate = pick(row, ["交易时间", "发生时间", "记账日期", "日期", "时间", "date"]);
+        const rawDate = pick(row, ["交易时间", "交易日期", "发生时间", "记账日期", "日期", "时间", "date"]);
         const date = normalizeDate(rawDate);
-        const name = String(pick(row, ["名称", "项目", "商户", "交易对象", "账单备注", "备注", "说明", "name", "merchant"])).trim();
-        const category = String(pick(row, ["一级分类", "账目分类", "分类", "类别", "category"])).trim();
+        const name = String(pick(row, ["名称", "项目", "商品说明", "商品", "商户", "交易对方", "交易对象", "账单备注", "备注", "说明", "name", "merchant"])).trim();
+        const category = String(pick(row, ["一级分类", "二级分类", "账目分类", "分类", "类别", "category"])).trim() || "未分类";
         const externalId = String(pick(row, ["记录id", "账单id", "流水号", "订单号", "交易号", "id", "transactionid"])).trim();
         const amount = Math.abs(parsedAmount);
         const key = externalId
