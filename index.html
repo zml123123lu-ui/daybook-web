@@ -3162,8 +3162,11 @@
       max-height: calc(100dvh - 2rem);
       margin: auto;
       border-radius: var(--radius);
-      display: grid;
       grid-template-rows: auto minmax(0, 1fr) auto;
+    }
+
+    #financeRecordsDialog[open] {
+      display: grid;
     }
 
     #financeRecordsDialog .dialog-fields {
@@ -8007,16 +8010,6 @@
         return durations.length
           ? durations.map((item) => `${item.category} ${formatDuration(item.minutes)}`).join("，")
           : "无";
-      }
-
-      function renderTimeCategoryChart() {
-        const blocks = state.timeBlocks.filter((block) => (block.date || todayKey()) === activeDate);
-        const durations = categoryDurationsForBlocks(blocks);
-        if (!durations.length) {
-          $("#timeCategoryChart").innerHTML = `<div class="empty" role="status">记录时间轴后，这里会显示各分类用时。</div>`;
-          return;
-        }
-        $("#timeCategoryChart").innerHTML = categoryChartMarkup(durations);
       }
 
       function categoryChartMarkup(durations) {
