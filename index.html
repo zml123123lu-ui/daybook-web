@@ -5816,7 +5816,7 @@
               </div>
               <div>
                 <input class="sr-only" id="financeFile" type="file" accept=".csv,.tsv,.json,text/csv,text/tab-separated-values,application/json">
-                <label class="btn secondary small" for="financeFile">导入账单</label>
+                <button class="btn secondary small" id="financeImportButton" type="button">导入账单</button>
               </div>
             </header>
             <div class="panel-body">
@@ -8984,7 +8984,7 @@
         row.push(cell.trim());
         if (row.some(Boolean)) rows.push(row);
         if (rows.length < 2) return [];
-        const headers = rows.shift();
+        const headers = rows.shift().map((header, index) => String(header || "").replace(/^\uFEFF/, "").trim() || `列${index + 1}`);
         return rows.map((cells) => Object.fromEntries(headers.map((header, index) => [header, cells[index] ?? ""])));
       }
 
@@ -9077,7 +9077,7 @@
       }
 
       async function importFinance(file) {
-        const text = await file.text();
+        const text = (await file.text()).replace(/^\uFEFF/, "");
         let rows;
         if (file.name.toLowerCase().endsWith(".json") || text.trim().startsWith("[") || text.trim().startsWith("{")) {
           const parsed = JSON.parse(text);
@@ -9641,6 +9641,10 @@
         } finally {
           event.target.value = "";
         }
+      });
+
+      $("#financeImportButton").addEventListener("click", () => {
+        $("#financeFile").click();
       });
 
       $("#backupFile").addEventListener("change", async (event) => {
