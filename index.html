@@ -2953,6 +2953,82 @@
       background: var(--surface);
     }
 
+    .finance-plan-card {
+      display: grid;
+      gap: 0.85rem;
+      margin-bottom: 1rem;
+      padding: 1rem;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--surface);
+    }
+
+    .finance-plan-heading {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 0.75rem;
+    }
+
+    .finance-plan-heading h3 {
+      margin: 0;
+      font-family: "Songti SC", "STSong", serif;
+      font-size: 1rem;
+    }
+
+    .finance-plan-daily,
+    .finance-plan-monthly {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 0.55rem;
+    }
+
+    .finance-plan-stat,
+    .finance-budget-item {
+      min-width: 0;
+      padding: 0.7rem;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--surface-2);
+    }
+
+    .finance-plan-stat span,
+    .finance-budget-item span {
+      display: block;
+      color: var(--muted);
+      font-size: 0.76rem;
+    }
+
+    .finance-plan-stat strong {
+      display: block;
+      margin-top: 0.25rem;
+      font-family: "Songti SC", "STSong", serif;
+      font-size: 1.15rem;
+    }
+
+    .finance-plan-monthly {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .finance-budget-list {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 0.5rem;
+    }
+
+    .finance-budget-item strong {
+      display: block;
+      margin-top: 0.28rem;
+      font-size: 0.9rem;
+    }
+
+    .finance-budget-item small {
+      display: block;
+      margin-top: 0.2rem;
+      color: var(--muted);
+      font-size: 0.72rem;
+    }
+
     .finance-entry-card h3 {
       margin: 0;
       font-family: "Songti SC", "STSong", serif;
@@ -3921,6 +3997,17 @@
 
       .finance-overview {
         grid-template-columns: 1fr;
+      }
+
+      .finance-plan-daily,
+      .finance-plan-monthly,
+      .finance-budget-list {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .finance-plan-heading {
+        align-items: flex-start;
+        flex-direction: column;
       }
 
       .finance-entry-form {
@@ -5854,6 +5941,24 @@
                 </form>
                 <datalist id="financeCategories"><option value="餐饮"><option value="交通"><option value="购物"><option value="居住"><option value="医疗健康"><option value="娱乐"><option value="学习"><option value="工资"><option value="其他"></datalist>
               </section>
+              <section class="finance-plan-card" id="financePlanCard" aria-labelledby="financePlanTitle">
+                <div class="finance-plan-heading">
+                  <h3 id="financePlanTitle">我的财务计划</h3>
+                  <p class="muted">每天到账 ¥100，先存 ¥40，今天可花 ¥60。</p>
+                </div>
+                <div class="finance-plan-daily" aria-label="今日财务计划">
+                  <article class="finance-plan-stat"><span>今日应存</span><strong id="financePlanSaving">¥40</strong></article>
+                  <article class="finance-plan-stat"><span>今日可花</span><strong id="financePlanLimit">¥60</strong></article>
+                  <article class="finance-plan-stat"><span>今日已花</span><strong id="financePlanSpent">¥0</strong></article>
+                  <article class="finance-plan-stat"><span>今日剩余</span><strong id="financePlanRemaining">¥60</strong></article>
+                </div>
+                <div class="finance-plan-monthly" aria-label="本月财务计划">
+                  <article class="finance-plan-stat"><span>本月预算</span><strong id="financePlanBudget">¥1,500</strong></article>
+                  <article class="finance-plan-stat"><span>本月已花</span><strong id="financePlanMonthlySpent">¥0</strong></article>
+                  <article class="finance-plan-stat"><span>本月还可花</span><strong id="financePlanMonthlyRemaining">¥1,500</strong></article>
+                </div>
+                <div class="finance-budget-list" id="financePlanCategories" aria-label="本月分类预算"></div>
+              </section>
               <div class="finance-overview">
                 <article class="finance-stat"><span>本月支出</span><strong id="financeExpense">¥0</strong></article>
                 <article class="finance-stat"><span>本月收入</span><strong id="financeIncome">¥0</strong></article>
@@ -6344,6 +6449,19 @@
           maintenance: [],
           goals: [],
           financeRecords: [],
+          financePlan: {
+            dailyIncome: 100,
+            dailySaving: 40,
+            dailySpendingLimit: 60,
+            monthlyIncomeDays: 25,
+            monthlyBudgets: [
+              { name: "吃喝", amount: 500 },
+              { name: "购物 + 日用 + 快递", amount: 450 },
+              { name: "交通 + 健康", amount: 350 },
+              { name: "会员 + 花费 + 其他", amount: 100 },
+              { name: "缓冲", amount: 100 }
+            ]
+          },
           notes: {},
           dailySummaries: {},
           aiSummaries: {},
@@ -6444,6 +6562,7 @@
             : [],
           goals: Array.isArray(source.goals) ? source.goals.map(normalizeGoal) : [],
           financeRecords: Array.isArray(source.financeRecords) ? source.financeRecords : [],
+          financePlan: normalizeFinancePlan(source.financePlan),
           notes: source.notes && typeof source.notes === "object" ? source.notes : {},
           dailySummaries: source.dailySummaries && typeof source.dailySummaries === "object" ? source.dailySummaries : {},
           aiSummaries: source.aiSummaries && typeof source.aiSummaries === "object" ? source.aiSummaries : {},
@@ -8369,6 +8488,79 @@
         return state.financeRecords.filter((record) => String(record.date).slice(0, 7) === month);
       }
 
+      function financePlanDefaults() {
+        return {
+          dailyIncome: 100,
+          dailySaving: 40,
+          dailySpendingLimit: 60,
+          monthlyIncomeDays: 25,
+          monthlyBudgets: [
+            { name: "吃喝", amount: 500 },
+            { name: "购物 + 日用 + 快递", amount: 450 },
+            { name: "交通 + 健康", amount: 350 },
+            { name: "会员 + 花费 + 其他", amount: 100 },
+            { name: "缓冲", amount: 100 }
+          ]
+        };
+      }
+
+      function normalizeFinancePlan(source) {
+        const defaults = financePlanDefaults();
+        const value = source && typeof source === "object" ? source : {};
+        const budgets = Array.isArray(value.monthlyBudgets) ? value.monthlyBudgets : defaults.monthlyBudgets;
+        return {
+          dailyIncome: Number.isFinite(Number(value.dailyIncome)) ? Number(value.dailyIncome) : defaults.dailyIncome,
+          dailySaving: Number.isFinite(Number(value.dailySaving)) ? Number(value.dailySaving) : defaults.dailySaving,
+          dailySpendingLimit: Number.isFinite(Number(value.dailySpendingLimit)) ? Number(value.dailySpendingLimit) : defaults.dailySpendingLimit,
+          monthlyIncomeDays: Number.isFinite(Number(value.monthlyIncomeDays)) ? Number(value.monthlyIncomeDays) : defaults.monthlyIncomeDays,
+          monthlyBudgets: budgets.map((item, index) => ({
+            name: String(item?.name || defaults.monthlyBudgets[index]?.name || "未分类"),
+            amount: Math.max(0, Number(item?.amount) || defaults.monthlyBudgets[index]?.amount || 0)
+          }))
+        };
+      }
+
+      function financeBudgetCategory(category, plan) {
+        const text = String(category || "").trim();
+        const rules = [
+          ["吃喝", ["餐饮", "吃喝", "吃饭", "咖啡", "外卖", "食品", "水果", "饮料"]],
+          ["购物 + 日用 + 快递", ["购物", "日用", "快递", "服饰", "家居", "百货"]],
+          ["交通 + 健康", ["交通", "地铁", "打车", "公交", "健康", "医疗", "医疗健康", "运动"]],
+          ["会员 + 花费 + 其他", ["会员", "服务", "娱乐", "学习", "通讯", "其他"]]
+        ];
+        const matched = rules.find(([, terms]) => terms.some((term) => text.includes(term)));
+        const name = matched?.[0] || "未分类";
+        return (plan.monthlyBudgets || []).find((item) => item.name === name) || { name, amount: 0 };
+      }
+
+      function financeDailySnapshot(records, date, plan) {
+        const spent = records
+          .filter((record) => record.type === "expense" && String(record.date) === String(date))
+          .reduce((sum, record) => sum + (Number(record.amount) || 0), 0);
+        return {
+          income: Number(plan.dailyIncome) || 0,
+          saving: Number(plan.dailySaving) || 0,
+          limit: Number(plan.dailySpendingLimit) || 0,
+          spent,
+          remaining: (Number(plan.dailySpendingLimit) || 0) - spent
+        };
+      }
+
+      function financeMonthlyBudgetSnapshot(records, month, plan) {
+        const budgets = (plan.monthlyBudgets || []).map((item) => ({ ...item, spent: 0, remaining: Number(item.amount) || 0 }));
+        const byName = new Map(budgets.map((item) => [item.name, item]));
+        const monthExpenses = records.filter((record) => record.type === "expense" && String(record.date).slice(0, 7) === String(month));
+        monthExpenses.forEach((record) => {
+            const category = financeBudgetCategory(record.category, plan);
+            const target = byName.get(category.name);
+            if (target) target.spent += Number(record.amount) || 0;
+          });
+        budgets.forEach((item) => { item.remaining = item.amount - item.spent; });
+        const spent = monthExpenses.reduce((sum, record) => sum + (Number(record.amount) || 0), 0);
+        const budget = budgets.reduce((sum, item) => sum + (Number(item.amount) || 0), 0);
+        return { budget, spent, remaining: budget - spent, categories: budgets };
+      }
+
       function monthKeyFromDate(date) {
         return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
       }
@@ -8481,6 +8673,18 @@
         $("#financeExpense").textContent = currency.format(spending);
         $("#financeIncome").textContent = currency.format(income);
         $("#financeCount").textContent = String(state.financeRecords.length);
+        const plan = normalizeFinancePlan(state.financePlan);
+        state.financePlan = plan;
+        const dailyPlan = financeDailySnapshot(state.financeRecords, todayKey(), plan);
+        const monthlyPlan = financeMonthlyBudgetSnapshot(state.financeRecords, todayKey().slice(0, 7), plan);
+        $("#financePlanSaving").textContent = currency.format(dailyPlan.saving);
+        $("#financePlanLimit").textContent = currency.format(dailyPlan.limit);
+        $("#financePlanSpent").textContent = currency.format(dailyPlan.spent);
+        $("#financePlanRemaining").textContent = currency.format(dailyPlan.remaining);
+        $("#financePlanBudget").textContent = currency.format(monthlyPlan.budget);
+        $("#financePlanMonthlySpent").textContent = currency.format(monthlyPlan.spent);
+        $("#financePlanMonthlyRemaining").textContent = currency.format(monthlyPlan.remaining);
+        $("#financePlanCategories").innerHTML = monthlyPlan.categories.map((item) => `<div class="finance-budget-item"><span>${escapeHtml(item.name)}</span><strong>${currency.format(item.spent)} / ${currency.format(item.amount)}</strong><small>剩余 ${currency.format(item.remaining)}</small></div>`).join("");
         $("#financeImportStatus").textContent = state.lastImport
           ? `${state.lastImport.file} · 新增 ${state.lastImport.added} · 覆盖 ${state.lastImport.overwritten}`
           : "尚未导入";
