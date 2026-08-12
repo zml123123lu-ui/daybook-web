@@ -2976,6 +2976,10 @@
       font-size: 1rem;
     }
 
+    .finance-plan-heading .btn {
+      flex: 0 0 auto;
+    }
+
     .finance-plan-daily,
     .finance-plan-monthly {
       display: grid;
@@ -3095,6 +3099,40 @@
       padding: 0;
     }
 
+    .finance-inline-records {
+      display: grid;
+      gap: 0.65rem;
+      margin-bottom: 1rem;
+      padding: 0.9rem;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--surface);
+    }
+
+    .finance-inline-records-header {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 0.75rem;
+    }
+
+    .finance-inline-records-header h3 {
+      margin: 0;
+      font-family: "Songti SC", "STSong", serif;
+      font-size: 1rem;
+    }
+
+    .finance-inline-record-list {
+      display: grid;
+      gap: 0.35rem;
+      max-height: 18rem;
+      overflow: auto;
+    }
+
+    .finance-inline-record-list .finance-record-row {
+      padding-block: 0.55rem;
+    }
+
     .finance-records-launch {
       display: flex;
       justify-content: flex-end;
@@ -3179,6 +3217,38 @@
 
     #financeRecordsDialog .dialog-footer {
       padding-block: 0.8rem;
+    }
+
+    #financePlanDialog {
+      width: min(42rem, calc(100vw - 2rem));
+      max-height: calc(100vh - 2rem);
+    }
+
+    .finance-plan-heading-actions {
+      display: flex;
+      align-items: center;
+      gap: 0.65rem;
+    }
+
+    .finance-plan-edit-grid,
+    .finance-plan-budget-fields {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 0.75rem;
+    }
+
+    .finance-plan-budget-fields {
+      margin: 1rem 0 0;
+      padding: 0.85rem;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+    }
+
+    .finance-plan-budget-fields legend {
+      padding: 0 0.35rem;
+      color: var(--muted);
+      font-size: 0.82rem;
+      font-weight: 750;
     }
 
     .finance-record-row {
@@ -4008,6 +4078,21 @@
       .finance-plan-heading {
         align-items: flex-start;
         flex-direction: column;
+      }
+
+      .finance-inline-records-header {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .finance-plan-heading-actions {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .finance-plan-edit-grid,
+      .finance-plan-budget-fields {
+        grid-template-columns: 1fr;
       }
 
       .finance-entry-form {
@@ -5944,7 +6029,10 @@
               <section class="finance-plan-card" id="financePlanCard" aria-labelledby="financePlanTitle">
                 <div class="finance-plan-heading">
                   <h3 id="financePlanTitle">我的财务计划</h3>
-                  <p class="muted">每天到账 ¥100，先存 ¥40，今天可花 ¥60。</p>
+                  <div class="finance-plan-heading-actions">
+                    <p class="muted">每天到账 ¥100，先存 ¥40，今天可花 ¥60。</p>
+                    <button class="btn secondary small" id="financePlanEditButton" type="button">编辑计划</button>
+                  </div>
                 </div>
                 <div class="finance-plan-daily" aria-label="今日财务计划">
                   <article class="finance-plan-stat"><span>今日应存</span><strong id="financePlanSaving">¥40</strong></article>
@@ -5958,6 +6046,16 @@
                   <article class="finance-plan-stat"><span>本月还可花</span><strong id="financePlanMonthlyRemaining">¥1,500</strong></article>
                 </div>
                 <div class="finance-budget-list" id="financePlanCategories" aria-label="本月分类预算"></div>
+              </section>
+              <section class="finance-inline-records" aria-labelledby="financeInlineRecordsTitle">
+                <div class="finance-inline-records-header">
+                  <div>
+                    <h3 id="financeInlineRecordsTitle">已导入账单</h3>
+                    <p class="muted" id="financeInlineRecordCount">还没有账单记录</p>
+                  </div>
+                  <button class="btn secondary small" id="financeRecordsButton" type="button">查看全部记录</button>
+                </div>
+                <div class="finance-inline-record-list" id="financeInlineRecordList" role="list"></div>
               </section>
               <div class="finance-overview">
                 <article class="finance-stat"><span>本月支出</span><strong id="financeExpense">¥0</strong></article>
@@ -5984,7 +6082,6 @@
                 </div>
                 <div id="financeCategoryChart" aria-label="已导入支出分类饼状图"></div>
               </section>
-              <div class="finance-records-launch"><button class="btn secondary small" id="financeRecordsButton" type="button">查看账单记录</button></div>
               <p class="muted" id="financeImportStatus">尚未导入</p>
               <p class="muted" id="financeSyncNote">这里只保留摘要，账单明细请回到原记账软件查看。</p>
             </div>
@@ -6245,6 +6342,38 @@
       </section>
     </div>
     <footer class="dialog-footer"><button class="btn" id="financeRecordsDoneBtn" type="button">完成</button></footer>
+  </dialog>
+
+  <dialog id="financePlanDialog" aria-labelledby="financePlanDialogTitle">
+    <form id="financePlanForm">
+      <header class="dialog-header">
+        <div>
+          <h2 id="financePlanDialogTitle">编辑财务计划</h2>
+          <p class="muted">这里改的是预算规则，不会修改已经记录的账单。</p>
+        </div>
+        <button class="icon-close" id="financePlanCloseBtn" type="button" aria-label="关闭财务计划编辑">×</button>
+      </header>
+      <div class="dialog-fields">
+        <div class="finance-plan-edit-grid">
+          <div class="field"><label for="financePlanDailyIncome">每天到账</label><input id="financePlanDailyIncome" name="dailyIncome" type="number" min="0" step="1"></div>
+          <div class="field"><label for="financePlanDailySaving">每天应存</label><input id="financePlanDailySaving" name="dailySaving" type="number" min="0" step="1"></div>
+          <div class="field"><label for="financePlanDailyLimit">每天可花</label><input id="financePlanDailyLimit" name="dailySpendingLimit" type="number" min="0" step="1"></div>
+          <div class="field"><label for="financePlanIncomeDays">每月发薪天数</label><input id="financePlanIncomeDays" name="monthlyIncomeDays" type="number" min="1" max="31" step="1"></div>
+        </div>
+        <fieldset class="finance-plan-budget-fields">
+          <legend>每月分类额度</legend>
+          <div class="field"><label for="financePlanBudget0">吃喝</label><input id="financePlanBudget0" name="budget-0" type="number" min="0" step="1"></div>
+          <div class="field"><label for="financePlanBudget1">购物 + 日用 + 快递</label><input id="financePlanBudget1" name="budget-1" type="number" min="0" step="1"></div>
+          <div class="field"><label for="financePlanBudget2">交通 + 健康</label><input id="financePlanBudget2" name="budget-2" type="number" min="0" step="1"></div>
+          <div class="field"><label for="financePlanBudget3">会员 + 花费 + 其他</label><input id="financePlanBudget3" name="budget-3" type="number" min="0" step="1"></div>
+          <div class="field"><label for="financePlanBudget4">缓冲</label><input id="financePlanBudget4" name="budget-4" type="number" min="0" step="1"></div>
+        </fieldset>
+      </div>
+      <footer class="dialog-footer">
+        <button class="btn secondary" id="financePlanCancelBtn" type="button">取消</button>
+        <button class="btn" type="submit">保存计划</button>
+      </footer>
+    </form>
   </dialog>
 
   <dialog id="syncDialog" aria-labelledby="syncDialogTitle">
@@ -8597,11 +8726,9 @@
           .sort((first, second) => String(second.date).localeCompare(String(first.date)));
       }
 
-      function renderFinanceRecords() {
-        const list = $("#financeRecordList");
-        const records = financeRecordsForList(state.financeRecords, financeRecordSourceFilter);
-        $("#financeRecordSourceFilter").value = financeRecordSourceFilter;
-        $("#financeRecordCount").textContent = records.length ? `共 ${records.length} 笔记录` : "还没有账单记录";
+      function renderFinanceRecordsInto(list, countNode = null, sourceFilter = financeRecordSourceFilter) {
+        const records = financeRecordsForList(state.financeRecords, sourceFilter);
+        if (countNode) countNode.textContent = records.length ? `共 ${records.length} 笔记录` : "还没有账单记录";
         if (!records.length) {
           list.innerHTML = '<div class="empty" role="status">在上方手动记一笔，或导入账单后，这里会按日期显示。</div>';
           return;
@@ -8623,6 +8750,11 @@
           previousDate = date;
           return `${divider}<article class="finance-record-row" role="listitem"><div class="finance-record-copy"><strong>${escapeHtml(record.name || "未命名")}</strong><span class="finance-record-meta">${escapeHtml(record.category || "未分类")} · ${source}</span></div><span class="finance-record-amount${income ? " income" : ""}">${income ? "+" : "-"}${currency.format(Number(record.amount) || 0)}</span></article>`;
         }).join("");
+      }
+
+      function renderFinanceRecords() {
+        $("#financeRecordSourceFilter").value = financeRecordSourceFilter;
+        renderFinanceRecordsInto($("#financeRecordList"), $("#financeRecordCount"));
       }
 
       function renderFinanceCategoryChart() {
@@ -8685,6 +8817,7 @@
         $("#financePlanMonthlySpent").textContent = currency.format(monthlyPlan.spent);
         $("#financePlanMonthlyRemaining").textContent = currency.format(monthlyPlan.remaining);
         $("#financePlanCategories").innerHTML = monthlyPlan.categories.map((item) => `<div class="finance-budget-item"><span>${escapeHtml(item.name)}</span><strong>${currency.format(item.spent)} / ${currency.format(item.amount)}</strong><small>剩余 ${currency.format(item.remaining)}</small></div>`).join("");
+        renderFinanceRecordsInto($("#financeInlineRecordList"), $("#financeInlineRecordCount"), "all");
         $("#financeImportStatus").textContent = state.lastImport
           ? `${state.lastImport.file} · 新增 ${state.lastImport.added} · 覆盖 ${state.lastImport.overwritten}`
           : "尚未导入";
@@ -8693,6 +8826,44 @@
           : "这里只保留摘要，账单明细请回到原记账软件查看。";
         renderFinanceCategoryChart();
         renderFinanceRecords();
+      }
+
+      function openFinancePlanDialog() {
+        const plan = normalizeFinancePlan(state.financePlan);
+        $("#financePlanDailyIncome").value = plan.dailyIncome;
+        $("#financePlanDailySaving").value = plan.dailySaving;
+        $("#financePlanDailyLimit").value = plan.dailySpendingLimit;
+        $("#financePlanIncomeDays").value = plan.monthlyIncomeDays;
+        plan.monthlyBudgets.forEach((item, index) => {
+          const input = $(`#financePlanBudget${index}`);
+          if (input) input.value = item.amount;
+        });
+        $("#financePlanDialog").showModal();
+        $("#financePlanDailyIncome").focus();
+      }
+
+      function closeFinancePlanDialog() {
+        $("#financePlanDialog").close();
+        $("#financePlanEditButton").focus();
+      }
+
+      function saveFinancePlan(form) {
+        const values = Object.fromEntries(new FormData(form));
+        const defaults = financePlanDefaults();
+        state.financePlan = normalizeFinancePlan({
+          dailyIncome: values.dailyIncome,
+          dailySaving: values.dailySaving,
+          dailySpendingLimit: values.dailySpendingLimit,
+          monthlyIncomeDays: values.monthlyIncomeDays,
+          monthlyBudgets: defaults.monthlyBudgets.map((item, index) => ({
+            name: item.name,
+            amount: values[`budget-${index}`]
+          }))
+        });
+        saveState();
+        renderFinance();
+        closeFinancePlanDialog();
+        showToast("财务计划已更新");
       }
 
       function renderWellbeing() {
@@ -9354,6 +9525,11 @@
           showToast(`${record.type === "income" ? "收入" : "支出"}已记入`);
         }
 
+        if (event.target.id === "financePlanForm") {
+          event.preventDefault();
+          saveFinancePlan(event.target);
+        }
+
         if (event.target.id === "maintenanceForm") {
           event.preventDefault();
           const form = new FormData(event.target);
@@ -9829,6 +10005,12 @@
       $("#financeRecordsDoneBtn").addEventListener("click", closeFinanceRecords);
       $("#financeRecordsDialog").addEventListener("click", (event) => {
         if (event.target === $("#financeRecordsDialog")) closeFinanceRecords();
+      });
+      $("#financePlanEditButton").addEventListener("click", openFinancePlanDialog);
+      $("#financePlanCloseBtn").addEventListener("click", closeFinancePlanDialog);
+      $("#financePlanCancelBtn").addEventListener("click", closeFinancePlanDialog);
+      $("#financePlanDialog").addEventListener("click", (event) => {
+        if (event.target === $("#financePlanDialog")) closeFinancePlanDialog();
       });
       $("#financeRecordSourceFilter").addEventListener("change", (event) => {
         financeRecordSourceFilter = event.target.value;
