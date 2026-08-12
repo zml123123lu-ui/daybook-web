@@ -2943,6 +2943,14 @@
       margin-bottom: 1rem;
     }
 
+    .finance-heading-actions {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 0.45rem;
+      flex-wrap: wrap;
+    }
+
     .finance-entry-card {
       display: grid;
       gap: 0.75rem;
@@ -3099,46 +3107,6 @@
       padding: 0;
     }
 
-    .finance-inline-records {
-      display: grid;
-      gap: 0.65rem;
-      margin-bottom: 1rem;
-      padding: 0.9rem;
-      border: 1px solid var(--line);
-      border-radius: var(--radius);
-      background: var(--surface);
-    }
-
-    .finance-inline-records-header {
-      display: flex;
-      align-items: baseline;
-      justify-content: space-between;
-      gap: 0.75rem;
-    }
-
-    .finance-inline-records-header h3 {
-      margin: 0;
-      font-family: "Songti SC", "STSong", serif;
-      font-size: 1rem;
-    }
-
-    .finance-inline-record-list {
-      display: grid;
-      gap: 0.35rem;
-      max-height: 18rem;
-      overflow: auto;
-    }
-
-    .finance-inline-record-list .finance-record-row {
-      padding-block: 0.55rem;
-    }
-
-    .finance-records-launch {
-      display: flex;
-      justify-content: flex-end;
-      margin: 0.25rem 0 1rem;
-    }
-
     .finance-records-header {
       display: flex;
       align-items: end;
@@ -3185,6 +3153,30 @@
       border-top: 1px solid var(--line);
     }
 
+    #financeRecordsDialog {
+      width: min(72rem, 100vw);
+      height: min(100vh, 60rem);
+      max-width: none;
+      max-height: none;
+      margin: 0;
+      border-radius: 0;
+    }
+
+    #financeRecordsDialog .dialog-fields {
+      min-height: 0;
+      overflow: auto;
+      padding: 1rem clamp(1rem, 4vw, 3rem);
+    }
+
+    #financeRecordsDialog .finance-records-card {
+      width: min(56rem, 100%);
+      margin: 0 auto;
+    }
+
+    #financeRecordsDialog .finance-record-list {
+      max-height: none;
+    }
+
     .finance-record-day-divider {
       display: grid;
       grid-template-columns: minmax(0, 1fr) auto;
@@ -3203,16 +3195,6 @@
       font-size: 0.74rem;
       font-weight: 600;
       white-space: nowrap;
-    }
-
-    #financeRecordsDialog {
-      width: min(42rem, calc(100vw - 2rem));
-      max-height: calc(100vh - 2rem);
-    }
-
-    #financeRecordsDialog .dialog-fields {
-      overflow: hidden;
-      padding-bottom: 0.9rem;
     }
 
     #financeRecordsDialog .dialog-footer {
@@ -6005,8 +5987,9 @@
                 <h2>账单摘要</h2>
                 <p class="muted">手动记一笔，或从现有记账软件导入。</p>
               </div>
-              <div>
+              <div class="finance-heading-actions">
                 <input class="sr-only" id="financeFile" type="file" accept=".csv,.tsv,.json,text/csv,text/tab-separated-values,application/json">
+                <button class="btn secondary small" id="financeRecordsButton" type="button">账单记录</button>
                 <button class="btn secondary small" id="financeImportButton" type="button">导入账单</button>
               </div>
             </header>
@@ -6065,16 +6048,6 @@
                   <article class="finance-plan-stat"><span>本月还可花</span><strong id="financePlanMonthlyRemaining">¥1,500</strong></article>
                 </div>
                 <div class="finance-budget-list" id="financePlanCategories" aria-label="本月分类预算"></div>
-              </section>
-              <section class="finance-inline-records" aria-labelledby="financeInlineRecordsTitle">
-                <div class="finance-inline-records-header">
-                  <div>
-                    <h3 id="financeInlineRecordsTitle">已导入账单</h3>
-                    <p class="muted" id="financeInlineRecordCount">还没有账单记录</p>
-                  </div>
-                  <button class="btn secondary small" id="financeRecordsButton" type="button">查看全部记录</button>
-                </div>
-                <div class="finance-inline-record-list" id="financeInlineRecordList" role="list"></div>
               </section>
               <div class="finance-overview">
                 <article class="finance-stat"><span>本月支出</span><strong id="financeExpense">¥0</strong></article>
@@ -8836,7 +8809,6 @@
         $("#financePlanMonthlySpent").textContent = currency.format(monthlyPlan.spent);
         $("#financePlanMonthlyRemaining").textContent = currency.format(monthlyPlan.remaining);
         $("#financePlanCategories").innerHTML = monthlyPlan.categories.map((item) => `<div class="finance-budget-item"><span>${escapeHtml(item.name)}</span><strong>${currency.format(item.spent)} / ${currency.format(item.amount)}</strong><small>剩余 ${currency.format(item.remaining)}</small></div>`).join("");
-        renderFinanceRecordsInto($("#financeInlineRecordList"), $("#financeInlineRecordCount"), "all");
         $("#financeImportStatus").textContent = state.lastImport
           ? `${state.lastImport.file} · 新增 ${state.lastImport.added} · 覆盖 ${state.lastImport.overwritten}`
           : "尚未导入";
