@@ -9285,16 +9285,17 @@
       });
 
       document.addEventListener("click", (event) => {
-        const target = event.target.closest("[data-action], [data-filter], [data-period], [data-habit-period], [data-finance-scope], [data-appearance-theme]");
-        if (!target) return;
-        if (target.dataset.appearanceTheme) {
-          state.appearance = { theme: target.dataset.appearanceTheme };
+        const appearanceTarget = event.target.closest(".appearance-option[data-appearance-theme]");
+        if (appearanceTarget) {
+          state.appearance = { theme: appearanceTarget.dataset.appearanceTheme };
           applyAppearanceTheme();
           renderAppearanceThemes();
           saveState({ syncCloud: false });
           showToast(`已切换为${currentAppearanceTheme().name}`);
           return;
         }
+        const target = event.target.closest("[data-action], [data-filter], [data-period], [data-habit-period], [data-finance-scope]");
+        if (!target) return;
         if (target.dataset.period) {
           reviewPeriod = target.dataset.period;
           renderReview();
