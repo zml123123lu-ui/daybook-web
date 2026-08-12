@@ -6340,7 +6340,10 @@
         <div class="finance-record-list" id="financeRecordList" role="list"></div>
       </section>
     </div>
-    <footer class="dialog-footer"><button class="btn" id="financeRecordsDoneBtn" type="button">完成</button></footer>
+    <footer class="dialog-footer">
+      <button class="btn danger small" id="clearFinanceRecordsBtn" type="button">清除账单数据</button>
+      <button class="btn" id="financeRecordsDoneBtn" type="button">完成</button>
+    </footer>
   </dialog>
 
   <dialog id="financePlanDialog" aria-labelledby="financePlanDialogTitle">
@@ -8746,6 +8749,19 @@
         renderFinanceRecordsInto($("#financeRecordList"), $("#financeRecordCount"));
       }
 
+      function clearFinanceRecords() {
+        if (!state.financeRecords.length) {
+          showToast("当前没有账单记录");
+          return;
+        }
+        if (!confirm("确定清除全部账单记录吗？此操作不会影响财务计划。")) return;
+        state.financeRecords = [];
+        state.lastImport = null;
+        render();
+        renderFinanceRecords();
+        showToast("账单数据已清除");
+      }
+
       function renderFinanceCategoryChart() {
         const chart = $("#financeCategoryChart");
         const records = financeRecordsForChart(state.financeRecords, financeChartScope, financeChartMonth);
@@ -9991,6 +10007,7 @@
       };
       $("#financeRecordsCloseBtn").addEventListener("click", closeFinanceRecords);
       $("#financeRecordsDoneBtn").addEventListener("click", closeFinanceRecords);
+      $("#clearFinanceRecordsBtn").addEventListener("click", clearFinanceRecords);
       $("#financeRecordsDialog").addEventListener("click", (event) => {
         if (event.target === $("#financeRecordsDialog")) closeFinanceRecords();
       });
