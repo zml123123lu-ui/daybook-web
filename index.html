@@ -7095,6 +7095,10 @@
             markCloudRow(cloudRow);
             return;
           }
+          if (syncDirty && cloudRow.revision === syncRevision) {
+            await pushLocalState();
+            return;
+          }
           applyCloudRow(cloudRow);
         } catch (error) {
           handleSyncError(error);
