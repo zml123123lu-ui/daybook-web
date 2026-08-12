@@ -64,15 +64,19 @@
 
   function mergeRecordArrays(localItems, cloudItems, tombstones = {}) {
     const localById = new Map((Array.isArray(localItems) ? localItems : [])
-      .filter((item) => isPlainObject(item) && item.id != null)
-      .map((item) => [String(item.id), item]));
+      .filter((item) => isPlainObject(item) && (item.id != null || item.key != null))
+      .map((item) => [String(item.id ?? item.key), item]));
     const cloudById = new Map((Array.isArray(cloudItems) ? cloudItems : [])
-      .filter((item) => isPlainObject(item) && item.id != null)
-      .map((item) => [String(item.id), item]));
+      .filter((item) => isPlainObject(item) && (item.id != null || item.key != null))
+      .map((item) => [String(item.id ?? item.key), item]));
     const ids = [...new Set([...cloudById.keys(), ...localById.keys()])];
     return ids
       .map((id) => mergeRecords(localById.get(id), cloudById.get(id)))
-      .filter((item) => !tombstones[String(item.id)] || recordTime({ updatedAt: tombstones[String(item.id)] }) < recordTime(item));
+      .filter((item) => {
+        const recordId = String(item.id ?? item.key);
+        const deletedAt = tombstones[recordId];
+        return !deletedAt || recordTime({ updatedAt: deletedAt }) < recordTime(item);
+      });
   }
 
   function mergeKeyedRecords(localRecords, cloudRecords) {
