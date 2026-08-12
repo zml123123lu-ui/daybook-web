@@ -8654,6 +8654,10 @@
         return (plan.monthlyBudgets || []).find((item) => item.name === name) || { name, amount: 0 };
       }
 
+      function financeBudgetCategoryForRecord(record, plan) {
+        return financeBudgetCategory(`${record?.ledger || ""} ${record?.category || ""}`, plan);
+      }
+
       function financeDailySnapshot(records, date, plan) {
         const spent = records
           .filter((record) => record.type === "expense" && String(record.date) === String(date))
@@ -8672,7 +8676,7 @@
         const byName = new Map(budgets.map((item) => [item.name, item]));
         const monthExpenses = records.filter((record) => record.type === "expense" && String(record.date).slice(0, 7) === String(month));
         monthExpenses.forEach((record) => {
-            const category = financeBudgetCategory(record.category, plan);
+            const category = financeBudgetCategoryForRecord(record, plan);
             const target = byName.get(category.name);
             if (target) target.spent += Number(record.amount) || 0;
           });
@@ -9416,7 +9420,8 @@
         const rawDate = pick(row, ["交易时间", "交易日期", "发生时间", "记账日期", "日期", "时间", "date"]);
         const date = normalizeDate(rawDate);
         const name = String(pick(row, ["名称", "项目", "商品说明", "商品", "商户", "交易对方", "交易对象", "账单备注", "备注", "说明", "name", "merchant"])).trim();
-        const category = String(pick(row, ["一级分类", "二级分类", "账目分类", "分类", "类别", "category"])).trim() || "未分类";
+        const category = String(pick(row, ["二级分类", "账目分类", "分类", "类别", "category", "一级分类"])).trim() || "未分类";
+        const ledger = String(pick(row, ["账本", "账簿", "所属账本", "账户", "ledger", "book"])).trim();
         const externalId = String(pick(row, ["记录id", "账单id", "流水号", "订单号", "交易号", "id", "transactionid"])).trim();
         const amount = Math.abs(parsedAmount);
         const key = externalId
@@ -9429,6 +9434,7 @@
           date,
           name,
           category,
+          ledger,
           amount,
           type,
           source: sourceName
