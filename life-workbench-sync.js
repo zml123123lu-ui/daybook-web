@@ -119,12 +119,7 @@
 
   function decideInitialSync({ localState, cloudRow, syncMeta, userId }) {
     if (!cloudRow) return "create-cloud";
-    if (stableStringify(stateForCloud(localState)) === stableStringify(stateForCloud(cloudRow.state))) return "use-cloud";
-    if (!hasMeaningfulState(localState)) return "use-cloud";
-    const sharesBaseRevision = isPlainObject(syncMeta)
-      && syncMeta.userId === userId
-      && syncMeta.revision === cloudRow.revision;
-    return sharesBaseRevision ? "push-local" : "conflict";
+    return "use-cloud";
   }
 
   function validateCloudRow(row) {

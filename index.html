@@ -6402,9 +6402,6 @@
             <span id="syncAccountMeta">云端数据已连接</span>
           </div>
         </div>
-        <div id="syncConflictView" hidden>
-          <p class="sync-conflict">这台设备和云端都有不同的新数据。请选择保留哪一份；另一份不会自动覆盖。</p>
-        </div>
         <p class="sync-error" id="syncDialogMessage" role="status" aria-live="polite"></p>
       </div>
       <footer class="dialog-footer" id="syncLoggedOutActions">
@@ -6414,10 +6411,6 @@
       <footer class="dialog-footer" id="syncLoggedInActions" hidden>
         <button class="btn ghost" id="syncSignOutBtn" type="button">退出登录</button>
         <button class="btn" id="syncNowBtn" type="button">立即同步</button>
-      </footer>
-      <footer class="dialog-footer" id="syncConflictActions" hidden>
-        <button class="btn secondary" id="useCloudStateBtn" type="button">使用云端</button>
-        <button class="btn" id="keepLocalStateBtn" type="button">保留本机</button>
       </footer>
     </form>
   </dialog>
@@ -6758,7 +6751,6 @@
       let syncDirty = false;
       let syncApplying = false;
       let syncTimer = 0;
-      let syncConflict = null;
       let timelineHeightObserver = null;
       const colorSchemeQuery = window.matchMedia("(prefers-color-scheme: dark)");
 
@@ -6951,13 +6943,10 @@
       function setSyncDialogView(view) {
         const loggedOut = view === "logged-out";
         const loggedIn = view === "logged-in";
-        const conflict = view === "conflict";
         $("#syncLoggedOutView").hidden = !loggedOut;
         $("#syncLoggedInView").hidden = !loggedIn;
-        $("#syncConflictView").hidden = !conflict;
         $("#syncLoggedOutActions").hidden = !loggedOut;
         $("#syncLoggedInActions").hidden = !loggedIn;
-        $("#syncConflictActions").hidden = !conflict;
       }
 
       function setSyncDialogMessage(message = "") {
@@ -6992,7 +6981,6 @@
       function markCloudRow(row) {
         syncRevision = row.revision;
         syncDirty = false;
-        syncConflict = null;
         writeSyncMeta(row);
         setSyncStatus("云端已同步", "saved");
         $("#syncAccountMeta").textContent = `云端版本 ${row.revision}`;
@@ -7012,33 +7000,6 @@
           syncApplying = false;
         }
         markCloudRow(row);
-      }
-
-      function mergeCloudRow(row) {
-        const localAppearance = state.appearance;
-        syncApplying = true;
-        try {
-          state = {
-            ...normalizeState(syncApi.mergeCloudStates(state, row.state)),
-            appearance: localAppearance
-          };
-          localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-          render();
-        } finally {
-          syncApplying = false;
-        }
-        syncRevision = row.revision;
-        syncDirty = true;
-      }
-
-      function showSyncConflict(row) {
-        syncConflict = row;
-        syncRevision = row.revision;
-        clearTimeout(syncTimer);
-        setSyncStatus("需要选择", "error");
-        if (!$("#syncDialog").open) openSyncDialog("conflict");
-        else setSyncDialogView("conflict");
-        setSyncDialogMessage("请选择保留本机数据，或使用云端数据。");
       }
 
       function handleSyncError(error) {
@@ -7062,7 +7023,7 @@
       }
 
       async function pushLocalState() {
-        if (!syncClient?.getSession() || !syncDirty || syncConflict) return;
+        if (!syncClient?.getSession() || !syncDirty) return;
         setSyncStatus("同步中", "syncing");
         try {
           let row;
@@ -7071,8 +7032,8 @@
           } else {
             const existing = await syncClient.fetchState();
             if (existing) {
-              mergeCloudRow(existing);
-              row = await syncClient.updateState(state, syncRevision);
+              applyCloudRow(existing);
+              return;
             } else {
               row = await syncClient.createState(state);
             }
@@ -7083,9 +7044,7 @@
             try {
               const latest = await syncClient.fetchState();
               if (latest) {
-                mergeCloudRow(latest);
-                row = await syncClient.updateState(state, syncRevision);
-                markCloudRow(row);
+                applyCloudRow(latest);
               } else {
                 syncRevision = 0;
                 markCloudRow(await syncClient.createState(state));
@@ -7117,19 +7076,12 @@
           applyCloudRow(cloudRow);
           return true;
         }
-        if (decision === "push-local") {
-          syncRevision = cloudRow.revision;
-          syncDirty = true;
-          await pushLocalState();
-          return !syncConflict;
-        }
-        mergeCloudRow(cloudRow);
-        await pushLocalState();
-        return !syncConflict;
+        applyCloudRow(cloudRow);
+        return true;
       }
 
       async function synchronizeNow() {
-        if (!syncClient?.getSession() || syncConflict) return;
+        if (!syncClient?.getSession()) return;
         setSyncStatus("同步中", "syncing");
         try {
           const cloudRow = await syncClient.fetchState();
@@ -7143,15 +7095,7 @@
             markCloudRow(cloudRow);
             return;
           }
-          if (cloudRow.revision > syncRevision) {
-            if (syncDirty) {
-              mergeCloudRow(cloudRow);
-              await pushLocalState();
-            } else applyCloudRow(cloudRow);
-            return;
-          }
-          syncDirty = true;
-          await pushLocalState();
+          applyCloudRow(cloudRow);
         } catch (error) {
           handleSyncError(error);
         }
@@ -10138,7 +10082,6 @@
         syncClient.signOut();
         syncRevision = 0;
         syncDirty = false;
-        syncConflict = null;
         setSyncStatus("仅本机", "offline");
         closeSyncDialog();
         showToast("已退出云端同步，本机数据仍然保留");
@@ -10150,30 +10093,7 @@
         setSyncDialogMessage("正在检查两台设备的数据……");
         await synchronizeNow();
         button.disabled = false;
-        if (!syncConflict) setSyncDialogMessage("云端数据已经是最新的。");
-      });
-
-      $("#useCloudStateBtn").addEventListener("click", () => {
-        if (!syncConflict) return;
-        applyCloudRow(syncConflict);
-        closeSyncDialog();
-        showToast("已使用云端数据");
-      });
-
-      $("#keepLocalStateBtn").addEventListener("click", async (event) => {
-        if (!syncConflict) return;
-        const button = event.currentTarget;
-        button.disabled = true;
-        const expectedRevision = syncConflict.revision;
-        syncConflict = null;
-        syncRevision = expectedRevision;
-        syncDirty = true;
-        await pushLocalState();
-        button.disabled = false;
-        if (!syncConflict) {
-          closeSyncDialog();
-          showToast("已保留本机数据并更新云端");
-        }
+        setSyncDialogMessage("已使用云端最新数据。");
       });
 
       document.querySelectorAll("[data-view]").forEach((link) => {
