@@ -6359,7 +6359,7 @@
           <div class="field"><label for="financePlanBudget0">吃喝</label><input id="financePlanBudget0" name="budget-0" type="number" min="0" step="1"></div>
           <div class="field"><label for="financePlanBudget1">购物 + 日用 + 快递</label><input id="financePlanBudget1" name="budget-1" type="number" min="0" step="1"></div>
           <div class="field"><label for="financePlanBudget2">交通 + 健康</label><input id="financePlanBudget2" name="budget-2" type="number" min="0" step="1"></div>
-          <div class="field"><label for="financePlanBudget3">会员 + 花费 + 其他</label><input id="financePlanBudget3" name="budget-3" type="number" min="0" step="1"></div>
+          <div class="field"><label for="financePlanBudget3">会员 + 话费 + 其他</label><input id="financePlanBudget3" name="budget-3" type="number" min="0" step="1"></div>
           <div class="field"><label for="financePlanBudget4">缓冲</label><input id="financePlanBudget4" name="budget-4" type="number" min="0" step="1"></div>
         </fieldset>
       </div>
@@ -6581,7 +6581,7 @@
               { name: "吃喝", amount: 500 },
               { name: "购物 + 日用 + 快递", amount: 450 },
               { name: "交通 + 健康", amount: 350 },
-              { name: "会员 + 花费 + 其他", amount: 100 },
+              { name: "会员 + 话费 + 其他", amount: 100 },
               { name: "缓冲", amount: 100 }
             ]
           },
@@ -8621,7 +8621,7 @@
             { name: "吃喝", amount: 500 },
             { name: "购物 + 日用 + 快递", amount: 450 },
             { name: "交通 + 健康", amount: 350 },
-            { name: "会员 + 花费 + 其他", amount: 100 },
+            { name: "会员 + 话费 + 其他", amount: 100 },
             { name: "缓冲", amount: 100 }
           ]
         };
@@ -8637,7 +8637,7 @@
           dailySpendingLimit: Number.isFinite(Number(value.dailySpendingLimit)) ? Number(value.dailySpendingLimit) : defaults.dailySpendingLimit,
           monthlyIncomeDays: Number.isFinite(Number(value.monthlyIncomeDays)) ? Number(value.monthlyIncomeDays) : defaults.monthlyIncomeDays,
           monthlyBudgets: budgets.map((item, index) => ({
-            name: String(item?.name || defaults.monthlyBudgets[index]?.name || "未分类"),
+            name: String(item?.name || defaults.monthlyBudgets[index]?.name || "未分类").replace("会员 + 花费 + 其他", "会员 + 话费 + 其他"),
             amount: Math.max(0, Number(item?.amount) || defaults.monthlyBudgets[index]?.amount || 0)
           }))
         };
@@ -8649,7 +8649,7 @@
           ["吃喝", ["餐饮", "吃喝", "吃饭", "咖啡", "外卖", "食品", "水果", "饮料"]],
           ["购物 + 日用 + 快递", ["购物", "日用", "快递", "服饰", "家居", "百货"]],
           ["交通 + 健康", ["交通", "地铁", "打车", "公交", "健康", "医疗", "医疗健康", "运动"]],
-          ["会员 + 花费 + 其他", ["会员", "服务", "娱乐", "学习", "通讯", "其他"]]
+          ["会员 + 话费 + 其他", ["会员", "服务", "娱乐", "学习", "通讯", "话费", "其他"]]
         ];
         const matched = rules.find(([, terms]) => terms.some((term) => text.includes(term)));
         const name = matched?.[0] || "未分类";
