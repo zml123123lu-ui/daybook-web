@@ -5857,7 +5857,7 @@
                 <span class="pill status-note" id="gratitudeStatus">自动保存</span>
               </header>
               <div class="panel-body">
-                <textarea id="gratitudeNote" placeholder="我感谢……"></textarea>
+                <textarea id="gratitudeNote" aria-label="感恩日记内容" placeholder="我感谢……"></textarea>
                 <div class="gratitude-actions">
                   <span class="save-caption" id="gratitudeSaveStatus" aria-live="polite">会按所选日期保存</span>
                   <button class="btn secondary small" id="saveGratitudeBtn" type="button">保存感恩日记</button>
@@ -5921,10 +5921,10 @@
                     <p class="muted">按周、月、年查看每个周期的打卡柱状图。</p>
                   </div>
                   <div class="habit-chart-controls">
-                    <div class="period-tabs" id="habitPeriodTabs" role="tablist" aria-label="习惯打卡周期">
-                      <button class="period-tab active" type="button" data-habit-period="week" role="tab">周</button>
-                      <button class="period-tab" type="button" data-habit-period="month" role="tab">月</button>
-                      <button class="period-tab" type="button" data-habit-period="year" role="tab">年</button>
+                    <div class="period-tabs" id="habitPeriodTabs" role="group" aria-label="习惯打卡周期">
+                      <button class="period-tab active" type="button" data-habit-period="week" aria-pressed="true">周</button>
+                      <button class="period-tab" type="button" data-habit-period="month" aria-pressed="false">月</button>
+                      <button class="period-tab" type="button" data-habit-period="year" aria-pressed="false">年</button>
                     </div>
                     <div class="habit-period-nav" aria-label="切换习惯打卡日期">
                       <button class="icon-btn" type="button" data-action="habit-prev" aria-label="查看上一周期" title="上一周期">‹</button>
@@ -5995,7 +5995,7 @@
                 <p class="muted">手动记一笔，或从现有记账软件导入。</p>
               </div>
               <div class="finance-heading-actions">
-                <input class="sr-only" id="financeFile" type="file" accept=".csv,.tsv,.json,text/csv,text/tab-separated-values,application/json">
+                <input class="sr-only" id="financeFile" type="file" aria-label="选择要导入的账单文件" accept=".csv,.tsv,.json,text/csv,text/tab-separated-values,application/json">
                 <button class="btn secondary small" id="financeRecordsButton" type="button">账单记录</button>
                 <button class="btn secondary small" id="financeImportButton" type="button">导入账单</button>
               </div>
@@ -6068,9 +6068,9 @@
                     <p class="finance-chart-note" id="financeChartNote">按本月支出记录统计，收入不计入图表。</p>
                   </div>
                   <div class="finance-chart-controls">
-                    <div class="period-tabs" role="tablist" aria-label="支出统计范围">
-                      <button class="period-tab active" type="button" data-finance-scope="month" role="tab" aria-selected="true">本月</button>
-                      <button class="period-tab" type="button" data-finance-scope="all" role="tab" aria-selected="false">全部支出</button>
+                    <div class="period-tabs" role="group" aria-label="支出统计范围">
+                      <button class="period-tab active" type="button" data-finance-scope="month" aria-pressed="true">本月</button>
+                      <button class="period-tab" type="button" data-finance-scope="all" aria-pressed="false">全部支出</button>
                     </div>
                     <div class="finance-month-nav" id="financeMonthNav" aria-label="切换账单月份">
                       <button class="icon-btn" type="button" data-action="finance-prev" aria-label="上一个月">‹</button>
@@ -6232,10 +6232,10 @@
                       <strong>阶段复盘</strong>
                       <p class="muted" id="periodLabel">本周</p>
                     </div>
-                    <div class="period-tabs" id="periodTabs" role="tablist" aria-label="复盘周期">
-                      <button class="period-tab active" type="button" data-period="week" role="tab">周</button>
-                      <button class="period-tab" type="button" data-period="month" role="tab">月</button>
-                      <button class="period-tab" type="button" data-period="year" role="tab">年</button>
+                    <div class="period-tabs" id="periodTabs" role="group" aria-label="复盘周期">
+                      <button class="period-tab active" type="button" data-period="week" aria-pressed="true">周</button>
+                      <button class="period-tab" type="button" data-period="month" aria-pressed="false">月</button>
+                      <button class="period-tab" type="button" data-period="year" aria-pressed="false">年</button>
                     </div>
                     <button class="btn small" id="generatePeriodAiBtn" type="button">AI 复盘本周期</button>
                   </div>
@@ -6727,6 +6727,7 @@
       }
 
       let state = loadState();
+      let lastSavedState = JSON.stringify(state);
       let activeDate = todayKey();
       let editorType = "";
       let schedulingTaskId = null;
@@ -6876,7 +6877,11 @@
 
       function saveState({ syncCloud = true } = {}) {
         try {
-          localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+          const serialized = JSON.stringify(state);
+          const changed = serialized !== lastSavedState;
+          if (!changed) return true;
+          localStorage.setItem(STORAGE_KEY, serialized);
+          lastSavedState = serialized;
           const status = $("#storageStatus");
           if (status) {
             status.textContent = "本机已保存";
@@ -6994,7 +6999,8 @@
             ...normalizeState(row.state),
             appearance: localAppearance
           };
-          localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+          lastSavedState = JSON.stringify(state);
+          localStorage.setItem(STORAGE_KEY, lastSavedState);
           render();
         } finally {
           syncApplying = false;
@@ -7081,27 +7087,29 @@
       }
 
       async function synchronizeNow() {
-        if (!syncClient?.getSession()) return;
+        if (!syncClient?.getSession()) return false;
         setSyncStatus("同步中", "syncing");
         try {
           const cloudRow = await syncClient.fetchState();
           if (!cloudRow) {
             markCloudRow(await syncClient.createState(state));
-            return;
+            return true;
           }
           const sameState = syncApi.stableStringify(syncApi.stateForCloud(state))
             === syncApi.stableStringify(syncApi.stateForCloud(cloudRow.state));
           if (sameState) {
             markCloudRow(cloudRow);
-            return;
+            return true;
           }
           if (syncDirty && cloudRow.revision === syncRevision) {
             await pushLocalState();
-            return;
+            return true;
           }
           applyCloudRow(cloudRow);
+          return true;
         } catch (error) {
           handleSyncError(error);
+          return false;
         }
       }
 
@@ -7679,7 +7687,7 @@
       function renderPeriodReview() {
         document.querySelectorAll("[data-period]").forEach((tab) => {
           tab.classList.toggle("active", tab.dataset.period === reviewPeriod);
-          tab.setAttribute("aria-selected", String(tab.dataset.period === reviewPeriod));
+          tab.setAttribute("aria-pressed", String(tab.dataset.period === reviewPeriod));
         });
         const context = periodSummaryContext();
         const { dates, start, end } = context;
@@ -8404,7 +8412,7 @@
         document.querySelectorAll("[data-habit-period]").forEach((tab) => {
           const active = tab.dataset.habitPeriod === habitPeriod;
           tab.classList.toggle("active", active);
-          tab.setAttribute("aria-selected", String(active));
+          tab.setAttribute("aria-pressed", String(active));
         });
         const today = new Date();
         const currentStart = habitChartPeriodStart(habitPeriod, today).getTime();
@@ -8805,6 +8813,7 @@
         if (!confirm("确定清除全部账单记录吗？此操作不会影响财务计划。")) return;
         state.financeRecords = [];
         state.lastImport = null;
+        saveState();
         render();
         renderFinanceRecords();
         showToast("账单数据已清除");
@@ -8823,7 +8832,7 @@
         document.querySelectorAll("[data-finance-scope]").forEach((tab) => {
           const active = tab.dataset.financeScope === financeChartScope;
           tab.classList.toggle("active", active);
-          tab.setAttribute("aria-selected", String(active));
+          tab.setAttribute("aria-pressed", String(active));
         });
         if (!totals.length) {
           chart.innerHTML = `<div class="empty" role="status">${financeChartScope === "month" ? `${escapeHtml(monthLabel)}还没有支出记录。` : "导入账单后，这里会按支出分类生成饼状图。"}</div>`;
@@ -8874,7 +8883,9 @@
           ? `${state.lastImport.file} · 新增 ${state.lastImport.added} · 覆盖 ${state.lastImport.overwritten}`
           : "尚未导入";
         $("#financeSyncNote").textContent = state.financeRecords.length
-          ? `最近一次同步：${state.lastImport?.at ? new Date(state.lastImport.at).toLocaleString("zh-CN") : "已有历史记录"}。重复导入会覆盖相同记录。`
+          ? (state.lastImport?.at
+            ? `最近一次导入：${new Date(state.lastImport.at).toLocaleString("zh-CN")}。重复导入会覆盖相同记录。`
+            : "账单已保存在工作台；云端状态请看页面顶部。")
           : "这里只保留摘要，账单明细请回到原记账软件查看。";
         renderFinanceCategoryChart();
         renderFinanceRecords();
@@ -9644,7 +9655,8 @@
           }
           if (editorType === "block") {
             const start = String(form.get("start"));
-            const end = String(form.get("end") || addMinutes(start, 60));
+            const requestedEnd = String(form.get("end") || addMinutes(start, 60));
+            const end = requestedEnd === start ? addMinutes(start, 60) : requestedEnd;
             const duration = Math.max(60, blockDurationMinutes({ start, end }));
             const block = editingBlockId ? state.timeBlocks.find((item) => item.id === editingBlockId) : null;
             const nextBlock = {
@@ -10116,7 +10128,7 @@
       $("#clearBtn").addEventListener("click", () => {
         if (!confirm("确定清空工作台中的全部数据吗？")) return;
         state = emptyState();
-        localStorage.removeItem(STORAGE_KEY);
+        saveState();
         render();
         showToast("数据已清空");
       });
@@ -10191,9 +10203,9 @@
         const button = event.currentTarget;
         button.disabled = true;
         setSyncDialogMessage("正在检查两台设备的数据……");
-        await synchronizeNow();
+        const synced = await synchronizeNow();
         button.disabled = false;
-        setSyncDialogMessage("已使用云端最新数据。");
+        if (synced) setSyncDialogMessage("已使用云端最新数据。");
       });
 
       document.querySelectorAll("[data-view]").forEach((link) => {
