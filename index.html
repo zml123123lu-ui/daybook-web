@@ -8118,22 +8118,48 @@
 
         if (pendingNames.length) {
           advice.push(`明天先给“${pendingNames[0]}”留一个明确时间块；只决定开始的 20 分钟，不要求一次做完。`);
-        } else if (context.tasks.length) {
-          advice.push("今天的计划已经收束得不错，明天只保留一件真正重要的推进，避免又把空白填满。");
         }
-        if (context.wellbeing && Number(context.wellbeing.energy) <= 2) {
-          advice.push("精力偏低时，把需要专注的事情放在相对清醒的时段，其余时间允许自己做轻量事项或休息。");
-        } else if (!context.blocks.length) {
-          advice.push("明天可以先给最重要的一件事留出一个时间块，让计划从文字变成可执行的安排。");
-        } else {
-          advice.push("保留时间块之间的缓冲；今天已有安排时，明天不必再靠加满日程来证明自己在推进。");
+        if (context.wellbeing?.nextStep) {
+          advice.push(`你已经写下下一步“${context.wellbeing.nextStep}”，明天先把它安排到具体时段，完成这一件就算有效推进。`);
         }
-        if (context.wellbeing?.drain) advice.push(`对于“${context.wellbeing.drain}”带来的消耗，明天试着提前设一个停止点或更小的完成标准。`);
-        else if (!context.gratitude) advice.push("睡前记下一件具体的小事，明天回看时会更容易看见真实的进展。 ");
+        if (context.wellbeing && Number(context.wellbeing.sleep) > 0 && Number(context.wellbeing.sleep) < 7) {
+          advice.push(`今天睡眠约 ${context.wellbeing.sleep} 小时，明天优先守住休息时间；需要专注的事尽量放在精力较好的时段。`);
+        } else if (context.wellbeing && Number(context.wellbeing.energy) <= 2) {
+          advice.push(`今天精力是 ${context.wellbeing.energy}/5，明天把任务拆小，并主动留一段不安排事项的恢复时间。`);
+        }
+        if (context.wellbeing?.drain) {
+          advice.push(`对于今天最消耗的“${context.wellbeing.drain}”，明天提前设一个停止点，或把完成标准缩小到可承受的程度。`);
+        }
+
+        const durations = categoryDurationsForBlocks(context.blocks);
+        const dominant = durations[0];
+        const dominantBlocks = dominant
+          ? context.blocks.filter((block) => (block.category || "生活") === dominant.category).slice(0, 2).map((block) => block.title)
+          : [];
+        if (dominant?.category === "娱乐" && dominant.minutes >= 240) {
+          advice.push(`娱乐占用较多时间${dominantBlocks.length ? `，主要是${dominantBlocks.join("、")}` : ""}；明天可以先决定结束时间，再开始娱乐。`);
+        } else if (dominant?.category === "工作" && dominant.minutes >= 480) {
+          advice.push(`工作时间较长${dominantBlocks.length ? `，集中在${dominantBlocks.join("、")}` : ""}；明天至少保留一段明确的下班后恢复时间。`);
+        } else if (!context.blocks.length && (pendingNames.length || context.tasks.length)) {
+          advice.push(`明天给“${pendingNames[0] || context.tasks[0].title}”放进时间轴，先预留一个能真正开始的时段。`);
+        }
+
+        if (context.mealRecord) {
+          const missingMeals = [
+            ["早餐", context.mealRecord.breakfast],
+            ["午餐", context.mealRecord.lunch],
+            ["晚餐", context.mealRecord.dinner]
+          ].filter(([, value]) => !String(value || "").trim()).map(([label]) => label);
+          if (missingMeals.length) advice.push(`今天没有记录${missingMeals.join("、")}；明天先保证其中一餐有主食、蛋白质和蔬菜，不必追求一次调整完美。`);
+        }
+        if (!advice.length && habitNames.length) {
+          advice.push(`今天完成了${habitNames.join("、")}，明天优先延续其中最容易开始的一项，让连续性比数量更重要。`);
+        }
+        if (!advice.length) advice.push(`明天围绕“${focus}”只安排一个最小行动，并在当天结束前确认它是否真的推进。`);
 
         const lines = [
           observations.join(" "),
-          ...advice.slice(0, 3).map((item, index) => `建议 ${index + 1}：${item}`)
+          ...advice.slice(0, 4).map((item, index) => `建议 ${index + 1}：${item}`)
         ].filter(Boolean);
         return lines.join("\n\n");
       }
