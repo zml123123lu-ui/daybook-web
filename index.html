@@ -1305,8 +1305,7 @@
     }
 
     .meal-section-header,
-    .meal-actions,
-    .meal-nutrition-header {
+    .meal-actions {
       display: flex;
       align-items: center;
       justify-content: space-between;
@@ -1314,8 +1313,7 @@
       flex-wrap: wrap;
     }
 
-    .meal-section-header h3,
-    .meal-nutrition-header h4 {
+    .meal-section-header h3 {
       margin: 0;
       font-family: var(--serif);
     }
@@ -1342,79 +1340,6 @@
     .meal-grid textarea {
       min-height: 6rem;
       resize: vertical;
-    }
-
-    .meal-action-buttons {
-      display: flex;
-      align-items: center;
-      justify-content: flex-end;
-      gap: 0.45rem;
-      flex-wrap: wrap;
-    }
-
-    .meal-nutrition-card {
-      display: grid;
-      gap: 0.75rem;
-      padding: 0.9rem;
-      border: 1px solid #e2d6d3;
-      border-radius: var(--radius);
-      background: rgba(255, 253, 252, 0.65);
-    }
-
-    .meal-nutrition-card.empty .nutrition-grid,
-    .meal-nutrition-card.empty .nutrition-summary,
-    .meal-nutrition-card.empty .nutrition-disclaimer {
-      display: none;
-    }
-
-    .nutrition-mode {
-      color: var(--muted);
-      font-size: 0.72rem;
-    }
-
-    .nutrition-grid {
-      display: grid;
-      grid-template-columns: repeat(5, minmax(0, 1fr));
-      gap: 0.5rem;
-    }
-
-    .nutrition-stat {
-      padding: 0.65rem;
-      border-left: 3px solid var(--nutrition-color, #8a5f87);
-      background: color-mix(in srgb, var(--nutrition-color, #8a5f87) 11%, var(--surface));
-    }
-
-    .nutrition-stat[data-nutrient="calories"] { --nutrition-color: #b26345; }
-    .nutrition-stat[data-nutrient="protein"] { --nutrition-color: #3f7f74; }
-    .nutrition-stat[data-nutrient="carbs"] { --nutrition-color: #4d7096; }
-    .nutrition-stat[data-nutrient="fat"] { --nutrition-color: #8a5f87; }
-    .nutrition-stat[data-nutrient="fiber"] { --nutrition-color: #728547; }
-
-    .nutrition-stat span,
-    .nutrition-stat small {
-      display: block;
-      color: var(--muted);
-      font-size: 0.7rem;
-    }
-
-    .nutrition-stat strong {
-      display: block;
-      margin: 0.18rem 0 0.05rem;
-      color: color-mix(in srgb, var(--nutrition-color, #8a5f87) 72%, var(--ink));
-      font-family: var(--serif);
-      font-size: 1.05rem;
-    }
-
-    .nutrition-summary {
-      margin: 0;
-      line-height: 1.75;
-      white-space: pre-wrap;
-    }
-
-    .nutrition-disclaimer {
-      margin: 0;
-      color: var(--muted);
-      font-size: 0.7rem;
     }
 
     .habit-item {
@@ -2510,8 +2435,7 @@
         grid-template-columns: 1fr;
       }
 
-      .meal-grid,
-      .nutrition-grid {
+      .meal-grid {
         grid-template-columns: 1fr;
       }
 
@@ -4645,31 +4569,6 @@
         background: #262122;
       }
 
-      .meal-nutrition-card {
-        border-color: var(--line);
-        background: #262122;
-      }
-
-      .nutrition-stat {
-        border-color: var(--nutrition-color);
-        background: color-mix(in srgb, var(--nutrition-color) 17%, #262122);
-      }
-
-      .nutrition-stat[data-nutrient="calories"] { --nutrition-color: #d58b6f; }
-      .nutrition-stat[data-nutrient="protein"] { --nutrition-color: #76b8aa; }
-      .nutrition-stat[data-nutrient="carbs"] { --nutrition-color: #7fa5cc; }
-      .nutrition-stat[data-nutrient="fat"] { --nutrition-color: #c18caf; }
-      .nutrition-stat[data-nutrient="fiber"] { --nutrition-color: #a5b875; }
-
-      .nutrition-summary {
-        color: #ded4d6;
-      }
-
-      .nutrition-mode,
-      .nutrition-disclaimer {
-        color: #a99da0;
-      }
-
       .task.done {
         background: #202321;
       }
@@ -5522,20 +5421,6 @@
       font-size: 0.74rem;
     }
 
-    .meal-entry-heading {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 0.5rem;
-    }
-
-    .meal-entry-heading select {
-      width: auto;
-      min-height: 1.8rem;
-      padding: 0.25rem 1.8rem 0.25rem 0.55rem;
-      font-size: 0.72rem;
-    }
-
     .summary-time-distribution {
       display: grid;
       gap: 0.55rem;
@@ -6115,33 +6000,21 @@
                 <header class="meal-section-header">
                   <div>
                     <h3 id="mealSectionTitle">一日三餐</h3>
-                    <p class="muted">记录实际吃过的内容，再生成大致营养估算。</p>
+                    <p class="muted">按日期记录早餐、午餐和晚餐，之后可以在复盘中查看。</p>
                   </div>
                 </header>
                 <form id="mealForm">
                   <div class="field meal-date-field"><label for="mealDate">记录日期</label><input id="mealDate" name="date" type="date" required></div>
                   <div class="meal-grid">
-                    <div class="field meal-entry"><div class="meal-entry-heading"><label for="mealBreakfast">早餐</label><select id="mealBreakfastPortion" aria-label="早餐份量"><option value="0.75">小份</option><option value="1" selected>标准</option><option value="1.25">大份</option></select></div><textarea id="mealBreakfast" name="breakfast" placeholder="例如：鸡蛋2个、牛奶250毫升、全麦面包2片"></textarea></div>
-                    <div class="field meal-entry"><div class="meal-entry-heading"><label for="mealLunch">午餐</label><select id="mealLunchPortion" aria-label="午餐份量"><option value="0.75">小份</option><option value="1" selected>标准</option><option value="1.25">大份</option></select></div><textarea id="mealLunch" name="lunch" placeholder="例如：米饭半碗、鸡胸肉120克、青菜一份"></textarea></div>
-                    <div class="field meal-entry"><div class="meal-entry-heading"><label for="mealDinner">晚餐</label><select id="mealDinnerPortion" aria-label="晚餐份量"><option value="0.75">小份</option><option value="1" selected>标准</option><option value="1.25">大份</option></select></div><textarea id="mealDinner" name="dinner" placeholder="尽量写克数、个数、碗数或杯数，估算会更接近实际"></textarea></div>
+                    <div class="field meal-entry"><label for="mealBreakfast">早餐</label><textarea id="mealBreakfast" name="breakfast" placeholder="例如：鸡蛋、牛奶和面包"></textarea></div>
+                    <div class="field meal-entry"><label for="mealLunch">午餐</label><textarea id="mealLunch" name="lunch" placeholder="例如：牛肉盖饭和青菜"></textarea></div>
+                    <div class="field meal-entry"><label for="mealDinner">晚餐</label><textarea id="mealDinner" name="dinner" placeholder="写下晚餐吃了什么"></textarea></div>
                   </div>
                   <div class="meal-actions">
                     <span class="save-caption" id="mealSaveStatus" aria-live="polite">记录会保存在本机</span>
-                    <div class="meal-action-buttons">
-                      <button class="btn secondary small" type="submit">保存餐饮记录</button>
-                      <button class="btn small" id="estimateMealNutritionBtn" type="button">AI 估算营养</button>
-                    </div>
+                    <button class="btn secondary small" type="submit">保存餐饮记录</button>
                   </div>
                 </form>
-                <section class="meal-nutrition-card empty" id="mealNutritionCard" aria-labelledby="mealNutritionTitle">
-                  <header class="meal-nutrition-header">
-                    <h4 id="mealNutritionTitle">营养估算</h4>
-                    <span class="nutrition-mode" id="mealNutritionMode">等待三餐记录</span>
-                  </header>
-                  <div class="nutrition-grid" id="mealNutritionGrid"></div>
-                  <p class="nutrition-summary" id="mealNutritionSummary"></p>
-                  <p class="nutrition-disclaimer">仅为粗略估算，请尽量填写份量。未识别的内容不会计入总量；烹饪用油、调味料和品牌差异仍可能带来误差，不替代医生或营养师建议。</p>
-                </section>
               </section>
             </div>
           </section>
@@ -7546,7 +7419,7 @@
             `分类用时：${categoryDurationText(blocks)}`,
             `习惯打卡：${habitCompletions.join("；") || "无"}`,
             `身心记录：${wellbeingEntries.map((entry) => `${entry.date} 心情${entry.mood}/5 精力${entry.energy}/5 睡眠${entry.sleep || "-"}小时 身体${entry.body || "无"} 开心${entry.highlight || "无"} 消耗${entry.drain || "无"}`).join("\n") || "无"}`,
-            `餐饮记录：${mealEntries.map((entry) => `${entry.date} 早餐${entry.breakfast || "无"} 午餐${entry.lunch || "无"} 晚餐${entry.dinner || "无"}${entry.nutrition ? ` 估算热量${entry.nutrition.calories}千卡 蛋白质${entry.nutrition.protein}克` : ""}`).join("\n") || "无"}`,
+            `餐饮记录：${mealEntries.map((entry) => `${entry.date} 早餐${entry.breakfast || "无"} 午餐${entry.lunch || "无"} 晚餐${entry.dinner || "无"}`).join("\n") || "无"}`,
             `每日记录：${notes.join("\n") || "无"}`,
             `感恩日记：${gratitudeEntries.join("\n") || "无"}`,
             `写给自己的信：${thoughtEntries.join("\n") || "无"}`
@@ -7608,8 +7481,7 @@
           const mealLines = [
             meals.breakfast && `早餐：${meals.breakfast}`,
             meals.lunch && `午餐：${meals.lunch}`,
-            meals.dinner && `晚餐：${meals.dinner}`,
-            meals.nutrition && `营养估算：${meals.nutrition.calories} 千卡，蛋白质 ${meals.nutrition.protein} 克`
+            meals.dinner && `晚餐：${meals.dinner}`
           ].filter(Boolean);
           details.push(`<div class="review-detail"><strong>一日三餐</strong><span>${escapeHtml(mealLines.join("\n"))}</span></div>`);
         }
@@ -8083,7 +7955,7 @@
             `分类用时：${categoryDurationText(blocks)}`,
             `完成习惯：${completedHabits.map((habit) => habit.title).join("；") || "无"}`,
             `身心状态：${wellbeing ? `心情${wellbeing.mood}/5，精力${wellbeing.energy}/5，睡眠${wellbeing.sleep || "-"}小时，身体${wellbeing.body || "无"}，开心${wellbeing.highlight || "无"}，消耗${wellbeing.drain || "无"}，下一步${wellbeing.nextStep || "无"}` : "未记录"}`,
-            `三餐：${mealRecord ? `早餐${mealRecord.breakfast || "无"}；午餐${mealRecord.lunch || "无"}；晚餐${mealRecord.dinner || "无"}${mealRecord.nutrition ? `；估算热量${mealRecord.nutrition.calories}千卡，蛋白质${mealRecord.nutrition.protein}克` : ""}` : "未记录"}`,
+            `三餐：${mealRecord ? `早餐${mealRecord.breakfast || "无"}；午餐${mealRecord.lunch || "无"}；晚餐${mealRecord.dinner || "无"}` : "未记录"}`,
             `感恩日记：${gratitude || "未记录"}`,
             `当天笔记：${notes || "未记录"}`,
             `写给自己的信：${thoughts.map((thought) => `${thought.title}：${thought.excerpt}`).join("；") || "未记录"}`
@@ -8129,7 +8001,7 @@
         }
         if (context.mealRecord) {
           const meals = [context.mealRecord.breakfast, context.mealRecord.lunch, context.mealRecord.dinner].filter(Boolean).length;
-          observations.push(`今天记录了 ${meals} 餐${context.mealRecord.nutrition ? `，估算约 ${context.mealRecord.nutrition.calories} 千卡` : ""}。`);
+          observations.push(`今天记录了 ${meals} 餐。`);
         }
         if (context.gratitude) observations.push(`感恩日记里留下了“${context.gratitude.slice(0, 42)}${context.gratitude.length > 42 ? "…" : ""}”。`);
         if (context.notes) observations.push(`当天笔记里记下了“${context.notes.slice(0, 42)}${context.notes.length > 42 ? "…" : ""}”。`);
@@ -8946,196 +8818,6 @@
 
       }
 
-      const MEAL_NUTRIENTS = [
-        { terms: ["番茄意面"], base: 400, units: { 盘: 1, 份: 1 }, calories: 560, protein: 18, carbs: 85, fat: 16, fiber: 6 },
-        { terms: ["菠萝虾仁焗饭", "虾仁焗饭", "海鲜焗饭"], base: 1, units: { 份: 1, 碗: 1, 盘: 1 }, calories: 780, protein: 28, carbs: 100, fat: 28, fiber: 4, composite: true },
-        { terms: ["焗饭"], base: 1, units: { 份: 1, 碗: 1, 盘: 1 }, calories: 700, protein: 22, carbs: 90, fat: 25, fiber: 3, composite: true },
-        { terms: ["牛肉盖浇饭", "牛肉盖饭", "牛肉饭"], base: 450, units: { 份: 1, 碗: 1 }, calories: 720, protein: 28, carbs: 88, fat: 28, fiber: 4 },
-        { terms: ["盖浇饭", "盖饭", "焖饭", "拌饭", "煲仔饭", "咖喱饭"], base: 450, units: { 份: 1, 碗: 1 }, calories: 650, protein: 22, carbs: 85, fat: 23, fiber: 5, skipWhenDetailed: true, composite: true },
-        { terms: ["饭"], base: 450, units: { 份: 1, 碗: 1 }, calories: 620, protein: 23, carbs: 85, fat: 20, fiber: 4, composite: true, requiresPrefix: true },
-        { terms: ["炒饭"], base: 400, units: { 份: 1, 碗: 1, 盘: 1 }, calories: 620, protein: 16, carbs: 92, fat: 20, fiber: 3, composite: true },
-        { terms: ["炒面", "拌面", "汤面", "炒米粉", "炒粉", "米线", "米粉", "河粉"], base: 400, units: { 份: 1, 碗: 1, 盘: 1 }, calories: 580, protein: 17, carbs: 82, fat: 19, fiber: 3, composite: true },
-        { terms: ["面"], base: 400, units: { 份: 1, 碗: 1 }, calories: 550, protein: 24, carbs: 76, fat: 17, fiber: 3, composite: true, requiresPrefix: true },
-        { terms: ["牛肉面", "牛肉粉", "牛肉米线"], base: 450, units: { 份: 1, 碗: 1 }, calories: 600, protein: 30, carbs: 75, fat: 18, fiber: 3 },
-        { terms: ["鲜虾云吞", "鲜肉云吞", "云吞", "馄饨", "抄手"], base: 1, units: { 个: 1, 只: 1, 碗: 12, 份: 12 }, calories: 38, protein: 2, carbs: 5, fat: 1.1, fiber: 0.3 },
-        { terms: ["卤鸡蛋", "水煮蛋", "荷包蛋", "煎蛋", "鸡蛋"], base: 50, units: { 个: 1, 只: 1, 枚: 1 }, calories: 72, protein: 6.3, carbs: 0.4, fat: 4.8, fiber: 0 },
-        { terms: ["鲜奶", "牛奶"], base: 250, measure: "ml", units: { 杯: 1 }, calories: 150, protein: 8, carbs: 12, fat: 8, fiber: 0 },
-        { terms: ["酸奶", "优格"], base: 150, units: { 杯: 1 }, calories: 120, protein: 5.5, carbs: 17, fat: 3.5, fiber: 0 },
-        { terms: ["蒜香面包", "蒜蓉面包"], base: 1, units: { 片: 1, 个: 1, 份: 1 }, calories: 170, protein: 4, carbs: 22, fat: 7, fiber: 1.2 },
-        { terms: ["全麦面包", "吐司", "面包"], base: 60, units: { 片: 0.5 }, calories: 160, protein: 7, carbs: 28, fat: 2.5, fiber: 4 },
-        { terms: ["燕麦", "麦片"], base: 40, units: { 碗: 1 }, calories: 152, protein: 5.2, carbs: 27, fat: 2.8, fiber: 4 },
-        { terms: ["米饭", "白饭", "饭"], base: 150, units: { 碗: 1, 份: 1 }, calories: 174, protein: 3.9, carbs: 38.9, fat: 0.5, fiber: 0.5 },
-        { terms: ["稀饭", "白粥", "粥"], base: 300, units: { 碗: 1 }, calories: 138, protein: 3.3, carbs: 29.7, fat: 0.9, fiber: 0.9 },
-        { terms: ["粥"], base: 300, units: { 碗: 1 }, calories: 260, protein: 12, carbs: 42, fat: 5, fiber: 1.5, composite: true, requiresPrefix: true },
-        { terms: ["意面", "面条"], base: 250, units: { 碗: 1 }, calories: 345, protein: 11.3, carbs: 62.5, fat: 5.3, fiber: 3 },
-        { terms: ["鸡胸肉", "鸡腿肉", "鸡肉", "鸡腿"], base: 100, units: { 份: 1 }, calories: 165, protein: 31, carbs: 0, fat: 3.6, fiber: 0 },
-        { terms: ["牛肉"], base: 100, units: { 份: 1 }, calories: 250, protein: 26, carbs: 0, fat: 15, fiber: 0 },
-        { terms: ["北京烤鸭", "烤鸭"], base: 1, units: { 份: 1, 只: 2 }, calories: 760, protein: 42, carbs: 32, fat: 50, fiber: 1, composite: true },
-        { terms: ["排骨", "猪肉"], base: 100, units: { 份: 1 }, calories: 242, protein: 27, carbs: 0, fat: 14, fiber: 0 },
-        { terms: ["红烧肉", "卤肉"], base: 100, units: { 份: 1 }, calories: 300, protein: 18, carbs: 6, fat: 23, fiber: 0 },
-        { terms: ["卤香肠", "腊肠", "香肠"], base: 60, units: { 根: 1, 份: 1 }, calories: 180, protein: 8, carbs: 5, fat: 14, fiber: 0 },
-        { terms: ["三文鱼", "鲑鱼"], base: 100, units: { 份: 1 }, calories: 208, protein: 20, carbs: 0, fat: 13, fiber: 0 },
-        { terms: ["鳕鱼", "鱼肉", "鱼"], base: 100, units: { 份: 1 }, calories: 120, protein: 22, carbs: 0, fat: 3, fiber: 0 },
-        { terms: ["虾仁", "虾"], base: 100, units: { 份: 1 }, calories: 99, protein: 24, carbs: 0.2, fat: 0.3, fiber: 0 },
-        { terms: ["豆腐", "豆干", "豆制品"], base: 150, units: { 份: 1 }, calories: 120, protein: 12, carbs: 4, fat: 7, fiber: 2 },
-        { terms: ["青菜", "蔬菜", "生菜", "菠菜", "白菜"], base: 150, units: { 份: 1, 碗: 1 }, calories: 45, protein: 3, carbs: 7.5, fat: 0.8, fiber: 3.5 },
-        { terms: ["西兰花", "花椰菜"], base: 150, units: { 份: 1, 碗: 1 }, calories: 52, protein: 4.2, carbs: 10.5, fat: 0.6, fiber: 5 },
-        { terms: ["土豆丝", "马铃薯", "土豆"], base: 100, units: { 份: 1 }, calories: 100, protein: 2, carbs: 17, fat: 3, fiber: 1.5 },
-        { terms: ["苹果"], base: 180, units: { 个: 1 }, calories: 95, protein: 0.5, carbs: 25, fat: 0.3, fiber: 4.4 },
-        { terms: ["梨"], base: 180, units: { 个: 1 }, calories: 102, protein: 0.6, carbs: 27, fat: 0.2, fiber: 5.5 },
-        { terms: ["橙子", "橘子"], base: 150, units: { 个: 1 }, calories: 71, protein: 1.4, carbs: 18, fat: 0.2, fiber: 3.6 },
-        { terms: ["香蕉"], base: 118, units: { 根: 1, 个: 1 }, calories: 105, protein: 1.3, carbs: 27, fat: 0.4, fiber: 3.1 },
-        { terms: ["坚果", "杏仁", "核桃", "花生"], base: 30, units: { 把: 1, 份: 1 }, calories: 180, protein: 6, carbs: 6, fat: 16, fiber: 3 },
-        { terms: ["豆浆"], base: 250, measure: "ml", units: { 杯: 1 }, calories: 83, protein: 7, carbs: 4, fat: 4, fiber: 1.5 },
-        { terms: ["奶茶"], base: 500, measure: "ml", units: { 杯: 1 }, calories: 350, protein: 3, carbs: 58, fat: 12, fiber: 0 },
-        { terms: ["焦糖玛奇朵", "玛奇朵"], base: 350, measure: "ml", units: { 杯: 1 }, calories: 260, protein: 8, carbs: 32, fat: 11, fiber: 0 },
-        { terms: ["拿铁咖啡", "咖啡拿铁", "拿铁"], base: 350, measure: "ml", units: { 杯: 1 }, calories: 190, protein: 10, carbs: 18, fat: 8, fiber: 0 },
-        { terms: ["卡布奇诺"], base: 300, measure: "ml", units: { 杯: 1 }, calories: 130, protein: 6, carbs: 10, fat: 6, fiber: 0 },
-        { terms: ["摩卡咖啡", "咖啡摩卡", "摩卡"], base: 350, measure: "ml", units: { 杯: 1 }, calories: 300, protein: 9, carbs: 38, fat: 12, fiber: 0 },
-        { terms: ["美式咖啡", "美式", "黑咖啡", "冷萃咖啡", "冷萃"], base: 350, measure: "ml", units: { 杯: 1, 瓶: 1 }, calories: 10, protein: 0, carbs: 2, fat: 0, fiber: 0 },
-        { terms: ["咖啡"], base: 350, measure: "ml", units: { 杯: 1 }, calories: 50, protein: 2, carbs: 6, fat: 2, fiber: 0 },
-        { terms: ["双层脆鸡堡", "双层鸡肉堡", "双层鸡腿堡"], base: 1, units: { 个: 1, 份: 1 }, calories: 690, protein: 30, carbs: 55, fat: 39, fiber: 3 },
-        { terms: ["脆鸡堡", "鸡肉堡", "鸡腿堡", "炸鸡汉堡"], base: 1, units: { 个: 1, 份: 1 }, calories: 510, protein: 22, carbs: 48, fat: 26, fiber: 2 },
-        { terms: ["汉堡包", "汉堡"], base: 1, units: { 个: 1, 份: 1 }, calories: 480, protein: 20, carbs: 45, fat: 24, fiber: 2 },
-        { terms: ["甜辣鸡块", "上校鸡块", "麦乐鸡", "鸡块"], base: 1, units: { 个: 1, 块: 1, 份: 6, 盒: 6 }, calories: 50, protein: 2.8, carbs: 3.2, fat: 3, fiber: 0.1 },
-        { terms: ["甜玉米杯", "玉米杯", "玉米粒"], base: 1, units: { 个: 1, 杯: 1, 份: 1 }, calories: 120, protein: 4, carbs: 26, fat: 1.5, fiber: 3 },
-        { terms: ["薯条"], base: 120, units: { 份: 1, 盒: 1 }, calories: 365, protein: 4, carbs: 48, fat: 17, fiber: 4 },
-        { terms: ["含糖饮料", "可乐"], base: 500, measure: "ml", units: { 瓶: 1, 杯: 0.5 }, calories: 210, protein: 0, carbs: 53, fat: 0, fiber: 0 }
-      ];
-      const NUTRITION_ESTIMATOR_VERSION = 14;
-
-      function parseMealAmount(raw) {
-        const value = String(raw || "").trim();
-        if (!value) return NaN;
-        if (value === "半") return 0.5;
-        const numeric = Number.parseFloat(value);
-        if (Number.isFinite(numeric)) return numeric;
-        const digits = { 零: 0, 一: 1, 二: 2, 两: 2, 三: 3, 四: 4, 五: 5, 六: 6, 七: 7, 八: 8, 九: 9 };
-        if (value === "十") return 10;
-        if (value.includes("十")) {
-          const [tens, ones] = value.split("十");
-          return (tens ? digits[tens] : 1) * 10 + (ones ? digits[ones] : 0);
-        }
-        return digits[value] ?? NaN;
-      }
-
-      function mealQuantityForMatch(text, match, food) {
-        const amountPattern = "(半|[一二两三四五六七八九十]+|\\d+(?:\\.\\d+)?)";
-        const unitPattern = "(千克|公斤|kg|KG|克|g|G|毫升|ml|ML|个|只|枚|碗|杯|盘|片|份|根|把|瓶|块|盒)?";
-        const before = text.slice(Math.max(0, match.start - 14), match.start);
-        const after = text.slice(match.end, match.end + 14);
-        const qualitativeAmounts = { "一点点": 0.25, "少量": 0.3, "小份": 0.65, "小碗": 0.65, "小杯": 0.65 };
-        const beforeQualitative = before.match(/(一点点|少量|小份|小碗|小杯)\s*$/);
-        const afterQualitative = after.match(/^\s*(一点点|少量|小份|小碗|小杯)/);
-        const qualitative = beforeQualitative || afterQualitative;
-        if (qualitative) return { multiplier: qualitativeAmounts[qualitative[1]], explicit: true };
-        const beforeMatch = before.match(new RegExp(`${amountPattern}\\s*${unitPattern}\\s*$`));
-        const afterMatch = after.match(new RegExp(`^\\s*${amountPattern}\\s*${unitPattern}`));
-        const quantity = beforeMatch || afterMatch;
-        if (!quantity) return { multiplier: 1, explicit: false };
-        const amount = parseMealAmount(quantity[1]);
-        const unit = quantity[2] || "份";
-        if (!Number.isFinite(amount) || amount <= 0) return { multiplier: 1, explicit: false };
-        if (["克", "g", "G"].includes(unit)) return { multiplier: amount / food.base, explicit: true };
-        if (["千克", "公斤", "kg", "KG"].includes(unit)) return { multiplier: amount * 1000 / food.base, explicit: true };
-        if (["毫升", "ml", "ML"].includes(unit)) return { multiplier: amount / food.base, explicit: true };
-        return { multiplier: amount * (food.units?.[unit] ?? 1), explicit: true };
-      }
-
-      function mealCompositeMatch(text, food, term, start, end) {
-        if (!food.composite) return null;
-        if (food.skipWhenDetailed && /^\s*[（(]/.test(text.slice(end))) return null;
-        const before = text.slice(0, start);
-        const boundary = Math.max(before.lastIndexOf("，"), before.lastIndexOf(","), before.lastIndexOf("；"), before.lastIndexOf(";"), before.lastIndexOf("\n"));
-        const segment = before.slice(boundary + 1);
-        const quantity = segment.match(/^(?:半|[一二两三四五六七八九十]+|\d+(?:\.\d+)?)\s*(?:千克|公斤|kg|KG|克|g|G|毫升|ml|ML|个|只|枚|碗|杯|盘|片|份|根|把|瓶|块|盒)?\s*/i);
-        const prefix = segment.slice(quantity ? quantity[0].length : 0).trim();
-        if (!prefix || prefix.length > 8 || !/[\u3400-\u9fff]/.test(prefix)) return null;
-        const ingredientTerms = MEAL_NUTRIENTS.filter((entry) => !entry.composite).flatMap((entry) => entry.terms);
-        if (!ingredientTerms.some((ingredient) => prefix.endsWith(ingredient))) return null;
-        const combinedStart = start - prefix.length;
-        return { food, term: text.slice(combinedStart, end), start: combinedStart, end };
-      }
-
-      function mealFoodMatches(text) {
-        const candidates = [];
-        MEAL_NUTRIENTS.forEach((food) => {
-          food.terms.forEach((term) => {
-            let start = text.indexOf(term);
-            while (start >= 0) {
-              const end = start + term.length;
-              const previousCharacter = text[start - 1] || "";
-              const nextCharacter = text[end] || "";
-              const quantityBefore = /(?:半|[一二两三四五六七八九十]+|\d+(?:\.\d+)?)\s*(?:克|g|千克|公斤|kg|碗|份)\s*$/i.test(text.slice(Math.max(0, start - 12), start));
-              const embeddedSingleCharacter = term.length === 1 && /[\u3400-\u9fff]/.test(previousCharacter + nextCharacter) && !quantityBefore && !food.composite;
-              const followedByIngredientDetails = food.skipWhenDetailed && /^\s*[（(]/.test(text.slice(end));
-              if (!embeddedSingleCharacter && !followedByIngredientDetails) {
-                if (!food.requiresPrefix) candidates.push({ food, term, start, end });
-                const composite = mealCompositeMatch(text, food, term, start, end);
-                if (composite) candidates.push(composite);
-              }
-              start = text.indexOf(term, start + term.length);
-            }
-          });
-        });
-        return candidates
-          .sort((a, b) => b.term.length - a.term.length || a.start - b.start)
-          .reduce((selected, candidate) => {
-            const overlaps = selected.some((match) => candidate.start < match.end && candidate.end > match.start);
-            if (!overlaps) selected.push(candidate);
-            return selected;
-          }, [])
-          .sort((a, b) => a.start - b.start);
-      }
-
-      function estimateMealNutrition(meals) {
-        const totals = { calories: 0, protein: 0, carbs: 0, fat: 0, fiber: 0, recognizedFoods: 0, recognizedLabels: [], quantityFoods: 0, assumedFoods: 0, unknownMeals: 0 };
-        [["breakfast", meals.breakfast], ["lunch", meals.lunch], ["dinner", meals.dinner]].forEach(([mealKey, meal]) => {
-          const text = String(meal || "").trim();
-          if (!text) return;
-          const portion = [0.75, 1, 1.25].includes(Number(meals.portions?.[mealKey])) ? Number(meals.portions[mealKey]) : 1;
-          const matches = mealFoodMatches(text);
-          if (!matches.length) {
-            totals.unknownMeals += 1;
-            return;
-          }
-          matches.forEach((match) => {
-            const quantity = mealQuantityForMatch(text, match, match.food);
-            ["calories", "protein", "carbs", "fat", "fiber"].forEach((key) => {
-              totals[key] += match.food[key] * quantity.multiplier * portion;
-            });
-            totals.recognizedFoods += 1;
-            totals.recognizedLabels.push(match.term);
-            if (quantity.explicit) totals.quantityFoods += 1;
-            else totals.assumedFoods += 1;
-          });
-        });
-        ["protein", "carbs", "fat", "fiber"].forEach((key) => {
-          totals[key] = Math.round(totals[key] * 10) / 10;
-        });
-        totals.calories = Math.round(totals.calories);
-        return totals;
-      }
-
-      function localMealNutritionSummary(nutrition) {
-        if (!nutrition.recognizedFoods) {
-          return "没有识别到可计算的食物。请写成“食物 + 份量”，例如鸡蛋2个、米饭半碗或鸡胸肉120克。未识别的内容不会计入总量。";
-        }
-        const notes = [`根据已识别的 ${nutrition.recognizedFoods} 项食物，粗略换算约 ${nutrition.calories} 千卡，蛋白质 ${nutrition.protein} 克。`];
-        if (nutrition.recognizedLabels?.length) {
-          notes.push(`已计入：${[...new Set(nutrition.recognizedLabels)].join("、")}。记录中没有出现在这个列表里的食物，不会计入总量。`);
-        }
-        if (nutrition.assumedFoods) notes.push(`其中 ${nutrition.assumedFoods} 项没有写份量，暂按常见一份计算；补充克数、个数、碗数或杯数会更准确。`);
-        if (nutrition.unknownMeals) notes.push(`有 ${nutrition.unknownMeals} 餐没有识别到可计算的食物，未识别的内容不会计入总量。`);
-        if (!nutrition.unknownMeals && nutrition.recognizedFoods >= 3) {
-          if (nutrition.protein < 45) notes.push("按当前记录看，蛋白质来源可能偏少，可检查蛋、奶、豆、鱼或瘦肉的实际份量。");
-          else notes.push("按当前记录看，蛋白质来源相对明确。");
-          if (nutrition.fiber < 18) notes.push("按当前记录看，膳食纤维可能偏少，可检查蔬菜、水果或全谷物的实际份量。");
-          else notes.push("按当前记录看，膳食纤维相对充足。");
-        }
-        return notes.join("\n\n");
-      }
-
       function renderMealRecord() {
         const selectedDate = $("#mealDate").value || todayKey();
         const record = state.mealRecords[selectedDate] || {};
@@ -9143,43 +8825,7 @@
         $("#mealBreakfast").value = record.breakfast || "";
         $("#mealLunch").value = record.lunch || "";
         $("#mealDinner").value = record.dinner || "";
-        $("#mealBreakfastPortion").value = String(record.portions?.breakfast || 1);
-        $("#mealLunchPortion").value = String(record.portions?.lunch || 1);
-        $("#mealDinnerPortion").value = String(record.portions?.dinner || 1);
         $("#mealSaveStatus").textContent = record.updatedAt ? "这一天已有餐饮记录" : "记录会保存在本机";
-
-        const card = $("#mealNutritionCard");
-        let nutrition = record.nutrition;
-        if (nutrition && nutrition.estimatorVersion !== NUTRITION_ESTIMATOR_VERSION) {
-          const recalculated = estimateMealNutrition(record);
-          nutrition = {
-            ...recalculated,
-            summary: localMealNutritionSummary(recalculated),
-            mode: "本地营养估算 · 已按份量更新",
-            estimatorVersion: NUTRITION_ESTIMATOR_VERSION,
-            generatedAt: new Date().toISOString()
-          };
-          record.nutrition = nutrition;
-        }
-        $("#estimateMealNutritionBtn").textContent = nutrition ? "重新估算营养" : "AI 估算营养";
-        card.classList.toggle("empty", !nutrition);
-        if (!nutrition) {
-          $("#mealNutritionMode").textContent = "等待三餐记录";
-          $("#mealNutritionGrid").innerHTML = "";
-          $("#mealNutritionSummary").textContent = "";
-        } else {
-          const stats = [
-            ["calories", "热量", nutrition.calories, "千卡"],
-            ["protein", "蛋白质", nutrition.protein, "克"],
-            ["carbs", "碳水", nutrition.carbs, "克"],
-            ["fat", "脂肪", nutrition.fat, "克"],
-            ["fiber", "膳食纤维", nutrition.fiber, "克"]
-          ];
-          $("#mealNutritionGrid").innerHTML = stats.map(([key, label, value, unit]) => `<div class="nutrition-stat" data-nutrient="${key}"><span>${label}</span><strong>${value}</strong><small>${unit}</small></div>`).join("");
-          $("#mealNutritionSummary").textContent = nutrition.summary || localMealNutritionSummary(nutrition);
-          $("#mealNutritionMode").textContent = nutrition.mode || "本地营养估算";
-        }
-
       }
 
       function mealFormValues() {
@@ -9187,65 +8833,18 @@
           date: $("#mealDate").value || todayKey(),
           breakfast: $("#mealBreakfast").value.trim(),
           lunch: $("#mealLunch").value.trim(),
-          dinner: $("#mealDinner").value.trim(),
-          portions: {
-            breakfast: Number($("#mealBreakfastPortion").value) || 1,
-            lunch: Number($("#mealLunchPortion").value) || 1,
-            dinner: Number($("#mealDinnerPortion").value) || 1
-          }
+          dinner: $("#mealDinner").value.trim()
         };
       }
 
       function saveMealRecord(values = mealFormValues()) {
-        const existing = state.mealRecords[values.date] || {};
-        const changed = existing.breakfast !== values.breakfast
-          || existing.lunch !== values.lunch
-          || existing.dinner !== values.dinner
-          || JSON.stringify(existing.portions || { breakfast: 1, lunch: 1, dinner: 1 }) !== JSON.stringify(values.portions);
         state.mealRecords[values.date] = {
           breakfast: values.breakfast,
           lunch: values.lunch,
           dinner: values.dinner,
-          portions: values.portions,
-          nutrition: changed ? null : existing.nutrition || null,
           updatedAt: new Date().toISOString()
         };
         return state.mealRecords[values.date];
-      }
-
-      async function generateMealNutrition() {
-        const button = $("#estimateMealNutritionBtn");
-        const values = mealFormValues();
-        if (![values.breakfast, values.lunch, values.dinner].some(Boolean)) {
-          showToast("先写下至少一餐吃了什么");
-          return;
-        }
-        const record = saveMealRecord(values);
-        const nutrition = estimateMealNutrition(values);
-        let summary = localMealNutritionSummary(nutrition);
-        let mode = "本地营养估算";
-        button.disabled = true;
-        button.textContent = "估算中";
-        try {
-          if ("Summarizer" in window) {
-            const availability = await window.Summarizer.availability();
-            if (availability === "available") {
-              const summarizer = await window.Summarizer.create({ type: "key-points", format: "plain-text", length: "medium" });
-              summary = await summarizer.summarize(`早餐：${values.breakfast || "无"}\n午餐：${values.lunch || "无"}\n晚餐：${values.dinner || "无"}\n估算：热量${nutrition.calories}千卡，蛋白质${nutrition.protein}克，碳水${nutrition.carbs}克，脂肪${nutrition.fat}克，膳食纤维${nutrition.fiber}克。`, {
-                context: "请用简洁、温和的中文总结今天的饮食结构，只能使用给出的估算数字，不要改变数字，不做诊断。指出蛋白质、蔬果、主食结构中值得保留或可调整的一点，并提醒结果受份量和烹饪方式影响。"
-              });
-              mode = "浏览器本地 AI · 营养估算";
-              summarizer.destroy?.();
-            }
-          }
-        } catch {
-          summary = localMealNutritionSummary(nutrition);
-        }
-        record.nutrition = { ...nutrition, summary, mode, estimatorVersion: NUTRITION_ESTIMATOR_VERSION, generatedAt: new Date().toISOString() };
-        button.disabled = false;
-        button.textContent = "重新估算营养";
-        render();
-        showToast("营养估算已生成");
       }
 
       function renderGratitude() {
@@ -10057,7 +9656,6 @@
       $("#activeDate").addEventListener("change", (event) => setActiveDate(event.target.value));
       $("#habitCheckDate").addEventListener("change", (event) => setActiveDate(event.target.value));
       $("#maintenanceLogDate").addEventListener("change", renderMaintenance);
-      $("#estimateMealNutritionBtn").addEventListener("click", generateMealNutrition);
       $("#financeRecordsButton").addEventListener("click", () => {
         renderFinanceRecords();
         $("#financeRecordsDialog").showModal();
