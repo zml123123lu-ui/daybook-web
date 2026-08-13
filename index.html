@@ -8084,8 +8084,22 @@
       }
 
       function localStructuredSummary(context) {
+        const phraseSeed = String(context.text || JSON.stringify(context));
+        const dailyPhrase = (key, phrases) => {
+          let hash = 2166136261;
+          for (const character of `${phraseSeed}|${key}`) {
+            hash ^= character.codePointAt(0);
+            hash = Math.imul(hash, 16777619);
+          }
+          return phrases[(hash >>> 0) % phrases.length]();
+        };
         if (!context.tasks.length && !context.blocks.length && !context.completedHabits.length && !context.wellbeing && !context.mealRecord && !context.gratitude && !context.notes && !context.thoughts.length) {
-          return "先留下一个最小记录：写下一件明天真正要做的事，并为它留出一段明确时间。";
+          return dailyPhrase("empty-day", [
+            () => "先留下一个最小记录：写下一件明天真正要做的事，并为它留出一段明确时间。",
+            () => "今天还没有可供分析的记录。可以先写下一件发生过的小事，或安排明天最想推进的一步。",
+            () => "记录暂时是空白的，不需要一次补全；先留下此刻的精力感受，或明天最重要的一件事就够了。",
+            () => "这一天还没有留下内容。先从最容易写的地方开始：一顿饭、一段时间，或者一个明天要做的计划。"
+          ]);
         }
         const doneNames = context.doneTasks.slice(0, 3).map((task) => task.title);
         const pendingNames = context.pendingTasks.slice(0, 3).map((task) => task.title);
@@ -8117,18 +8131,43 @@
         observations.unshift(`今天最值得继续留意的是“${focus}”。`);
 
         if (pendingNames.length) {
-          advice.push(`明天先给“${pendingNames[0]}”留一个明确时间块；只决定开始的 20 分钟，不要求一次做完。`);
+          advice.push(dailyPhrase("pending-task", [
+            () => `明天先给“${pendingNames[0]}”留一个明确时间块；只决定开始的 20 分钟，不要求一次做完。`,
+            () => `把“${pendingNames[0]}”放到明天精力较好的时段，先完成一个能看得见的小步骤，再决定是否继续。`,
+            () => `“${pendingNames[0]}”还在等待推进。明天不妨先写清第一步，并给它一个不会被其他事情挤掉的开始时间。`,
+            () => `明天面对“${pendingNames[0]}”时，先降低启动门槛：准备好需要的东西，开始做 15 到 20 分钟就够。`
+          ]));
         }
         if (context.wellbeing?.nextStep) {
-          advice.push(`你已经写下下一步“${context.wellbeing.nextStep}”，明天先把它安排到具体时段，完成这一件就算有效推进。`);
+          advice.push(dailyPhrase("next-step", [
+            () => `你已经写下下一步“${context.wellbeing.nextStep}”，明天先把它安排到具体时段，完成这一件就算有效推进。`,
+            () => `“${context.wellbeing.nextStep}”已经足够具体，明天优先为它留出位置，先兑现这个对自己的小约定。`,
+            () => `明天可以直接从“${context.wellbeing.nextStep}”开始，不必再补充更多计划；把它做完，就是清楚的一步。`,
+            () => `把“${context.wellbeing.nextStep}”设成明天的最低完成线，其他安排都可以根据当天精力灵活调整。`
+          ]));
         }
         if (context.wellbeing && Number(context.wellbeing.sleep) > 0 && Number(context.wellbeing.sleep) < 7) {
-          advice.push(`今天睡眠约 ${context.wellbeing.sleep} 小时，明天优先守住休息时间；需要专注的事尽量放在精力较好的时段。`);
+          advice.push(dailyPhrase("short-sleep", [
+            () => `今天睡眠约 ${context.wellbeing.sleep} 小时，明天优先守住休息时间；需要专注的事尽量放在精力较好的时段。`,
+            () => `从 ${context.wellbeing.sleep} 小时的睡眠来看，明天的安排适合稍微留白，把最费脑力的事集中在状态较好的那一段。`,
+            () => `睡眠只有约 ${context.wellbeing.sleep} 小时，明天先照顾恢复：减少不必要的消耗，也尽量别把重要任务拖到太晚。`,
+            () => `今天的睡眠约 ${context.wellbeing.sleep} 小时。明天与其塞满日程，不如先保住休息和一件真正重要的事。`
+          ]));
         } else if (context.wellbeing && Number(context.wellbeing.energy) <= 2) {
-          advice.push(`今天精力是 ${context.wellbeing.energy}/5，明天把任务拆小，并主动留一段不安排事项的恢复时间。`);
+          advice.push(dailyPhrase("low-energy", [
+            () => `今天精力是 ${context.wellbeing.energy}/5，明天把任务拆小，并主动留一段不安排事项的恢复时间。`,
+            () => `精力只有 ${context.wellbeing.energy}/5，明天适合采用轻量节奏：少安排一件事，也给自己留出缓冲。`,
+            () => `今天的精力是 ${context.wellbeing.energy}/5。明天先做最必要的部分，状态回升后再考虑额外推进。`,
+            () => `根据 ${context.wellbeing.energy}/5 的精力记录，明天可以把难事缩成短步骤，并避免连续安排高消耗事项。`
+          ]));
         }
         if (context.wellbeing?.drain) {
-          advice.push(`对于今天最消耗的“${context.wellbeing.drain}”，明天提前设一个停止点，或把完成标准缩小到可承受的程度。`);
+          advice.push(dailyPhrase("drain", [
+            () => `对于今天最消耗的“${context.wellbeing.drain}”，明天提前设一个停止点，或把完成标准缩小到可承受的程度。`,
+            () => `“${context.wellbeing.drain}”今天消耗了不少精力。明天可以提前划定边界，到了停止点就先收尾。`,
+            () => `面对“${context.wellbeing.drain}”，明天先区分必须处理和可以延后的部分，别让它继续占满整段注意力。`,
+            () => `既然“${context.wellbeing.drain}”是今天最消耗的事，明天可以为它设一个更小的完成标准，并在之后安排恢复。`
+          ]));
         }
 
         const durations = categoryDurationsForBlocks(context.blocks);
@@ -8137,11 +8176,27 @@
           ? context.blocks.filter((block) => (block.category || "生活") === dominant.category).slice(0, 2).map((block) => block.title)
           : [];
         if (dominant?.category === "娱乐" && dominant.minutes >= 240) {
-          advice.push(`娱乐占用较多时间${dominantBlocks.length ? `，主要是${dominantBlocks.join("、")}` : ""}；明天可以先决定结束时间，再开始娱乐。`);
+          advice.push(dailyPhrase("more-leisure", [
+            () => `娱乐占用较多时间${dominantBlocks.length ? `，主要是${dominantBlocks.join("、")}` : ""}；明天可以先决定结束时间，再开始娱乐。`,
+            () => `今天的娱乐时间比较集中${dominantBlocks.length ? `，包括${dominantBlocks.join("、")}` : ""}。明天开始前先定一个收尾时间，会更容易保住后面的安排。`,
+            () => `${dominantBlocks.length ? `${dominantBlocks.join("、")}占了` : "娱乐占了"}今天较大一段时间；明天可以先完成一件重要的小事，再安心进入娱乐。`,
+            () => `明天如果还想安排${dominantBlocks[0] || "娱乐"}，可以同时写下开始和结束时间，让放松有边界也更踏实。`
+          ]));
         } else if (dominant?.category === "工作" && dominant.minutes >= 480) {
-          advice.push(`工作时间较长${dominantBlocks.length ? `，集中在${dominantBlocks.join("、")}` : ""}；明天至少保留一段明确的下班后恢复时间。`);
+          advice.push(dailyPhrase("long-work", [
+            () => `工作时间较长${dominantBlocks.length ? `，集中在${dominantBlocks.join("、")}` : ""}；明天至少保留一段明确的下班后恢复时间。`,
+            () => `今天在工作上投入了较长时间${dominantBlocks.length ? `，主要处理了${dominantBlocks.join("、")}` : ""}。明天记得给工作设置一个清楚的收尾点。`,
+            () => `${dominantBlocks.length ? `${dominantBlocks.join("、")}让` : ""}今天的工作时段偏长；明天可以把休息也正式放进时间轴，避免它总被挤到最后。`,
+            () => `工作占据了今天的大部分时间${dominantBlocks.length ? `，重点是${dominantBlocks.join("、")}` : ""}。明天优先守住一段完整、不处理工作的恢复时间。`
+          ]));
         } else if (!context.blocks.length && (pendingNames.length || context.tasks.length)) {
-          advice.push(`明天给“${pendingNames[0] || context.tasks[0].title}”放进时间轴，先预留一个能真正开始的时段。`);
+          const taskName = pendingNames[0] || context.tasks[0].title;
+          advice.push(dailyPhrase("unscheduled-task", [
+            () => `明天给“${taskName}”放进时间轴，先预留一个能真正开始的时段。`,
+            () => `“${taskName}”还没有对应的时间安排，明天为它选一个具体的开始点，会比只留在计划里更容易行动。`,
+            () => `明天把“${taskName}”从计划移到时间轴上，哪怕只留半小时，也能减少临时决定带来的消耗。`,
+            () => `为“${taskName}”确定明天何时开始，而不是只决定要不要做；一个明确时段就足够。`
+          ]));
         }
 
         if (context.mealRecord) {
@@ -8150,12 +8205,27 @@
             ["午餐", context.mealRecord.lunch],
             ["晚餐", context.mealRecord.dinner]
           ].filter(([, value]) => !String(value || "").trim()).map(([label]) => label);
-          if (missingMeals.length) advice.push(`今天没有记录${missingMeals.join("、")}；明天先保证其中一餐有主食、蛋白质和蔬菜，不必追求一次调整完美。`);
+          if (missingMeals.length) advice.push(dailyPhrase("missing-meals", [
+            () => `今天没有记录${missingMeals.join("、")}；明天先保证其中一餐有主食、蛋白质和蔬菜，不必追求一次调整完美。`,
+            () => `${missingMeals.join("、")}今天还是空白。明天先把其中一餐记下来，并尽量搭配主食、蛋白质和蔬菜。`,
+            () => `今天缺少${missingMeals.join("、")}的记录；明天不用追求复杂，先照顾好一顿结构完整的饭。`,
+            () => `明天可以优先补上${missingMeals[0]}：有主食、有蛋白质、再加一点蔬菜，就是很实际的改善。`
+          ]));
         }
         if (!advice.length && habitNames.length) {
-          advice.push(`今天完成了${habitNames.join("、")}，明天优先延续其中最容易开始的一项，让连续性比数量更重要。`);
+          advice.push(dailyPhrase("habits", [
+            () => `今天完成了${habitNames.join("、")}，明天优先延续其中最容易开始的一项，让连续性比数量更重要。`,
+            () => `${habitNames.join("、")}今天都做到了。明天先保住最轻松的一项，不必为了数量增加压力。`,
+            () => `今天的习惯记录里有${habitNames.join("、")}，明天继续从门槛最低的那一项开始，让节奏自然延续。`,
+            () => `明天可以沿用今天完成${habitNames.join("、")}时的触发方式，少做一点也没关系，重点是容易再次开始。`
+          ]));
         }
-        if (!advice.length) advice.push(`明天围绕“${focus}”只安排一个最小行动，并在当天结束前确认它是否真的推进。`);
+        if (!advice.length) advice.push(dailyPhrase("default", [
+          () => `明天围绕“${focus}”只安排一个最小行动，并在当天结束前确认它是否真的推进。`,
+          () => `明天先从“${focus}”里挑出最容易落地的一步，完成后再决定是否继续增加安排。`,
+          () => `把“${focus}”作为明天的主线就够了：提前写清第一步，并给它一个具体开始时间。`,
+          () => `明天不必同时改善很多事情，先让“${focus}”向前移动一小步，再观察当天状态。`
+        ]));
 
         const lines = [
           observations.join(" "),
