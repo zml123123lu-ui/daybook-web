@@ -441,6 +441,78 @@
       margin-top: 0.6rem;
     }
 
+    .strength-form {
+      display: grid;
+      grid-template-columns: 10rem minmax(0, 0.8fr) minmax(0, 1.2fr) auto;
+      gap: 0.65rem;
+      align-items: end;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .strength-form textarea {
+      min-height: 2.65rem;
+      height: 2.65rem;
+      resize: vertical;
+    }
+
+    .strength-toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.75rem;
+      margin: 1rem 0 0.65rem;
+    }
+
+    .strength-period-tabs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.35rem;
+    }
+
+    .strength-list {
+      display: grid;
+      gap: 0.65rem;
+    }
+
+    .strength-day {
+      display: grid;
+      gap: 0.45rem;
+    }
+
+    .strength-day-heading {
+      color: var(--muted);
+      font-size: 0.78rem;
+      font-weight: 760;
+    }
+
+    .strength-entry {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 0.75rem;
+      padding: 0.8rem;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--surface-2);
+    }
+
+    .strength-entry strong {
+      display: block;
+      color: var(--theme-contrast, var(--berry));
+    }
+
+    .strength-entry p {
+      margin-top: 0.28rem;
+      color: var(--muted);
+      line-height: 1.55;
+      white-space: pre-wrap;
+    }
+
+    .strength-empty {
+      padding: 1.25rem;
+      text-align: center;
+    }
+
     .panel {
       background: var(--surface);
       border: 1px solid #dfe3da;
@@ -2414,7 +2486,8 @@
       .quick-grid,
       .form-row,
       .expense-form,
-      .reflection-grid {
+      .reflection-grid,
+      .strength-form {
         grid-template-columns: 1fr;
       }
     }
@@ -2449,6 +2522,15 @@
 
       .period-day {
         grid-template-columns: 1fr;
+      }
+
+      .strength-entry {
+        grid-template-columns: 1fr;
+      }
+
+      .strength-toolbar {
+        align-items: flex-start;
+        flex-direction: column;
       }
 
      .summary {
@@ -5611,6 +5693,7 @@
         <a href="#maintenance" data-view="maintenance" aria-label="维护"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m14 6 4 4M5 19l7-7M3 21l3-3M13 4l2-2 5 5-2 2M8 10l3-3 6 6-3 3"/></svg></span><span class="nav-label">维护</span><span class="nav-balance" aria-hidden="true"></span></a>
         <a href="#money" data-view="money" aria-label="财务"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 9h18M16 14h2"/></svg></span><span class="nav-label">财务</span><span class="nav-balance" aria-hidden="true"></span></a>
         <a href="#health" data-view="health" aria-label="身心"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M20 8c0 5-8 11-8 11S4 13 4 8a4 4 0 0 1 7-2.6A4 4 0 0 1 20 8Z"/><path d="M8 11h2l1-2 2 5 1-3h2"/></svg></span><span class="nav-label">身心</span><span class="nav-balance" aria-hidden="true"></span></a>
+        <a href="#strengths" data-view="strengths" aria-label="优点"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m12 3 2.8 5.7 6.2.9-4.5 4.4 1.1 6.2-5.6-3-5.6 3 1.1-6.2L3 9.6l6.2-.9L12 3Z"/></svg></span><span class="nav-label">优点</span><span class="nav-balance" aria-hidden="true"></span></a>
         <a href="#thoughts" data-view="thoughts" aria-label="随想"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 4h14v16H5zM8 8h8M8 12h8M8 16h5"/></svg></span><span class="nav-label">随想</span><span class="nav-balance" aria-hidden="true"></span></a>
         <a href="#review" data-view="review" aria-label="复盘"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 12a8 8 0 1 0 2.3-5.7L4 8.6M4 4v4.6h4.6"/><path d="M12 8v4l3 2"/></svg></span><span class="nav-label">复盘</span><span class="nav-balance" aria-hidden="true"></span></a>
       </nav>
@@ -6019,6 +6102,36 @@
             </div>
           </section>
 
+          <section class="panel view-panel" id="strengths" data-panel="strengths" hidden>
+            <header class="panel-header">
+              <div>
+                <h2>我的优点</h2>
+                <p class="muted">不写“我应该很好”，只记录今天真实做到的事和它证明的能力。</p>
+              </div>
+              <span class="pill status-note" id="strengthCount">0 条记录</span>
+            </header>
+            <div class="panel-body">
+              <form class="strength-form" id="strengthForm">
+                <div class="field"><label for="strengthDate">发生日期</label><input id="strengthDate" name="date" type="date" required></div>
+                <div class="field"><label for="strengthTitle">我展现了什么优点</label><input id="strengthTitle" name="title" autocomplete="off" required placeholder="例如：有耐心、守信用、愿意开始"></div>
+                <div class="field"><label for="strengthEvidence">具体证据</label><textarea id="strengthEvidence" name="evidence" required placeholder="今天哪件事证明了它？写一件小事就够了。"></textarea></div>
+                <button class="btn" type="submit">保存这条证据</button>
+              </form>
+              <div class="strength-toolbar">
+                <div>
+                  <strong>回看自己的可靠之处</strong>
+                  <p class="muted" id="strengthReviewHint">先记录一条，之后这里会按日期整理。</p>
+                </div>
+                <div class="strength-period-tabs" id="strengthPeriodTabs" role="group" aria-label="优点回看范围">
+                  <button class="period-tab active" type="button" data-strength-period="all" aria-pressed="true">全部</button>
+                  <button class="period-tab" type="button" data-strength-period="week" aria-pressed="false">本周</button>
+                  <button class="period-tab" type="button" data-strength-period="month" aria-pressed="false">本月</button>
+                </div>
+              </div>
+              <div class="strength-list" id="strengthList"></div>
+            </div>
+          </section>
+
           <section class="panel view-panel thought-panel" id="thoughts" data-panel="thoughts" hidden>
             <div class="panel-body">
               <div class="thought-workspace">
@@ -6395,6 +6508,11 @@
           heading: "身心与餐饮",
           description: "心情、睡眠、身体感受和三餐都会进入阶段回看。"
         },
+        strengths: {
+          title: "把做得好的地方留下来，别让自我否定替你删掉证据。",
+          heading: "我的优点",
+          description: "记录具体做到的事，再按周、月或全部回看自己的可靠之处。"
+        },
         thoughts: {
           title: "把想法留下来，给每一种记录一个合适的入口。",
           heading: "随想备忘录",
@@ -6465,6 +6583,7 @@
           periodSummaries: {},
           wellbeing: {},
           mealRecords: {},
+          strengths: [],
           gratitude: {},
           thoughts: [],
           deletedRecords: {},
@@ -6528,6 +6647,18 @@
         };
       }
 
+      function normalizeStrength(item) {
+        const source = item && typeof item === "object" ? item : {};
+        return {
+          id: String(source.id || uid()),
+          date: /^\d{4}-\d{2}-\d{2}$/.test(String(source.date || "")) ? String(source.date) : todayKey(),
+          title: String(source.title || source.name || "").trim(),
+          evidence: String(source.evidence || source.detail || "").trim(),
+          createdAt: String(source.createdAt || source.updatedAt || new Date().toISOString()),
+          updatedAt: String(source.updatedAt || source.createdAt || new Date().toISOString())
+        };
+      }
+
       function normalizeState(parsed) {
         const source = parsed && typeof parsed === "object" ? parsed : {};
         const clean = emptyState();
@@ -6566,6 +6697,7 @@
           periodSummaries: source.periodSummaries && typeof source.periodSummaries === "object" ? source.periodSummaries : {},
           wellbeing: source.wellbeing && typeof source.wellbeing === "object" ? source.wellbeing : {},
           mealRecords: source.mealRecords && typeof source.mealRecords === "object" ? source.mealRecords : {},
+          strengths: Array.isArray(source.strengths) ? source.strengths.map(normalizeStrength).filter((item) => item.title || item.evidence) : [],
           gratitude: source.gratitude && typeof source.gratitude === "object" ? source.gratitude : {},
           appearance: source.appearance && typeof source.appearance === "object"
             ? { theme: APPEARANCE_THEMES.some((theme) => theme.id === source.appearance.theme) ? source.appearance.theme : "mist-rose" }
@@ -6610,6 +6742,7 @@
       let calendarCursor = new Date();
       let reviewPeriod = "week";
       let habitPeriod = "week";
+      let strengthPeriod = "all";
       let habitChartAnchor = new Date();
       let financeChartScope = "month";
       let financeChartMonth = todayKey().slice(0, 7);
@@ -7036,6 +7169,7 @@
         syncTaskDateField();
         $("#wellbeingDate").value = todayKey();
         $("#mealDate").value = todayKey();
+        $("#strengthDate").value = activeDate;
         $("#maintenanceLogDate").value = todayKey();
       }
 
@@ -7064,6 +7198,10 @@
           renderWellbeing();
           renderMealRecord();
         }
+        if (view === "strengths") {
+          $("#strengthDate").value = activeDate;
+          renderStrengths();
+        }
         if (view === "habits") $("#habitCheckDate").value = activeDate;
         if (view === "maintenance") $("#maintenanceLogDate").value = $("#maintenanceLogDate").value || activeDate;
         document.title = `${meta.heading} · 日序`;
@@ -7087,9 +7225,52 @@
         activeDate = normalized;
         $("#activeDate").value = activeDate;
         $("#taskDate").value = "";
+        $("#strengthDate").value = activeDate;
         syncTaskDateField();
         delete $("#timeline").dataset.positioned;
         render();
+      }
+
+      function strengthEntriesForPeriod(period = strengthPeriod) {
+        const entries = Array.isArray(state.strengths) ? state.strengths : [];
+        if (period === "all") return entries;
+        const { dates } = getPeriodDates(period, todayKey());
+        return entries.filter((entry) => dates.includes(entry.date));
+      }
+
+      function renderStrengths() {
+        const entries = strengthEntriesForPeriod().sort((first, second) => String(second.date).localeCompare(String(first.date)) || String(second.updatedAt).localeCompare(String(first.updatedAt)));
+        $("#strengthDate").value = $("#strengthDate").value || activeDate;
+        $("#strengthCount").textContent = `${state.strengths.length} 条记录`;
+        document.querySelectorAll("[data-strength-period]").forEach((button) => {
+          const active = button.dataset.strengthPeriod === strengthPeriod;
+          button.classList.toggle("active", active);
+          button.setAttribute("aria-pressed", String(active));
+        });
+        const periodLabel = { all: "全部时间", week: "本周", month: "本月" }[strengthPeriod];
+        $("#strengthReviewHint").textContent = entries.length
+          ? `${periodLabel}留下了 ${entries.length} 条具体证据。先看事实，再决定要不要相信自己。`
+          : `${periodLabel}还没有记录。今天发生的一件小事，也值得留下。`;
+        if (!entries.length) {
+          $("#strengthList").innerHTML = '<div class="empty strength-empty" role="status">这里还没有优点证据。试着写下一个你今天没有放弃、认真完成或温柔对待自己的瞬间。</div>';
+          return;
+        }
+        const groups = new Map();
+        entries.forEach((entry) => {
+          if (!groups.has(entry.date)) groups.set(entry.date, []);
+          groups.get(entry.date).push(entry);
+        });
+        $("#strengthList").innerHTML = [...groups.entries()].map(([date, dayEntries]) => `
+          <section class="strength-day" aria-labelledby="strength-day-${date}">
+            <h3 class="strength-day-heading" id="strength-day-${date}">${escapeHtml(reviewDateLabel(date, true))}</h3>
+            ${dayEntries.map((entry) => `
+              <article class="strength-entry">
+                <div><strong>${escapeHtml(entry.title || "我做得很好")}</strong><p>${escapeHtml(entry.evidence || "留下了这条证据")}</p></div>
+                <button class="btn ghost small" type="button" data-action="delete-strength" data-id="${escapeHtml(entry.id)}">删除</button>
+              </article>
+            `).join("")}
+          </section>
+        `).join("");
       }
 
       function globalSearchEntries(query = "") {
@@ -7106,6 +7287,7 @@
         Object.entries(state.gratitude).forEach(([date, entry]) => add({ type: "感恩日记", title: entry?.text || "感恩日记", date, view: "today" }));
         Object.entries(state.wellbeing).forEach(([date, entry]) => add({ type: "身心", title: entry?.highlight || entry?.body || "身心记录", detail: `${entry?.drain || ""} ${entry?.nextStep || ""}`, date, view: "health" }));
         Object.entries(state.mealRecords).forEach(([date, entry]) => add({ type: "餐饮", title: [entry?.breakfast, entry?.lunch, entry?.dinner].filter(Boolean).join("、") || "餐饮记录", date, view: "health" }));
+        state.strengths.forEach((entry) => add({ type: "优点证据", title: entry.title || "我的优点", detail: entry.evidence || "", date: entry.date, view: "strengths" }));
         state.thoughts.forEach((thought) => add({ type: "随想", title: thought.title || "未命名的信", detail: thought.body || "", date: thought.date, view: "thoughts", id: thought.id }));
         Object.entries(state.aiSummaries).forEach(([date, entry]) => add({ type: "每日总结", title: entry?.text?.slice(0, 80) || "每日总结", detail: entry?.text || "", date, view: "review" }));
         Object.entries(state.periodSummaries).forEach(([key, entry]) => add({ type: "阶段 AI 复盘", title: entry?.text?.slice(0, 80) || "阶段复盘", detail: entry?.text || "", date: key.split(":")[1], view: "review" }));
@@ -7308,6 +7490,7 @@
         renderFinance();
         renderWellbeing();
         renderMealRecord();
+        renderStrengths();
         renderGratitude();
         renderThoughts();
         renderReview();
@@ -7327,6 +7510,7 @@
           || state.financeRecords.some((record) => record.date === key)
           || state.wellbeing[key]
           || state.mealRecords[key]
+          || state.strengths.some((entry) => entry.date === key)
           || state.gratitude[key]?.text
           || state.thoughts.some((thought) => thought.date === key && thought.body?.trim())
         );
@@ -7386,6 +7570,9 @@
         const mealEntries = dates
           .filter((date) => state.mealRecords[date])
           .map((date) => ({ date, ...state.mealRecords[date] }));
+        const strengthEntries = state.strengths
+          .filter((entry) => dates.includes(entry.date))
+          .map((entry) => ({ ...entry }));
         const gratitudeEntries = dates
           .filter((date) => state.gratitude[date]?.text?.trim())
           .map((date) => `${date}：${state.gratitude[date].text.trim()}`);
@@ -7408,6 +7595,7 @@
           notes,
           wellbeingEntries,
           mealEntries,
+          strengthEntries,
           gratitudeEntries,
           thoughtEntries,
           label: period === "year"
@@ -7420,6 +7608,7 @@
             `习惯打卡：${habitCompletions.join("；") || "无"}`,
             `身心记录：${wellbeingEntries.map((entry) => `${entry.date} 心情${entry.mood}/5 精力${entry.energy}/5 睡眠${entry.sleep || "-"}小时 身体${entry.body || "无"} 开心${entry.highlight || "无"} 消耗${entry.drain || "无"}`).join("\n") || "无"}`,
             `餐饮记录：${mealEntries.map((entry) => `${entry.date} 早餐${entry.breakfast || "无"} 午餐${entry.lunch || "无"} 晚餐${entry.dinner || "无"}`).join("\n") || "无"}`,
+            `优点证据：${strengthEntries.map((entry) => `${entry.date} ${entry.title || "未命名优点"}：${entry.evidence || "无具体证据"}`).join("\n") || "无"}`,
             `每日记录：${notes.join("\n") || "无"}`,
             `感恩日记：${gratitudeEntries.join("\n") || "无"}`,
             `写给自己的信：${thoughtEntries.join("\n") || "无"}`
@@ -7428,14 +7617,14 @@
       }
 
       function localPeriodSummary(context) {
-        if (!context.tasks.length && !context.blocks.length && !context.habitCompletions.length && !context.notes.length && !context.wellbeingEntries.length && !context.mealEntries.length && !context.gratitudeEntries.length && !context.thoughtEntries.length) {
+        if (!context.tasks.length && !context.blocks.length && !context.habitCompletions.length && !context.notes.length && !context.wellbeingEntries.length && !context.mealEntries.length && !context.strengthEntries.length && !context.gratitudeEntries.length && !context.thoughtEntries.length) {
           return "这个周期还没有足够的记录。先从一天的计划、习惯打卡或一句复盘开始，下一次这里就会有可回看的内容。";
         }
         const completion = context.tasks.length ? Math.round((context.doneTasks.length / context.tasks.length) * 100) : 0;
         const doneNames = context.doneTasks.slice(0, 3).map((task) => task.title).join("、");
         const pendingNames = context.pendingTasks.slice(0, 3).map((task) => task.title).join("、");
         const lines = [
-          `这段时间共完成 ${context.doneTasks.length}/${context.tasks.length} 项计划，完成率 ${completion}%，习惯打卡 ${context.habitCompletions.length} 次，留下 ${context.notes.length} 天文字记录、${context.wellbeingEntries.length} 天身心记录、${context.mealEntries.length} 天餐饮记录、${context.gratitudeEntries.length} 天感恩记录和 ${context.thoughtEntries.length} 封写给自己的信。`,
+          `这段时间共完成 ${context.doneTasks.length}/${context.tasks.length} 项计划，完成率 ${completion}%，习惯打卡 ${context.habitCompletions.length} 次，留下 ${context.notes.length} 天文字记录、${context.wellbeingEntries.length} 天身心记录、${context.mealEntries.length} 天餐饮记录、${context.strengthEntries.length} 条优点证据、${context.gratitudeEntries.length} 天感恩记录和 ${context.thoughtEntries.length} 封写给自己的信。`,
           `分类用时：${categoryDurationText(context.blocks)}。`
         ];
         if (doneNames) lines.push(`值得保留的推进：${doneNames}。`);
@@ -7458,6 +7647,7 @@
           .sort((first, second) => String(first.start || first.time || "").localeCompare(String(second.start || second.time || "")));
         const wellbeing = state.wellbeing[key];
         const meals = state.mealRecords[key];
+        const strengths = state.strengths.filter((entry) => entry.date === key);
         const gratitude = state.gratitude[key];
         const thoughts = state.thoughts.filter((thought) => thought.date === key && (thought.title || thought.body));
 
@@ -7484,6 +7674,9 @@
             meals.dinner && `晚餐：${meals.dinner}`
           ].filter(Boolean);
           details.push(`<div class="review-detail"><strong>一日三餐</strong><span>${escapeHtml(mealLines.join("\n"))}</span></div>`);
+        }
+        if (strengths.length) {
+          details.push(`<div class="review-detail"><strong>优点证据</strong><span>${escapeHtml(strengths.map((entry) => `${entry.title || "我做得很好"}：${entry.evidence || "无具体证据"}`).join("\n"))}</span></div>`);
         }
         if (gratitude?.text) {
           details.push(`<div class="review-detail"><strong>感恩日记</strong><span>${escapeHtml(gratitude.text)}</span></div>`);
@@ -7932,6 +8125,7 @@
         const completedHabits = state.habits.filter((habit) => habit.completions[date]);
         const wellbeing = state.wellbeing[date] || null;
         const mealRecord = state.mealRecords[date] || null;
+        const strengths = state.strengths.filter((entry) => entry.date === date);
         const gratitude = state.gratitude[date]?.text || "";
         const notes = String(state.notes[date] || "").trim();
         const thoughts = state.thoughts
@@ -7945,6 +8139,7 @@
           completedHabits,
           wellbeing,
           mealRecord,
+          strengths,
           gratitude,
           notes,
           thoughts,
@@ -7956,6 +8151,7 @@
             `完成习惯：${completedHabits.map((habit) => habit.title).join("；") || "无"}`,
             `身心状态：${wellbeing ? `心情${wellbeing.mood}/5，精力${wellbeing.energy}/5，睡眠${wellbeing.sleep || "-"}小时，身体${wellbeing.body || "无"}，开心${wellbeing.highlight || "无"}，消耗${wellbeing.drain || "无"}，下一步${wellbeing.nextStep || "无"}` : "未记录"}`,
             `三餐：${mealRecord ? `早餐${mealRecord.breakfast || "无"}；午餐${mealRecord.lunch || "无"}；晚餐${mealRecord.dinner || "无"}` : "未记录"}`,
+            `优点证据：${strengths.map((entry) => `${entry.title || "我做得很好"}：${entry.evidence || "无具体证据"}`).join("；") || "未记录"}`,
             `感恩日记：${gratitude || "未记录"}`,
             `当天笔记：${notes || "未记录"}`,
             `写给自己的信：${thoughts.map((thought) => `${thought.title}：${thought.excerpt}`).join("；") || "未记录"}`
@@ -7965,6 +8161,7 @@
 
       function localStructuredSummary(context) {
         const phraseSeed = String(context.text || JSON.stringify(context));
+        const strengths = Array.isArray(context.strengths) ? context.strengths : [];
         const dailyPhrase = (key, phrases) => {
           let hash = 2166136261;
           for (const character of `${phraseSeed}|${key}`) {
@@ -7973,7 +8170,7 @@
           }
           return phrases[(hash >>> 0) % phrases.length]();
         };
-        if (!context.tasks.length && !context.blocks.length && !context.completedHabits.length && !context.wellbeing && !context.mealRecord && !context.gratitude && !context.notes && !context.thoughts.length) {
+        if (!context.tasks.length && !context.blocks.length && !context.completedHabits.length && !context.wellbeing && !context.mealRecord && !strengths.length && !context.gratitude && !context.notes && !context.thoughts.length) {
           return dailyPhrase("empty-day", [
             () => "先留下一个最小记录：写下一件明天真正要做的事，并为它留出一段明确时间。",
             () => "今天还没有可供分析的记录。可以先写下一件发生过的小事，或安排明天最想推进的一步。",
@@ -8002,6 +8199,9 @@
         if (context.mealRecord) {
           const meals = [context.mealRecord.breakfast, context.mealRecord.lunch, context.mealRecord.dinner].filter(Boolean).length;
           observations.push(`今天记录了 ${meals} 餐。`);
+        }
+        if (strengths.length) {
+          observations.push(`今天留下了${strengths.map((entry) => `“${entry.title || "做得很好"}”`).join("、")}的具体证据。`);
         }
         if (context.gratitude) observations.push(`感恩日记里留下了“${context.gratitude.slice(0, 42)}${context.gratitude.length > 42 ? "…" : ""}”。`);
         if (context.notes) observations.push(`当天笔记里记下了“${context.notes.slice(0, 42)}${context.notes.length > 42 ? "…" : ""}”。`);
@@ -9246,6 +9446,26 @@
           showToast(`${values.date} 的餐饮记录已保存`);
         }
 
+        if (event.target.id === "strengthForm") {
+          event.preventDefault();
+          const form = new FormData(event.target);
+          const entry = normalizeStrength({
+            id: uid(),
+            date: String(form.get("date") || activeDate),
+            title: String(form.get("title") || ""),
+            evidence: String(form.get("evidence") || "")
+          });
+          if (!entry.title || !entry.evidence) {
+            showToast("请写下优点和一件具体证据");
+            return;
+          }
+          state.strengths.push(entry);
+          event.target.reset();
+          $("#strengthDate").value = activeDate;
+          render();
+          showToast("这条优点证据已保存");
+        }
+
         if (event.target.id === "editorForm") {
           event.preventDefault();
           const form = new FormData(event.target);
@@ -9339,8 +9559,13 @@
           showToast(`已切换为${currentAppearanceTheme().name}`);
           return;
         }
-        const target = event.target.closest("[data-action], [data-filter], [data-period], [data-habit-period], [data-finance-scope]");
+        const target = event.target.closest("[data-action], [data-filter], [data-period], [data-habit-period], [data-finance-scope], [data-strength-period]");
         if (!target) return;
+        if (target.dataset.strengthPeriod) {
+          strengthPeriod = target.dataset.strengthPeriod;
+          renderStrengths();
+          return;
+        }
         if (target.dataset.period) {
           reviewPeriod = target.dataset.period;
           renderReview();
@@ -9471,6 +9696,12 @@
         }
         if (action === "delete-task") removeRecord("tasks", id);
         if (action === "delete-block") removeRecord("timeBlocks", id);
+        if (action === "delete-strength") {
+          removeRecord("strengths", id);
+          renderStrengths();
+          showToast("这条优点证据已删除");
+          return;
+        }
         if (action === "edit-block") {
           const block = state.timeBlocks.find((item) => item.id === id);
           if (block) openEditor("block", {
