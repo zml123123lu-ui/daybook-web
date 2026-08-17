@@ -6655,10 +6655,11 @@
 
       function normalizeVision(vision) {
         const source = vision && typeof vision === "object" ? vision : {};
+        const legacyHorizon = source.horizon === "near" ? "half-year" : source.horizon === "custom" ? "unlimited" : source.horizon;
         return {
           id: String(source.id || uid()),
           title: String(source.title || source.name || "").trim(),
-          horizon: ["near", "half-year", "year", "five-years", "custom"].includes(source.horizon) ? source.horizon : "near",
+          horizon: ["half-year", "year", "three-years", "five-years", "unlimited"].includes(legacyHorizon) ? legacyHorizon : "half-year",
           status: ["not-ready", "waiting", "preparing", "started", "done", "paused"].includes(source.status) ? source.status : "not-ready",
           why: String(source.why || "").trim(),
           picture: String(source.picture || source.outcome || "").trim(),
@@ -8775,7 +8776,7 @@
       }
 
       function renderVisions() {
-        const horizons = { near: "近期", "half-year": "半年", year: "一年", "five-years": "五年以后", custom: "自定义" };
+        const horizons = { "half-year": "半年", year: "一年", "three-years": "三年", "five-years": "五年", unlimited: "不限时" };
         const statuses = { "not-ready": "还不能开始", waiting: "等待条件", preparing: "可以准备", started: "已开始", done: "已实现", paused: "暂时放下" };
         const filters = [{ id: "all", label: "全部" }, ...Object.entries(horizons).map(([id, label]) => ({ id, label }))];
         $("#visionFilters").innerHTML = filters.map((item) => `<button class="chip${visionFilter === item.id ? " active" : ""}" type="button" data-vision-filter="${item.id}" aria-pressed="${visionFilter === item.id}">${item.label}</button>`).join("");
@@ -9223,7 +9224,7 @@
             title: seed.id ? "编辑愿景" : "写下一个愿景",
             fields: `
               <div class="field"><label for="editorName">我想做什么</label><input id="editorName" name="name" value="${escapeHtml(seed.title || "")}" required autocomplete="off" placeholder="例如：去看一次极光、学会法语、住进海边的房子"></div>
-              <div class="dual"><div class="field"><label for="editorHorizon">时间范围</label><select id="editorHorizon" name="horizon"><option value="near"${(seed.horizon || "near") === "near" ? " selected" : ""}>近期</option><option value="half-year"${seed.horizon === "half-year" ? " selected" : ""}>半年</option><option value="year"${seed.horizon === "year" ? " selected" : ""}>一年</option><option value="five-years"${seed.horizon === "five-years" ? " selected" : ""}>五年以后</option><option value="custom"${seed.horizon === "custom" ? " selected" : ""}>自定义</option></select></div><div class="field"><label for="editorStatus">当前状态</label><select id="editorStatus" name="status"><option value="not-ready"${(seed.status || "not-ready") === "not-ready" ? " selected" : ""}>还不能开始</option><option value="waiting"${seed.status === "waiting" ? " selected" : ""}>等待条件</option><option value="preparing"${seed.status === "preparing" ? " selected" : ""}>可以准备</option><option value="started"${seed.status === "started" ? " selected" : ""}>已开始</option><option value="done"${seed.status === "done" ? " selected" : ""}>已实现</option><option value="paused"${seed.status === "paused" ? " selected" : ""}>暂时放下</option></select></div></div>
+              <div class="dual"><div class="field"><label for="editorHorizon">时间范围</label><select id="editorHorizon" name="horizon"><option value="half-year"${(seed.horizon || "half-year") === "half-year" || seed.horizon === "near" ? " selected" : ""}>半年</option><option value="year"${seed.horizon === "year" ? " selected" : ""}>一年</option><option value="three-years"${seed.horizon === "three-years" ? " selected" : ""}>三年</option><option value="five-years"${seed.horizon === "five-years" ? " selected" : ""}>五年</option><option value="unlimited"${seed.horizon === "unlimited" || seed.horizon === "custom" ? " selected" : ""}>不限时</option></select></div><div class="field"><label for="editorStatus">当前状态</label><select id="editorStatus" name="status"><option value="not-ready"${(seed.status || "not-ready") === "not-ready" ? " selected" : ""}>还不能开始</option><option value="waiting"${seed.status === "waiting" ? " selected" : ""}>等待条件</option><option value="preparing"${seed.status === "preparing" ? " selected" : ""}>可以准备</option><option value="started"${seed.status === "started" ? " selected" : ""}>已开始</option><option value="done"${seed.status === "done" ? " selected" : ""}>已实现</option><option value="paused"${seed.status === "paused" ? " selected" : ""}>暂时放下</option></select></div></div>
               <div class="field"><label for="editorWhy">为什么想做</label><textarea id="editorWhy" name="why" placeholder="它对你有什么意义？可以只写一句。">${escapeHtml(seed.why || "")}</textarea></div>
               <div class="field"><label for="editorPicture">未来想看到的画面</label><textarea id="editorPicture" name="picture" placeholder="如果这件事实现了，你希望生活里出现什么画面？">${escapeHtml(seed.picture || "")}</textarea></div>
               <div class="field"><label for="editorCondition">等待或准备条件（可选）</label><input id="editorCondition" name="condition" value="${escapeHtml(seed.condition || "")}" autocomplete="off" placeholder="例如：等存够钱、等有连续假期"></div>
@@ -9605,7 +9606,7 @@
             const nextVision = normalizeVision({
               id: vision?.id || uid(),
               title: String(form.get("name") || "").trim(),
-              horizon: String(form.get("horizon") || "near"),
+              horizon: String(form.get("horizon") || "half-year"),
               status: String(form.get("status") || "not-ready"),
               why: String(form.get("why") || ""),
               picture: String(form.get("picture") || ""),
