@@ -5689,6 +5689,7 @@
       <nav class="nav">
         <a href="#today" data-view="today" aria-label="今日"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M7 3v3M17 3v3M4 9h16M5 5h14a1 1 0 0 1 1 1v14H4V6a1 1 0 0 1 1-1Z"/></svg></span><span class="nav-label">今日</span><span class="nav-balance" aria-hidden="true"></span></a>
         <a href="#goals" data-view="goals" aria-label="方向"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/><path d="m14 10 5-5"/></svg></span><span class="nav-label">方向</span><span class="nav-balance" aria-hidden="true"></span></a>
+        <a href="#visions" data-view="visions" aria-label="愿景"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 3v18M3 12h18"/><circle cx="12" cy="12" r="8"/></svg></span><span class="nav-label">愿景</span><span class="nav-balance" aria-hidden="true"></span></a>
         <a href="#habits" data-view="habits" aria-label="习惯"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M6 4v4M18 4v4M4 10h16M5 6h14a1 1 0 0 1 1 1v13H4V7a1 1 0 0 1 1-1Z"/><path d="m8 15 2 2 5-5"/></svg></span><span class="nav-label">习惯</span><span class="nav-balance" aria-hidden="true"></span></a>
         <a href="#maintenance" data-view="maintenance" aria-label="维护"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m14 6 4 4M5 19l7-7M3 21l3-3M13 4l2-2 5 5-2 2M8 10l3-3 6 6-3 3"/></svg></span><span class="nav-label">维护</span><span class="nav-balance" aria-hidden="true"></span></a>
         <a href="#money" data-view="money" aria-label="财务"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 9h18M16 14h2"/></svg></span><span class="nav-label">财务</span><span class="nav-balance" aria-hidden="true"></span></a>
@@ -5868,6 +5869,23 @@
                 <div class="empty goal-intro" role="note">写下一个生活方向、为什么重要、想看到的变化，再定一个可以开始的下一步。</div>
                 <div class="goal-grid" id="goalGrid"></div>
               </div>
+            </div>
+          </section>
+
+          <section class="panel view-panel" id="visions" data-panel="visions" hidden>
+            <header class="panel-header">
+              <div>
+                <h2>愿景</h2>
+                <p class="muted">有些事现在还不能开始，但不代表它不重要。</p>
+              </div>
+              <div>
+                <span class="pill status-note" id="visionCount">0 条愿景</span>
+                <button class="btn secondary small" id="addVisionBtn" type="button">写下愿景</button>
+              </div>
+            </header>
+            <div class="panel-body">
+              <div class="filters" id="visionFilters" aria-label="愿景筛选"></div>
+              <div class="goal-grid" id="visionGrid"></div>
             </div>
           </section>
         </div>
@@ -6488,6 +6506,11 @@
           heading: "生活方向",
           description: "写下方向和下一步，用推进记录看见变化。"
         },
+        visions: {
+          title: "把还不能开始的愿望，也好好保存下来。",
+          heading: "愿景",
+          description: "记录想去、想做、想成为的事，不急着把它们变成任务。"
+        },
         habits: {
           title: "让喜欢的生活，长在日常里。",
           heading: "习惯节律",
@@ -6563,6 +6586,7 @@
           habits: [],
           maintenance: [],
           goals: [],
+          visions: [],
           financeRecords: [],
           financePlan: {
             dailyIncome: 100,
@@ -6629,6 +6653,23 @@
         };
       }
 
+      function normalizeVision(vision) {
+        const source = vision && typeof vision === "object" ? vision : {};
+        return {
+          id: String(source.id || uid()),
+          title: String(source.title || source.name || "").trim(),
+          horizon: ["near", "half-year", "year", "five-years", "custom"].includes(source.horizon) ? source.horizon : "near",
+          status: ["not-ready", "waiting", "preparing", "started", "done", "paused"].includes(source.status) ? source.status : "not-ready",
+          why: String(source.why || "").trim(),
+          picture: String(source.picture || source.outcome || "").trim(),
+          condition: String(source.condition || "").trim(),
+          revisitDate: /^\d{4}-\d{2}-\d{2}$/.test(String(source.revisitDate || "")) ? String(source.revisitDate) : "",
+          linkedGoalId: String(source.linkedGoalId || ""),
+          createdAt: String(source.createdAt || new Date().toISOString()),
+          updatedAt: String(source.updatedAt || source.createdAt || new Date().toISOString())
+        };
+      }
+
       function normalizeMaintenance(item) {
         const source = item && typeof item === "object" ? item : {};
         const completions = Array.isArray(source.completions)
@@ -6689,6 +6730,7 @@
             ? source.maintenance.map(normalizeMaintenance).filter((item) => item.title)
             : [],
           goals: Array.isArray(source.goals) ? source.goals.map(normalizeGoal) : [],
+          visions: Array.isArray(source.visions) ? source.visions.map(normalizeVision).filter((item) => item.title) : [],
           financeRecords: Array.isArray(source.financeRecords) ? source.financeRecords : [],
           financePlan: normalizeFinancePlan(source.financePlan),
           notes: source.notes && typeof source.notes === "object" ? source.notes : {},
@@ -6743,6 +6785,7 @@
       let reviewPeriod = "week";
       let habitPeriod = "week";
       let strengthPeriod = "all";
+      let visionFilter = "all";
       let habitChartAnchor = new Date();
       let financeChartScope = "month";
       let financeChartMonth = todayKey().slice(0, 7);
@@ -7284,6 +7327,7 @@
         state.tasks.forEach((task) => add({ type: task.archived ? "归档计划" : "计划", title: task.title, detail: task.repeat && task.repeat !== "none" ? "重复计划" : "", date: task.date, view: "today", archived: task.archived }));
         state.timeBlocks.forEach((block) => add({ type: "时间轴", title: block.title, detail: `${block.category || "生活"} ${block.detail || ""}`, date: block.date || todayKey(), view: "today" }));
         state.goals.forEach((goal) => add({ type: "生活方向", title: goal.title, detail: `${goal.why || ""} ${goal.outcome || ""} ${goal.nextStep || ""}`, view: "goals" }));
+        state.visions.forEach((vision) => add({ type: "愿景", title: vision.title, detail: `${vision.why || ""} ${vision.picture || ""} ${vision.condition || ""}`, view: "visions", id: vision.id }));
         Object.entries(state.gratitude).forEach(([date, entry]) => add({ type: "感恩日记", title: entry?.text || "感恩日记", date, view: "today" }));
         Object.entries(state.wellbeing).forEach(([date, entry]) => add({ type: "身心", title: entry?.highlight || entry?.body || "身心记录", detail: `${entry?.drain || ""} ${entry?.nextStep || ""}`, date, view: "health" }));
         Object.entries(state.mealRecords).forEach(([date, entry]) => add({ type: "餐饮", title: [entry?.breakfast, entry?.lunch, entry?.dinner].filter(Boolean).join("、") || "餐饮记录", date, view: "health" }));
@@ -7487,6 +7531,7 @@
         renderHabits();
         renderMaintenance();
         renderGoals();
+        renderVisions();
         renderFinance();
         renderWellbeing();
         renderMealRecord();
@@ -8729,6 +8774,30 @@
         `;
       }
 
+      function renderVisions() {
+        const horizons = { near: "近期", "half-year": "半年", year: "一年", "five-years": "五年以后", custom: "自定义" };
+        const statuses = { "not-ready": "还不能开始", waiting: "等待条件", preparing: "可以准备", started: "已开始", done: "已实现", paused: "暂时放下" };
+        const filters = [{ id: "all", label: "全部" }, ...Object.entries(horizons).map(([id, label]) => ({ id, label }))];
+        $("#visionFilters").innerHTML = filters.map((item) => `<button class="chip${visionFilter === item.id ? " active" : ""}" type="button" data-vision-filter="${item.id}" aria-pressed="${visionFilter === item.id}">${item.label}</button>`).join("");
+        const visions = state.visions.filter((item) => visionFilter === "all" || item.horizon === visionFilter).sort((a, b) => String(b.updatedAt).localeCompare(String(a.updatedAt)));
+        $("#visionCount").textContent = `${state.visions.length} 条愿景`;
+        if (!visions.length) {
+          $("#visionGrid").innerHTML = `<div class="empty" role="status">还没有保存的愿望。可以写下一个现在做不到、但未来仍想拥有的东西。</div>`;
+          return;
+        }
+        $("#visionGrid").innerHTML = visions.map((item) => {
+          const vision = normalizeVision(item);
+          Object.assign(item, vision);
+          return `<article class="goal-card vision-card">
+            <header><div><h3>${escapeHtml(vision.title)}</h3><small>${horizons[vision.horizon] || "远景"} · ${statuses[vision.status] || "还不能开始"}</small></div><button class="btn ghost small" type="button" data-action="delete-vision" data-id="${escapeHtml(vision.id)}">删除</button></header>
+            ${vision.why ? `<div class="goal-section"><span>为什么想做</span><p>${escapeHtml(vision.why)}</p></div>` : ""}
+            ${vision.picture ? `<div class="goal-section"><span>未来想看到的画面</span><p>${escapeHtml(vision.picture)}</p></div>` : ""}
+            ${vision.condition ? `<div class="goal-section goal-next"><span>等待或准备条件</span><p>${escapeHtml(vision.condition)}</p></div>` : ""}
+            <div class="goal-actions"><button class="btn secondary small" type="button" data-action="edit-vision" data-id="${escapeHtml(vision.id)}">编辑</button></div>
+          </article>`;
+        }).join("");
+      }
+
       function monthlyFinance(month = todayKey().slice(0, 7)) {
         return state.financeRecords.filter((record) => String(record.date).slice(0, 7) === month);
       }
@@ -9110,7 +9179,7 @@
 
       function openEditor(type, seed = {}) {
         editorType = type;
-        if (["goal", "goal-checkin", "goal-links"].includes(type)) editingGoalId = seed.id || null;
+        if (["goal", "goal-checkin", "goal-links", "vision"].includes(type)) editingGoalId = seed.id || null;
         if (type === "block") editingBlockId = seed.id || null;
         const defaultStart = seed.start || currentTimeValue();
         const defaultEnd = seed.end || addMinutes(defaultStart, Number(seed.duration) || 60);
@@ -9148,6 +9217,16 @@
               <div class="field"><label for="editorWhy">为什么这件事重要</label><textarea id="editorWhy" name="why" placeholder="写给自己看的原因，不需要宏大。">${escapeHtml(seed.why || "")}</textarea></div>
               <div class="field"><label for="editorOutcome">我想看到的变化</label><textarea id="editorOutcome" name="outcome" placeholder="例如：睡眠稳定、衣服穿得舒服、能交出一个作品。">${escapeHtml(seed.outcome || "")}</textarea></div>
               <div class="field"><label for="editorDetail">下一步</label><input id="editorDetail" name="detail" value="${escapeHtml(seed.nextStep || seed.note || "")}" autocomplete="off" placeholder="只写一个可以开始的小动作"></div>
+            `
+          },
+          vision: {
+            title: seed.id ? "编辑愿景" : "写下一个愿景",
+            fields: `
+              <div class="field"><label for="editorName">我想做什么</label><input id="editorName" name="name" value="${escapeHtml(seed.title || "")}" required autocomplete="off" placeholder="例如：去看一次极光、学会法语、住进海边的房子"></div>
+              <div class="dual"><div class="field"><label for="editorHorizon">时间范围</label><select id="editorHorizon" name="horizon"><option value="near"${(seed.horizon || "near") === "near" ? " selected" : ""}>近期</option><option value="half-year"${seed.horizon === "half-year" ? " selected" : ""}>半年</option><option value="year"${seed.horizon === "year" ? " selected" : ""}>一年</option><option value="five-years"${seed.horizon === "five-years" ? " selected" : ""}>五年以后</option><option value="custom"${seed.horizon === "custom" ? " selected" : ""}>自定义</option></select></div><div class="field"><label for="editorStatus">当前状态</label><select id="editorStatus" name="status"><option value="not-ready"${(seed.status || "not-ready") === "not-ready" ? " selected" : ""}>还不能开始</option><option value="waiting"${seed.status === "waiting" ? " selected" : ""}>等待条件</option><option value="preparing"${seed.status === "preparing" ? " selected" : ""}>可以准备</option><option value="started"${seed.status === "started" ? " selected" : ""}>已开始</option><option value="done"${seed.status === "done" ? " selected" : ""}>已实现</option><option value="paused"${seed.status === "paused" ? " selected" : ""}>暂时放下</option></select></div></div>
+              <div class="field"><label for="editorWhy">为什么想做</label><textarea id="editorWhy" name="why" placeholder="它对你有什么意义？可以只写一句。">${escapeHtml(seed.why || "")}</textarea></div>
+              <div class="field"><label for="editorPicture">未来想看到的画面</label><textarea id="editorPicture" name="picture" placeholder="如果这件事实现了，你希望生活里出现什么画面？">${escapeHtml(seed.picture || "")}</textarea></div>
+              <div class="field"><label for="editorCondition">等待或准备条件（可选）</label><input id="editorCondition" name="condition" value="${escapeHtml(seed.condition || "")}" autocomplete="off" placeholder="例如：等存够钱、等有连续假期"></div>
             `
           },
           "goal-links": {
@@ -9521,6 +9600,22 @@
             if (goal) Object.assign(goal, nextGoal);
             else state.goals.push(nextGoal);
           }
+          if (editorType === "vision") {
+            const vision = editingGoalId ? state.visions.find((item) => item.id === editingGoalId) : null;
+            const nextVision = normalizeVision({
+              id: vision?.id || uid(),
+              title: String(form.get("name") || "").trim(),
+              horizon: String(form.get("horizon") || "near"),
+              status: String(form.get("status") || "not-ready"),
+              why: String(form.get("why") || ""),
+              picture: String(form.get("picture") || ""),
+              condition: String(form.get("condition") || ""),
+              createdAt: vision?.createdAt,
+              updatedAt: new Date().toISOString()
+            });
+            if (vision) Object.assign(vision, nextVision);
+            else state.visions.push(nextVision);
+          }
           if (editorType === "goal-links") {
             const goal = state.goals.find((item) => item.id === editingGoalId);
             if (goal) {
@@ -9805,6 +9900,17 @@
           return;
         }
         if (action === "delete-goal") removeRecord("goals", id);
+        if (action === "edit-vision") {
+          const vision = state.visions.find((item) => item.id === id);
+          if (vision) openEditor("vision", vision);
+          return;
+        }
+        if (action === "delete-vision") {
+          removeRecord("visions", id);
+          render();
+          showToast("愿景已删除");
+          return;
+        }
         render();
       });
 
@@ -9832,6 +9938,13 @@
       });
       $("#generateAiSummaryBtn").addEventListener("click", generateAiSummary);
       $("#addGoalBtn").addEventListener("click", () => openEditor("goal"));
+      $("#addVisionBtn").addEventListener("click", () => openEditor("vision"));
+      $("#visionFilters").addEventListener("click", (event) => {
+        const button = event.target.closest("[data-vision-filter]");
+        if (!button) return;
+        visionFilter = button.dataset.visionFilter || "all";
+        renderVisions();
+      });
       $("#dialogCloseBtn").addEventListener("click", closeEditor);
       $("#dialogCancelBtn").addEventListener("click", closeEditor);
       $("#editorDialog").addEventListener("click", (event) => {
