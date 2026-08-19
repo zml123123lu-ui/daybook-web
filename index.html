@@ -188,6 +188,31 @@
       font-size: 0.9rem;
     }
 
+    .decision-notice {
+      display: flex;
+      align-items: baseline;
+      gap: 0.65rem;
+      margin-bottom: 1rem;
+      padding: 0.7rem 0.85rem;
+      border-left: 3px solid var(--theme-contrast, var(--coral));
+      border-radius: var(--radius);
+      background: var(--surface-2);
+      color: var(--ink);
+    }
+
+    .decision-notice strong {
+      flex: 0 0 auto;
+      color: var(--theme-contrast, var(--berry));
+      font-size: 0.82rem;
+    }
+
+    .decision-notice span {
+      min-width: 0;
+      color: var(--muted);
+      font-size: 0.84rem;
+      line-height: 1.5;
+    }
+
     .nav-icon {
       width: 1.75rem;
       height: 1.75rem;
@@ -3047,6 +3072,24 @@
       font-size: 0.72rem;
     }
 
+    .decision-insight {
+      display: grid;
+      gap: 0.25rem;
+      padding-top: 0.75rem;
+      border-top: 1px solid var(--line);
+    }
+
+    .decision-insight strong {
+      color: var(--theme-contrast, var(--berry));
+      font-size: 0.82rem;
+    }
+
+    .decision-insight p {
+      color: var(--muted);
+      font-size: 0.84rem;
+      line-height: 1.55;
+    }
+
     .finance-entry-card h3 {
       margin: 0;
       font-family: "Songti SC", "STSong", serif;
@@ -5750,6 +5793,11 @@
         </article>
       </section>
 
+      <aside class="decision-notice" id="lowEnergyNotice" role="status" hidden>
+        <strong>今天先减一点</strong>
+        <span id="lowEnergyNoticeText"></span>
+      </aside>
+
       <section class="view-heading" id="viewHeading" aria-live="polite">
         <div>
           <h2>今天</h2>
@@ -6041,6 +6089,7 @@
                   <article class="finance-plan-stat"><span>本月还可花</span><strong id="financePlanMonthlyRemaining">¥1,500</strong></article>
                 </div>
                 <div class="finance-budget-list" id="financePlanCategories" aria-label="本月分类预算"></div>
+                <div class="decision-insight" id="financeWeeklyInsight" aria-live="polite"></div>
               </section>
               <div class="finance-overview">
                 <article class="finance-stat"><span>本月支出</span><strong id="financeExpense">¥0</strong></article>
@@ -6116,6 +6165,7 @@
                     <button class="btn secondary small" type="submit">保存餐饮记录</button>
                   </div>
                 </form>
+                <div class="decision-insight" id="mealCompletenessInsight" aria-live="polite"></div>
               </section>
             </div>
           </section>
@@ -6647,9 +6697,12 @@
           outcome: String(source.outcome || "").trim(),
           status: ["active", "paused", "done"].includes(source.status) ? source.status : "active",
           nextStep: String(source.nextStep || source.note || "").trim(),
+          weeklyFocus: String(source.weeklyFocus || "").trim(),
           linkedTaskIds: Array.isArray(source.linkedTaskIds) ? source.linkedTaskIds.map(String) : [],
           linkedHabitIds: Array.isArray(source.linkedHabitIds) ? source.linkedHabitIds.map(String) : [],
-          checkIns
+          checkIns,
+          createdAt: String(source.createdAt || new Date().toISOString()),
+          updatedAt: String(source.updatedAt || source.createdAt || new Date().toISOString())
         };
       }
 
@@ -7217,6 +7270,27 @@
         $("#maintenanceLogDate").value = todayKey();
       }
 
+      function lowEnergyTrend(wellbeing, anchorKey) {
+        const entries = [];
+        const anchor = new Date(`${anchorKey}T12:00:00`);
+        for (let offset = 0; offset < 2; offset += 1) {
+          const date = new Date(anchor);
+          date.setDate(date.getDate() - offset);
+          const key = date.toISOString().slice(0, 10);
+          const energy = Number(wellbeing?.[key]?.energy);
+          if (!energy || energy > 2) return null;
+          entries.push(energy);
+        }
+        return { days: entries.length, average: entries.reduce((sum, value) => sum + value, 0) / entries.length };
+      }
+
+      function renderLowEnergyNotice() {
+        const notice = $("#lowEnergyNotice");
+        const trend = lowEnergyTrend(state.wellbeing, activeDate);
+        notice.hidden = $("#summary").hidden || !trend;
+        if (trend) $("#lowEnergyNoticeText").textContent = `连续 ${trend.days} 天精力偏低，今天可以只保留一件必要事项，并留出一段不安排事情的时间。`;
+      }
+
       function setView(requestedView, updateHistory = false) {
         const view = VIEW_META[requestedView] ? requestedView : "today";
         const meta = VIEW_META[view];
@@ -7236,6 +7310,7 @@
           ? (activeDate === todayKey() ? "今天" : reviewDateLabel(activeDate))
           : meta.heading;
         $("#viewHeading").querySelector("p").textContent = meta.description;
+        renderLowEnergyNotice();
         if (view === "health") {
           $("#wellbeingDate").value = activeDate;
           $("#mealDate").value = activeDate;
@@ -7327,7 +7402,7 @@
         };
         state.tasks.forEach((task) => add({ type: task.archived ? "归档计划" : "计划", title: task.title, detail: task.repeat && task.repeat !== "none" ? "重复计划" : "", date: task.date, view: "today", archived: task.archived }));
         state.timeBlocks.forEach((block) => add({ type: "时间轴", title: block.title, detail: `${block.category || "生活"} ${block.detail || ""}`, date: block.date || todayKey(), view: "today" }));
-        state.goals.forEach((goal) => add({ type: "生活方向", title: goal.title, detail: `${goal.why || ""} ${goal.outcome || ""} ${goal.nextStep || ""}`, view: "goals" }));
+        state.goals.forEach((goal) => add({ type: "生活方向", title: goal.title, detail: `${goal.why || ""} ${goal.outcome || ""} ${goal.nextStep || ""} ${goal.weeklyFocus || ""}`, view: "goals" }));
         state.visions.forEach((vision) => add({ type: "愿景", title: vision.title, detail: `${vision.why || ""} ${vision.picture || ""} ${vision.condition || ""}`, view: "visions", id: vision.id }));
         Object.entries(state.gratitude).forEach(([date, entry]) => add({ type: "感恩日记", title: entry?.text || "感恩日记", date, view: "today" }));
         Object.entries(state.wellbeing).forEach(([date, entry]) => add({ type: "身心", title: entry?.highlight || entry?.body || "身心记录", detail: `${entry?.drain || ""} ${entry?.nextStep || ""}`, date, view: "health" }));
@@ -7533,6 +7608,7 @@
         renderMaintenance();
         renderGoals();
         renderVisions();
+        renderLowEnergyNotice();
         renderFinance();
         renderWellbeing();
         renderMealRecord();
@@ -7625,6 +7701,13 @@
         const thoughtEntries = state.thoughts
           .filter((thought) => dates.includes(thought.date) && thought.body?.trim())
           .map((thought) => `${thought.date} ${thought.title?.trim() || "未命名的信"}：${thought.body.trim().slice(0, 500)}`);
+        const goalProgressEntries = state.goals.flatMap((goal) => (goal.checkIns || [])
+          .filter((entry) => dates.includes(entry.date))
+          .map((entry) => `${entry.date} ${goal.title || "未命名方向"}：${entry.text || entry.nextStep || "有推进记录"}`));
+        const directionEntries = state.goals
+          .filter((goal) => goal.status !== "done" || (goal.checkIns || []).some((entry) => dates.includes(entry.date)))
+          .map((goal) => `${goal.title || "未命名方向"}（${goal.status === "done" ? "已完成" : goal.status === "paused" ? "先放一放" : "推进中"}${goal.weeklyFocus ? `，本周主线：${goal.weeklyFocus}` : ""}${goal.nextStep ? `，下一步：${goal.nextStep}` : ""}）`);
+        const visionEntries = state.visions.map((vision) => `${vision.title || "未命名愿景"}（${{ "not-ready": "还不能开始", waiting: "等待条件", preparing: "可以准备", started: "已开始", done: "已实现", paused: "暂时放下" }[vision.status] || "还不能开始"}）`);
         const periodName = { week: "本周", month: "本月", year: "本年" }[period];
         const endDate = new Date(end.getTime() - 86400000);
         return {
@@ -7644,6 +7727,9 @@
           strengthEntries,
           gratitudeEntries,
           thoughtEntries,
+          goalProgressEntries,
+          directionEntries,
+          visionEntries,
           label: period === "year"
             ? `${start.getFullYear()} 年`
             : `${start.getFullYear()}年${start.getMonth() + 1}月${start.getDate()}日 - ${endDate.getMonth() + 1}月${endDate.getDate()}日`,
@@ -7655,6 +7741,9 @@
             `身心记录：${wellbeingEntries.map((entry) => `${entry.date} 心情${entry.mood}/5 精力${entry.energy}/5 睡眠${entry.sleep || "-"}小时 身体${entry.body || "无"} 开心${entry.highlight || "无"} 消耗${entry.drain || "无"}`).join("\n") || "无"}`,
             `餐饮记录：${mealEntries.map((entry) => `${entry.date} 早餐${entry.breakfast || "无"} 午餐${entry.lunch || "无"} 晚餐${entry.dinner || "无"}`).join("\n") || "无"}`,
             `优点证据：${strengthEntries.map((entry) => `${entry.date} ${entry.title || "未命名优点"}：${entry.evidence || "无具体证据"}`).join("\n") || "无"}`,
+            `方向推进：${goalProgressEntries.join("\n") || "本周期无推进记录"}`,
+            `当前方向：${directionEntries.join("；") || "无"}`,
+            `愿景状态：${visionEntries.join("；") || "无"}`,
             `每日记录：${notes.join("\n") || "无"}`,
             `感恩日记：${gratitudeEntries.join("\n") || "无"}`,
             `写给自己的信：${thoughtEntries.join("\n") || "无"}`
@@ -7663,7 +7752,7 @@
       }
 
       function localPeriodSummary(context) {
-        if (!context.tasks.length && !context.blocks.length && !context.habitCompletions.length && !context.notes.length && !context.wellbeingEntries.length && !context.mealEntries.length && !context.strengthEntries.length && !context.gratitudeEntries.length && !context.thoughtEntries.length) {
+        if (!context.tasks.length && !context.blocks.length && !context.habitCompletions.length && !context.notes.length && !context.wellbeingEntries.length && !context.mealEntries.length && !context.strengthEntries.length && !context.gratitudeEntries.length && !context.thoughtEntries.length && !context.goalProgressEntries.length && !context.directionEntries.length && !context.visionEntries.length) {
           return "这个周期还没有足够的记录。先从一天的计划、习惯打卡或一句复盘开始，下一次这里就会有可回看的内容。";
         }
         const completion = context.tasks.length ? Math.round((context.doneTasks.length / context.tasks.length) * 100) : 0;
@@ -7675,6 +7764,10 @@
         ];
         if (doneNames) lines.push(`值得保留的推进：${doneNames}。`);
         if (pendingNames) lines.push(`可以带入下个周期：${pendingNames}。`);
+        if (context.goalProgressEntries.length) lines.push(`方向推进：${context.goalProgressEntries.slice(0, 3).join("；")}。`);
+        const weeklyFocuses = context.directionEntries.filter((entry) => entry.includes("本周主线"));
+        if (weeklyFocuses.length) lines.push(`下个周期先延续一条主线：${weeklyFocuses[0]}。`);
+        if (context.visionEntries.length) lines.push(`愿景仍被保留：${context.visionEntries.slice(0, 3).join("；")}。不需要立刻把它们全部变成任务。`);
         lines.push(context.pendingTasks.length ? "下个周期先给一项未完成计划留出明确时间，再继续新增。" : "下个周期保持现在的节奏，同时给自己留一点空白。" );
         return lines.join("\n\n");
       }
@@ -8034,37 +8127,27 @@
       }
 
       function categoryDurationsForBlocks(blocks) {
-        const intervalsByCategory = new Map(TIME_CATEGORIES.map((category) => [category, []]));
+        const owners = Array(1440).fill(null);
         blocks.forEach((block) => {
           const category = TIME_CATEGORIES.includes(block.category) ? block.category : "生活";
           const start = timeToMinutes(block.start || block.time || "00:00");
           const duration = Math.min(1440, Math.max(0, blockDurationMinutes(block)));
-          const end = start + duration;
-          const intervals = intervalsByCategory.get(category);
-          if (end <= 1440) {
-            intervals.push([start, end]);
-          } else {
-            intervals.push([start, 1440], [0, end - 1440]);
+          for (let offset = 0; offset < duration; offset += 1) {
+            const minute = (start + offset) % 1440;
+            const current = owners[minute];
+            if (!current || duration < current.duration || (duration === current.duration && start > current.start)) {
+              owners[minute] = { category, duration, start };
+            }
           }
         });
-        return TIME_CATEGORIES
-          .map((category) => {
-            const intervals = intervalsByCategory.get(category).sort((a, b) => a[0] - b[0]);
-            let minutes = 0;
-            let mergedEnd = -1;
-            intervals.forEach(([start, end]) => {
-              if (start > mergedEnd) {
-                minutes += end - start;
-                mergedEnd = end;
-              } else if (end > mergedEnd) {
-                minutes += end - mergedEnd;
-                mergedEnd = end;
-              }
-            });
-            return { category, minutes };
-          })
+        const totals = new Map(TIME_CATEGORIES.map((category) => [category, 0]));
+        owners.forEach((owner) => {
+          if (owner) totals.set(owner.category, totals.get(owner.category) + 1);
+        });
+        return [...totals.entries()]
+          .map(([category, minutes]) => ({ category, minutes }))
           .filter((item) => item.minutes > 0)
-          .sort((a, b) => b.minutes - a.minutes);
+          .sort((a, b) => b.minutes - a.minutes || TIME_CATEGORIES.indexOf(a.category) - TIME_CATEGORIES.indexOf(b.category));
       }
 
       function formatDuration(minutes) {
@@ -8102,7 +8185,7 @@
         const section = $("#reviewTimeDistribution");
         section.hidden = !durations.length;
         if (!durations.length) return;
-        $("#reviewTimeDistributionHint").textContent = "按已记录时间轴统计";
+        $("#reviewTimeDistributionHint").textContent = "重叠时段只计一次，较具体的时间块优先";
         $("#reviewTimeCategoryChart").innerHTML = categoryChartMarkup(durations);
       }
 
@@ -8418,7 +8501,7 @@
                 length: context.period === "year" ? "long" : "medium"
               });
               text = await summarizer.summarize(context.text, {
-                context: `请用温和、具体的中文，完成${context.period === "week" ? "每周" : context.period === "month" ? "每月" : "每年"}复盘。总结完成与未完成的模式、分类时间分配、习惯和情绪记录中反复出现的信号，并给出下个周期 1-3 个可执行建议。不要编造数据，也不要给出任务总时间。`
+                context: `请用温和、具体的中文，完成${context.period === "week" ? "每周" : context.period === "month" ? "每月" : "每年"}复盘。总结完成与未完成的模式、分类时间分配、习惯和情绪记录中反复出现的信号，并结合方向推进、本周主线和愿景状态，给出下个周期 1-3 个可执行建议。愿景不必自动拆成任务；可以指出哪些适合继续保留、暂缓或转入方向。不要编造数据，也不要给出任务总时间。`
               });
               mode = "浏览器本地 AI";
               summarizer.destroy?.();
@@ -8747,6 +8830,7 @@
                 <p>${escapeHtml(normalized.nextStep || "先补一个今天或本周能开始的小动作。")}</p>
                 <small class="goal-step-date">${linkSummary}</small>
               </div>
+              ${normalized.weeklyFocus ? `<div class="goal-section"><span>本周主线</span><p>${escapeHtml(normalized.weeklyFocus)}</p></div>` : ""}
               <div class="goal-section">
                 <span>最近推进</span>
                 ${latestCheckIn ? `<div class="goal-latest"><time>${escapeHtml(reviewDateLabel(latestCheckIn.date, false))}</time><p>${escapeHtml(latestCheckIn.text || latestCheckIn.nextStep)}</p></div>` : `<p>还没有推进记录。做过一点点之后，回来写一句就够。</p>`}
@@ -8878,6 +8962,50 @@
         const spent = monthExpenses.reduce((sum, record) => sum + (Number(record.amount) || 0), 0);
         const budget = budgets.reduce((sum, item) => sum + (Number(item.amount) || 0), 0);
         return { budget, spent, remaining: budget - spent, categories: budgets };
+      }
+
+      function financeWeeklyInsight(records, anchorKey, plan) {
+        const anchor = new Date(`${anchorKey}T12:00:00`);
+        const start = new Date(anchor);
+        start.setDate(start.getDate() - ((start.getDay() + 6) % 7));
+        const end = new Date(start);
+        end.setDate(end.getDate() + 6);
+        const startKey = start.toISOString().slice(0, 10);
+        const endKey = end.toISOString().slice(0, 10);
+        const expenses = records.filter((record) => record.type === "expense" && record.date >= startKey && record.date <= endKey);
+        const spent = expenses.reduce((sum, record) => sum + (Number(record.amount) || 0), 0);
+        const limit = (Number(plan?.dailySpendingLimit) || 0) * 7;
+        const categoryTotals = new Map();
+        expenses.forEach((record) => categoryTotals.set(record.category || "未分类", (categoryTotals.get(record.category || "未分类") || 0) + (Number(record.amount) || 0)));
+        const topCategory = [...categoryTotals.entries()].sort((a, b) => b[1] - a[1])[0]?.[0] || "";
+        const historyStart = new Date(start);
+        historyStart.setDate(historyStart.getDate() - 56);
+        const historyStartKey = historyStart.toISOString().slice(0, 10);
+        const normalizeName = (record) => String(record.name || "").trim().toLocaleLowerCase("zh-CN");
+        const counts = new Map();
+        records.filter((record) => record.type === "expense" && record.date >= historyStartKey && record.date <= endKey).forEach((record) => {
+          const name = normalizeName(record);
+          if (name) counts.set(name, (counts.get(name) || 0) + 1);
+        });
+        const repeatedNames = [...new Set(expenses.map(normalizeName).filter((name) => (counts.get(name) || 0) >= 2))];
+        const largest = expenses.slice().sort((a, b) => (Number(b.amount) || 0) - (Number(a.amount) || 0))[0] || null;
+        const largestOneTime = largest && !repeatedNames.includes(normalizeName(largest)) ? largest : null;
+        return { spent, limit, remaining: limit - spent, topCategory, repeatedNames, largestOneTime };
+      }
+
+      function renderFinanceWeeklyInsight() {
+        const insight = financeWeeklyInsight(state.financeRecords, todayKey(), state.financePlan);
+        const node = $("#financeWeeklyInsight");
+        if (!insight.spent) {
+          node.innerHTML = "<strong>本周观察</strong><p>本周还没有支出记录，暂时不做消费判断。</p>";
+          return;
+        }
+        const difference = Math.abs(insight.remaining);
+        const parts = [`本周已花 ${currency.format(insight.spent)}，${insight.remaining >= 0 ? `距离周额度还剩 ${currency.format(difference)}` : `超过周额度 ${currency.format(difference)}`}。`];
+        if (insight.topCategory) parts.push(`目前支出最多的是${insight.topCategory}。`);
+        if (insight.repeatedNames.length) parts.push(`${insight.repeatedNames.slice(0, 2).join("、")}近期重复出现，更接近日常持续消费。`);
+        if (insight.largestOneTime) parts.push(`${insight.largestOneTime.name || insight.largestOneTime.category || "最大一笔支出"}是本周较大的单笔记录，更像一次性支出，请按实际用途判断。`);
+        node.innerHTML = `<strong>本周观察</strong><p>${escapeHtml(parts.join(""))}</p>`;
       }
 
       function monthKeyFromDate(date) {
@@ -9021,6 +9149,7 @@
         $("#financePlanMonthlySpent").textContent = currency.format(monthlyPlan.spent);
         $("#financePlanMonthlyRemaining").textContent = currency.format(monthlyPlan.remaining);
         $("#financePlanCategories").innerHTML = monthlyPlan.categories.map((item) => `<div class="finance-budget-item"><span>${escapeHtml(item.name)}</span><strong>${currency.format(item.spent)} / ${currency.format(item.amount)}</strong><small>剩余 ${currency.format(item.remaining)}</small></div>`).join("");
+        renderFinanceWeeklyInsight();
         $("#financeImportStatus").textContent = state.lastImport
           ? `${state.lastImport.file} · 新增 ${state.lastImport.added} · 覆盖 ${state.lastImport.overwritten}`
           : "尚未导入";
@@ -9088,6 +9217,39 @@
 
       }
 
+      function mealCompletenessInsight(records, anchorKey) {
+        const anchor = new Date(`${anchorKey}T12:00:00`);
+        const labels = [["breakfast", "早餐"], ["lunch", "午餐"], ["dinner", "晚餐"]];
+        const entries = [];
+        for (let offset = 6; offset >= 0; offset -= 1) {
+          const date = new Date(anchor);
+          date.setDate(date.getDate() - offset);
+          const key = date.toISOString().slice(0, 10);
+          if (records?.[key]) entries.push(records[key]);
+        }
+        const meals = entries.reduce((sum, entry) => sum + labels.filter(([field]) => String(entry[field] || "").trim()).length, 0);
+        const missing = labels.map(([field, label]) => ({ label, count: entries.filter((entry) => !String(entry[field] || "").trim()).length }));
+        const mostMissing = missing.sort((a, b) => b.count - a.count)[0];
+        return {
+          recordedDays: entries.length,
+          meals,
+          completeness: Math.round((meals / 21) * 100),
+          mostMissing: mostMissing?.count ? mostMissing.label : ""
+        };
+      }
+
+      function renderMealCompletenessInsight() {
+        const selectedDate = $("#mealDate").value || todayKey();
+        const insight = mealCompletenessInsight(state.mealRecords, selectedDate);
+        const node = $("#mealCompletenessInsight");
+        if (!insight.recordedDays) {
+          node.innerHTML = "<strong>近七天记录</strong><p>还没有餐饮记录，先从最容易记住的一餐开始。</p>";
+          return;
+        }
+        const missing = insight.mostMissing ? `已记录的日期里，${insight.mostMissing}最常留空。` : "已记录的日期里，三餐都较完整。";
+        node.innerHTML = `<strong>近七天记录</strong><p>记录了 ${insight.recordedDays} 天、共 ${insight.meals} 餐，占七天三餐的 ${insight.completeness}%。${missing}这里只判断记录完整度，不估算热量。</p>`;
+      }
+
       function renderMealRecord() {
         const selectedDate = $("#mealDate").value || todayKey();
         const record = state.mealRecords[selectedDate] || {};
@@ -9096,6 +9258,7 @@
         $("#mealLunch").value = record.lunch || "";
         $("#mealDinner").value = record.dinner || "";
         $("#mealSaveStatus").textContent = record.updatedAt ? "这一天已有餐饮记录" : "记录会保存在本机";
+        renderMealCompletenessInsight();
       }
 
       function mealFormValues() {
@@ -9218,6 +9381,7 @@
               <div class="field"><label for="editorWhy">为什么这件事重要</label><textarea id="editorWhy" name="why" placeholder="写给自己看的原因，不需要宏大。">${escapeHtml(seed.why || "")}</textarea></div>
               <div class="field"><label for="editorOutcome">我想看到的变化</label><textarea id="editorOutcome" name="outcome" placeholder="例如：睡眠稳定、衣服穿得舒服、能交出一个作品。">${escapeHtml(seed.outcome || "")}</textarea></div>
               <div class="field"><label for="editorDetail">下一步</label><input id="editorDetail" name="detail" value="${escapeHtml(seed.nextStep || seed.note || "")}" autocomplete="off" placeholder="只写一个可以开始的小动作"></div>
+              <div class="field"><label for="editorWeeklyFocus">本周主线（可选）</label><input id="editorWeeklyFocus" name="weeklyFocus" value="${escapeHtml(seed.weeklyFocus || "")}" autocomplete="off" placeholder="这周只想优先推进什么"></div>
             `
           },
           vision: {
@@ -9593,6 +9757,7 @@
               outcome: String(form.get("outcome") || "").trim(),
               status: String(form.get("status") || "active"),
               nextStep: String(form.get("detail") || "").trim(),
+              weeklyFocus: String(form.get("weeklyFocus") || "").trim(),
               linkedTaskIds: goal?.linkedTaskIds || [],
               linkedHabitIds: goal?.linkedHabitIds || [],
               checkIns: goal?.checkIns || [],
