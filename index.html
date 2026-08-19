@@ -565,6 +565,7 @@
     .reading-entry strong { min-width: 0; overflow-wrap: anywhere; }
     .reading-entry time { color: var(--muted); font-size: 0.78rem; }
     .reading-month-title { color: var(--muted); font-size: 0.78rem; font-weight: 760; }
+    .reading-year-insight { min-height: 1.35rem; margin: 0 0 0.7rem; font-size: 0.82rem; }
 
     .strength-entry p {
       margin-top: 0.28rem;
@@ -2556,9 +2557,7 @@
         grid-template-columns: 1fr;
       }
 
-      .reading-form { grid-template-columns: 1fr 1fr; }
-      .reading-form .field:first-child,
-      .reading-form .btn { grid-column: 1 / -1; }
+      .reading-form { grid-template-columns: 1fr; }
       .reading-toolbar { align-items: stretch; flex-direction: column; }
       .reading-period-nav { justify-content: space-between; }
       .reading-entry { grid-template-columns: minmax(0, 1fr) auto; }
@@ -6255,7 +6254,7 @@
                 <h2>阅读记录</h2>
                 <p class="muted">记下读过的书，按月查看，也能在年视图里回看每个月的阅读。</p>
               </div>
-              <span class="pill status-note" id="readingCount">0 本书</span>
+              <span class="pill status-note" id="readingCount">本月 0 本</span>
             </header>
             <div class="panel-body">
               <form class="reading-form" id="readingForm">
@@ -6275,6 +6274,7 @@
                   <button class="btn ghost small" type="button" data-action="reading-current">本期</button>
                 </div>
               </div>
+              <p class="muted reading-year-insight" id="readingYearInsight" aria-live="polite"></p>
               <div class="reading-list" id="readingList" role="list"></div>
             </div>
           </section>
@@ -7513,10 +7513,15 @@
       function renderReading() {
         const books = Array.isArray(state.readingBooks) ? state.readingBooks : [];
         const year = readingAnchor.slice(0, 4);
-        const visible = readingPeriod === "month" ? readingBooksForMonth(books, readingAnchor) : readingBooksForYear(books, year);
-        $("#readingCount").textContent = `${readingPeriod === "month" ? visible.length : readingBooksForYear(books, year).length} 本书`;
+        const yearBooks = readingBooksForYear(books, year);
+        const visible = readingPeriod === "month" ? readingBooksForMonth(books, readingAnchor) : yearBooks;
+        $("#readingCount").textContent = readingPeriod === "month" ? `${monthLabel(readingAnchor)} ${visible.length} 本` : `${year} 年 ${yearBooks.length} 本`;
         $("#readingDate").value = $("#readingDate").value || activeDate;
         $("#readingPeriodLabel").textContent = readingPeriod === "month" ? monthLabel(readingAnchor) : `${year} 年`;
+        const coveredMonths = new Set(yearBooks.map((book) => String(book.date).slice(0, 7))).size;
+        $("#readingYearInsight").textContent = readingPeriod === "year"
+          ? `${year} 年读了 ${yearBooks.length} 本，覆盖 ${coveredMonths} 个月。`
+          : `${monthLabel(readingAnchor)}读了 ${visible.length} 本。`;
         document.querySelectorAll("[data-reading-period]").forEach((button) => {
           const active = button.dataset.readingPeriod === readingPeriod;
           button.classList.toggle("active", active);
@@ -7793,6 +7798,7 @@
           || state.wellbeing[key]
           || state.mealRecords[key]
           || state.strengths.some((entry) => entry.date === key)
+          || state.readingBooks.some((book) => book.date === key)
           || state.gratitude[key]?.text
           || state.thoughts.some((thought) => thought.date === key && thought.body?.trim())
         );
