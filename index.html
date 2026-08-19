@@ -7794,7 +7794,7 @@
           details.push(`<div class="review-detail"><strong>近期计划</strong><span>${escapeHtml(tasks.map((task) => `${taskDoneOnDate(task, key) ? "已完成" : "未完成"}：${task.title}`).join("\n"))}</span></div>`);
         }
         if (blocks.length) {
-          details.push(`<div class="review-detail"><strong>今日时间轴</strong><span>${escapeHtml(blocks.map((block) => `${block.start || block.time || ""}-${block.end || ""}：${block.title}${block.category ? `（${block.category}）` : ""}`).join("\n"))}</span></div>`);
+          details.push(`<div class="review-detail"><strong>今日时间轴</strong><span>${escapeHtml(blocks.map((block) => `${block.start || block.time || ""}-${block.end || ""}：${block.title}${block.category ? `（${block.category}）` : ""} · ${formatDuration(blockDurationMinutes(block))}`).join("\n"))}</span></div>`);
         }
         if (wellbeing) {
           const wellbeingLines = [
@@ -8127,22 +8127,10 @@
       }
 
       function categoryDurationsForBlocks(blocks) {
-        const owners = Array(1440).fill(null);
+        const totals = new Map(TIME_CATEGORIES.map((category) => [category, 0]));
         blocks.forEach((block) => {
           const category = TIME_CATEGORIES.includes(block.category) ? block.category : "生活";
-          const start = timeToMinutes(block.start || block.time || "00:00");
-          const duration = Math.min(1440, Math.max(0, blockDurationMinutes(block)));
-          for (let offset = 0; offset < duration; offset += 1) {
-            const minute = (start + offset) % 1440;
-            const current = owners[minute];
-            if (!current || duration < current.duration || (duration === current.duration && start > current.start)) {
-              owners[minute] = { category, duration, start };
-            }
-          }
-        });
-        const totals = new Map(TIME_CATEGORIES.map((category) => [category, 0]));
-        owners.forEach((owner) => {
-          if (owner) totals.set(owner.category, totals.get(owner.category) + 1);
+          totals.set(category, totals.get(category) + Math.min(1440, Math.max(0, blockDurationMinutes(block))));
         });
         return [...totals.entries()]
           .map(([category, minutes]) => ({ category, minutes }))
@@ -8185,7 +8173,7 @@
         const section = $("#reviewTimeDistribution");
         section.hidden = !durations.length;
         if (!durations.length) return;
-        $("#reviewTimeDistributionHint").textContent = "重叠时段只计一次，较具体的时间块优先";
+        $("#reviewTimeDistributionHint").textContent = "按每项记录加总，重叠任务会分别计入";
         $("#reviewTimeCategoryChart").innerHTML = categoryChartMarkup(durations);
       }
 
