@@ -26,7 +26,7 @@
 
   function hasMeaningfulState(state) {
     if (!isPlainObject(state)) return false;
-    const arrayKeys = ["tasks", "timeBlocks", "habits", "maintenance", "goals", "visions", "financeRecords", "strengths", "thoughts"];
+    const arrayKeys = ["tasks", "timeBlocks", "habits", "maintenance", "goals", "visions", "financeRecords", "strengths", "readingBooks", "thoughts"];
     const recordKeys = ["notes", "dailySummaries", "aiSummaries", "periodSummaries", "wellbeing", "mealRecords", "gratitude"];
     return arrayKeys.some((key) => Array.isArray(state[key]) && state[key].length > 0)
       || recordKeys.some((key) => isPlainObject(state[key]) && Object.keys(state[key]).length > 0);
@@ -90,7 +90,7 @@
     const local = isPlainObject(localState) ? localState : {};
     const cloud = isPlainObject(cloudState) ? cloudState : {};
     const merged = { ...cloud, ...local };
-    const arrayKeys = ["tasks", "timeBlocks", "habits", "maintenance", "goals", "visions", "financeRecords", "strengths", "thoughts"];
+    const arrayKeys = ["tasks", "timeBlocks", "habits", "maintenance", "goals", "visions", "financeRecords", "strengths", "readingBooks", "thoughts"];
     const keyedKeys = ["notes", "dailySummaries", "aiSummaries", "periodSummaries", "wellbeing", "mealRecords", "gratitude"];
     const tombstones = mergeTombstones(local.deletedRecords, cloud.deletedRecords);
     arrayKeys.forEach((key) => {
