@@ -528,7 +528,7 @@
 
     .reading-form {
       display: grid;
-      grid-template-columns: minmax(0, 1fr) 10rem auto;
+      grid-template-columns: minmax(0, 1.5fr) repeat(2, minmax(0, 0.85fr)) minmax(0, 0.65fr) minmax(0, 0.75fr) auto;
       gap: 0.65rem;
       align-items: end;
       padding-bottom: 1rem;
@@ -548,22 +548,31 @@
     .reading-period-nav { justify-content: flex-end; }
     .reading-period-label { min-width: 6.5rem; text-align: center; }
     .reading-list,
+    .reading-month-books {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(9rem, 1fr));
+      gap: 0.65rem;
+    }
+
     .reading-year-groups,
     .reading-month-group { display: grid; gap: 0.65rem; }
 
     .reading-entry {
-      display: grid;
-      grid-template-columns: minmax(0, 1fr) auto auto;
-      align-items: center;
-      gap: 0.75rem;
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+      gap: 0.5rem;
+      aspect-ratio: 1 / 1;
+      min-width: 0;
       padding: 0.8rem;
       border: 1px solid var(--line);
       border-radius: var(--radius);
       background: var(--surface-2);
     }
 
-    .reading-entry strong { min-width: 0; overflow-wrap: anywhere; }
-    .reading-entry time { color: var(--muted); font-size: 0.78rem; }
+    .reading-entry strong { min-width: 0; overflow-wrap: anywhere; line-height: 1.4; }
+    .reading-entry-meta { display: grid; gap: 0.22rem; color: var(--muted); font-size: 0.72rem; line-height: 1.35; }
+    .reading-entry .btn { align-self: flex-start; margin-top: auto; }
     .reading-month-title { color: var(--muted); font-size: 0.78rem; font-weight: 760; }
     .reading-year-insight { min-height: 1.35rem; margin: 0 0 0.7rem; font-size: 0.82rem; }
 
@@ -622,6 +631,8 @@
     .field {
       display: grid;
       gap: 0.35rem;
+      min-width: 0;
+      max-width: 100%;
     }
 
     label {
@@ -2560,8 +2571,8 @@
       .reading-form { grid-template-columns: 1fr; }
       .reading-toolbar { align-items: stretch; flex-direction: column; }
       .reading-period-nav { justify-content: space-between; }
-      .reading-entry { grid-template-columns: minmax(0, 1fr) auto; }
-      .reading-entry time { grid-column: 1; }
+      .reading-list,
+      .reading-month-books { grid-template-columns: repeat(auto-fill, minmax(8rem, 1fr)); }
     }
 
     @media (max-width: 560px) {
@@ -4349,6 +4360,17 @@
         box-sizing: border-box !important;
         justify-self: stretch;
         font-size: 16px;
+      }
+
+      #maintenanceLogDate,
+      #financeEntryDate,
+      #wellbeingDate,
+      #strengthDate,
+      #readingStartDate,
+      #readingEndDate {
+        min-width: 0;
+        max-width: 100%;
+        padding-inline: 0.65rem;
       }
 
       #editorDialog input[type="date"]::-webkit-date-and-time-value,
@@ -6222,14 +6244,14 @@
             <header class="panel-header">
               <div>
                 <h2>我的优点</h2>
-                <p class="muted">不写“我应该很好”，只记录今天真实做到的事和它证明的能力。</p>
+                <p class="muted">记录真实做到的事，看见自己的能力。</p>
               </div>
               <span class="pill status-note" id="strengthCount">0 条记录</span>
             </header>
             <div class="panel-body">
               <form class="strength-form" id="strengthForm">
                 <div class="field"><label for="strengthDate">发生日期</label><input id="strengthDate" name="date" type="date" required></div>
-                <div class="field"><label for="strengthTitle">我展现了什么优点</label><input id="strengthTitle" name="title" autocomplete="off" required placeholder="例如：有耐心、守信用、愿意开始"></div>
+                <div class="field"><label for="strengthTitle">展现的优点</label><input id="strengthTitle" name="title" autocomplete="off" required placeholder="例如：有耐心、守信用、愿意开始"></div>
                 <div class="field"><label for="strengthEvidence">具体证据</label><textarea id="strengthEvidence" name="evidence" required placeholder="今天哪件事证明了它？写一件小事就够了。"></textarea></div>
                 <button class="btn" type="submit">保存这条证据</button>
               </form>
@@ -6259,7 +6281,10 @@
             <div class="panel-body">
               <form class="reading-form" id="readingForm">
                 <div class="field"><label for="readingTitle">书名</label><input id="readingTitle" name="title" autocomplete="off" required placeholder="写下这本书的名字"></div>
-                <div class="field"><label for="readingDate">阅读日期</label><input id="readingDate" name="date" type="date" required></div>
+                <div class="field"><label for="readingStartDate">开始日期</label><input id="readingStartDate" name="startDate" type="date" required></div>
+                <div class="field"><label for="readingEndDate">结束日期</label><input id="readingEndDate" name="endDate" type="date" required></div>
+                <div class="field"><label for="readingDuration">阅读时长（小时）</label><input id="readingDuration" name="duration" type="number" min="0" max="999" step="0.5" inputmode="decimal" placeholder="可不填"></div>
+                <div class="field"><label for="readingMedium">阅读介质</label><select id="readingMedium" name="medium"><option value="paper">实体书</option><option value="ebook">电子书</option></select></div>
                 <button class="btn" type="submit">记录这本书</button>
               </form>
               <div class="reading-toolbar">
@@ -6841,10 +6866,19 @@
 
       function normalizeReadingBook(item) {
         const source = item && typeof item === "object" ? item : {};
+        const date = /^\d{4}-\d{2}-\d{2}$/.test(String(source.date || source.endDate || source.startDate || ""))
+          ? String(source.date || source.endDate || source.startDate)
+          : todayKey();
+        const startDate = /^\d{4}-\d{2}-\d{2}$/.test(String(source.startDate || "")) ? String(source.startDate) : date;
+        const endDate = /^\d{4}-\d{2}-\d{2}$/.test(String(source.endDate || "")) ? String(source.endDate) : date;
         return {
           id: String(source.id || uid()),
           title: String(source.title || source.name || "").trim(),
-          date: /^\d{4}-\d{2}-\d{2}$/.test(String(source.date || "")) ? String(source.date) : todayKey(),
+          date: endDate,
+          startDate,
+          endDate,
+          duration: Math.max(0, Math.min(999, Number(source.duration) || 0)),
+          medium: ["paper", "ebook"].includes(source.medium) ? source.medium : "paper",
           createdAt: String(source.createdAt || source.updatedAt || new Date().toISOString()),
           updatedAt: String(source.updatedAt || source.createdAt || new Date().toISOString())
         };
@@ -7366,7 +7400,8 @@
         $("#wellbeingDate").value = todayKey();
         $("#mealDate").value = todayKey();
         $("#strengthDate").value = activeDate;
-        $("#readingDate").value = activeDate;
+        $("#readingStartDate").value = activeDate;
+        $("#readingEndDate").value = activeDate;
         $("#maintenanceLogDate").value = todayKey();
       }
 
@@ -7510,13 +7545,31 @@
         return `${year} 年 ${month} 月`;
       }
 
+      function readingBookMeta(book) {
+        const start = String(book.startDate || book.date || "").replaceAll("-", "/");
+        const end = String(book.endDate || book.date || "").replaceAll("-", "/");
+        const dates = start === end ? `完成 ${end}` : `${start} - ${end}`;
+        const duration = Number(book.duration) > 0 ? `${book.duration} 小时` : "时长未记录";
+        const medium = book.medium === "ebook" ? "电子书" : "实体书";
+        return `${dates} · ${duration} · ${medium}`;
+      }
+
+      function readingBookCard(book) {
+        return `<article class="reading-entry" role="listitem">
+          <strong>${escapeHtml(book.title)}</strong>
+          <div class="reading-entry-meta">${escapeHtml(readingBookMeta(book))}</div>
+          <button class="btn ghost small" type="button" data-action="delete-reading" data-id="${escapeHtml(book.id)}">删除</button>
+        </article>`;
+      }
+
       function renderReading() {
         const books = Array.isArray(state.readingBooks) ? state.readingBooks : [];
         const year = readingAnchor.slice(0, 4);
         const yearBooks = readingBooksForYear(books, year);
         const visible = readingPeriod === "month" ? readingBooksForMonth(books, readingAnchor) : yearBooks;
         $("#readingCount").textContent = readingPeriod === "month" ? `${monthLabel(readingAnchor)} ${visible.length} 本` : `${year} 年 ${yearBooks.length} 本`;
-        $("#readingDate").value = $("#readingDate").value || activeDate;
+        $("#readingStartDate").value = $("#readingStartDate").value || activeDate;
+        $("#readingEndDate").value = $("#readingEndDate").value || activeDate;
         $("#readingPeriodLabel").textContent = readingPeriod === "month" ? monthLabel(readingAnchor) : `${year} 年`;
         const coveredMonths = new Set(yearBooks.map((book) => String(book.date).slice(0, 7))).size;
         $("#readingYearInsight").textContent = readingPeriod === "year"
@@ -7532,13 +7585,7 @@
           return;
         }
         if (readingPeriod === "month") {
-          $("#readingList").innerHTML = visible.map((book) => `
-            <article class="reading-entry" role="listitem">
-              <strong>${escapeHtml(book.title)}</strong>
-              <time datetime="${escapeHtml(book.date)}">${escapeHtml(book.date.replaceAll("-", "/"))}</time>
-              <button class="btn ghost small" type="button" data-action="delete-reading" data-id="${escapeHtml(book.id)}">删除</button>
-            </article>
-          `).join("");
+          $("#readingList").innerHTML = visible.map(readingBookCard).join("");
           return;
         }
         const groups = new Map();
@@ -7550,7 +7597,7 @@
         $("#readingList").innerHTML = `<div class="reading-year-groups">${[...groups.entries()].map(([month, monthBooks]) => `
           <section class="reading-month-group" aria-labelledby="reading-month-${month}">
             <h3 class="reading-month-title" id="reading-month-${month}">${escapeHtml(monthLabel(month))} · ${monthBooks.length} 本</h3>
-            ${monthBooks.map((book) => `<article class="reading-entry" role="listitem"><strong>${escapeHtml(book.title)}</strong><time datetime="${escapeHtml(book.date)}">${escapeHtml(book.date.replaceAll("-", "/"))}</time><button class="btn ghost small" type="button" data-action="delete-reading" data-id="${escapeHtml(book.id)}">删除</button></article>`).join("")}
+            <div class="reading-month-books">${monthBooks.map(readingBookCard).join("")}</div>
           </section>
         `).join("")}</div>`;
       }
@@ -9867,12 +9914,26 @@
         if (event.target.id === "readingForm") {
           event.preventDefault();
           const form = new FormData(event.target);
-          const book = normalizeReadingBook({ id: uid(), title: form.get("title"), date: form.get("date") });
+          const startDate = String(form.get("startDate") || activeDate);
+          const endDate = String(form.get("endDate") || startDate);
+          if (endDate < startDate) {
+            showToast("结束日期不能早于开始日期");
+            return;
+          }
+          const book = normalizeReadingBook({
+            id: uid(),
+            title: form.get("title"),
+            startDate,
+            endDate,
+            duration: form.get("duration"),
+            medium: form.get("medium")
+          });
           if (!book.title) return;
           state.readingBooks.push(book);
           readingAnchor = book.date.slice(0, 7);
           event.target.reset();
-          $("#readingDate").value = activeDate;
+          $("#readingStartDate").value = activeDate;
+          $("#readingEndDate").value = activeDate;
           render();
           showToast("这本书已记录");
         }
