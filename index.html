@@ -5325,6 +5325,14 @@
       color: var(--theme-muted);
     }
 
+    html[data-appearance-theme] .category-bar-fill { background: var(--theme-accent); }
+    html[data-appearance-theme] .category-bar-row[data-category="学习"] .category-bar-fill { background: color-mix(in srgb, var(--theme-accent) 58%, var(--theme-contrast)); }
+    html[data-appearance-theme] .category-bar-row[data-category="生活"] .category-bar-fill { background: color-mix(in srgb, var(--theme-accent) 72%, var(--theme-contrast)); }
+    html[data-appearance-theme] .category-bar-row[data-category="健康"] .category-bar-fill { background: color-mix(in srgb, var(--theme-accent) 44%, var(--theme-contrast)); }
+    html[data-appearance-theme] .category-bar-row[data-category="社交"] .category-bar-fill { background: color-mix(in srgb, var(--theme-accent) 36%, var(--theme-contrast)); }
+    html[data-appearance-theme] .category-bar-row[data-category="娱乐"] .category-bar-fill { background: color-mix(in srgb, var(--theme-accent) 84%, var(--theme-contrast)); }
+    html[data-appearance-theme] .category-bar-row[data-category="休息"] .category-bar-fill { background: color-mix(in srgb, var(--theme-accent) 26%, var(--theme-contrast)); }
+
     html[data-appearance-theme] .category-bar-track {
       background: var(--theme-surface-2);
     }
@@ -7484,6 +7492,13 @@
           if (active) link.setAttribute("aria-current", "page");
           else link.removeAttribute("aria-current");
         });
+        document.querySelectorAll("#mobileNav [data-view-target]").forEach((button) => {
+          button.classList.toggle("active", button.dataset.viewTarget === view);
+        });
+        const mobileMoreMenu = $("#mobileMoreMenu");
+        if (mobileMoreMenu) mobileMoreMenu.hidden = true;
+        const mobileMoreButton = document.querySelector('#mobileNav [data-action="mobile-more"]');
+        if (mobileMoreButton) mobileMoreButton.setAttribute("aria-expanded", "false");
         $("#summary").hidden = view !== "today";
         $("#dayNavigator").hidden = view !== "today";
         $("#pageTitle").textContent = meta.title;
@@ -10677,16 +10692,11 @@
         if (synced) setSyncDialogMessage("已使用云端最新数据。");
       });
 
-        document.querySelectorAll("[data-view]").forEach((link) => {
+      document.querySelectorAll("[data-view]").forEach((link) => {
         link.addEventListener("click", (event) => {
           event.preventDefault();
           setView(link.dataset.view, true);
         });
-        document.querySelectorAll("#mobileNav [data-view-target]").forEach((button) => button.classList.toggle("active", button.dataset.viewTarget === view));
-        const mobileMoreMenu = $("#mobileMoreMenu");
-        if (mobileMoreMenu) mobileMoreMenu.hidden = true;
-        const mobileMoreButton = document.querySelector('#mobileNav [data-action="mobile-more"]');
-        if (mobileMoreButton) mobileMoreButton.setAttribute("aria-expanded", "false");
       });
 
       window.addEventListener("popstate", () => setView(location.hash.slice(1)));
