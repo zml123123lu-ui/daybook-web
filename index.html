@@ -5720,14 +5720,15 @@
     .sleep-heatmap-legend .duration { background:#5f8c72; }
     .sleep-heatmap-legend .quality { background:#7a6a9b; }
     .sleep-heatmap-legend .recovery { background:#b58252; }
-    .sleep-heatmap { display:grid; grid-template-columns:repeat(auto-fill,minmax(2.7rem,1fr)); gap:.35rem; margin-top:.8rem; }
+    .sleep-heatmap { display:grid; grid-template-columns:repeat(auto-fill,minmax(3.5rem,1fr)); gap:.35rem; margin-top:.8rem; }
     .sleep-heatmap-day { min-width:0; padding:.35rem .25rem .25rem; border:1px solid var(--line); border-radius:6px; background:var(--surface); text-align:center; }
     .sleep-heatmap-bars { display:grid; gap:2px; }
-    .sleep-heatmap-bar { height:.42rem; border-radius:2px; opacity:.16; }
+    .sleep-heatmap-bar { min-height:1.1rem; padding:0 .15rem; border-radius:3px; display:flex; align-items:center; justify-content:center; overflow:hidden; color:#17211b; font-size:.62rem; font-style:normal; font-weight:800; line-height:1; opacity:.2; }
     .sleep-heatmap-bar.has-data { opacity:var(--heat-opacity,.82); }
     .sleep-heatmap-bar.duration { background:#5f8c72; }
     .sleep-heatmap-bar.quality { background:#7a6a9b; }
     .sleep-heatmap-bar.recovery { background:#b58252; }
+    .sleep-heatmap-bar:not(.has-data) { color:var(--muted); }
     .sleep-heatmap-day small { display:block; margin-top:.25rem; color:var(--muted); font-size:.62rem; }
     .mobile-nav { display:none; }
     @media (max-width:820px) {
@@ -9326,7 +9327,10 @@
           const recovery = Math.max(0, Math.min(1, (Number(item.sleepRecovery) || 0) / 5));
           const hasData = duration > 0 || quality > 0 || recovery > 0;
           const label = `${date} · 时长 ${item.sleep || "未记录"} 小时 · 质量 ${item.sleepQuality || "未记录"}/5 · 恢复感 ${item.sleepRecovery || "未记录"}/5`;
-          return `<div class="sleep-heatmap-day" title="${escapeHtml(label)}"><div class="sleep-heatmap-bars"><i class="sleep-heatmap-bar duration${duration ? " has-data" : ""}" style="--heat-opacity:${Math.max(.22, duration)}"></i><i class="sleep-heatmap-bar quality${quality ? " has-data" : ""}" style="--heat-opacity:${Math.max(.22, quality)}"></i><i class="sleep-heatmap-bar recovery${recovery ? " has-data" : ""}" style="--heat-opacity:${Math.max(.22, recovery)}"></i></div><small>${date.slice(5)}</small></div>`;
+          const sleepLabel = item.sleep ? `${escapeHtml(item.sleep)}h` : "—";
+          const qualityLabel = item.sleepQuality ? `${escapeHtml(item.sleepQuality)}/5` : "—";
+          const recoveryLabel = item.sleepRecovery ? `${escapeHtml(item.sleepRecovery)}/5` : "—";
+          return `<div class="sleep-heatmap-day" title="${escapeHtml(label)}"><div class="sleep-heatmap-bars"><i class="sleep-heatmap-bar duration${duration ? " has-data" : ""}" style="--heat-opacity:${Math.max(.22, duration)}"><span>${sleepLabel}</span></i><i class="sleep-heatmap-bar quality${quality ? " has-data" : ""}" style="--heat-opacity:${Math.max(.22, quality)}"><span>${qualityLabel}</span></i><i class="sleep-heatmap-bar recovery${recovery ? " has-data" : ""}" style="--heat-opacity:${Math.max(.22, recovery)}"><span>${recoveryLabel}</span></i></div><small>${date.slice(5)}</small></div>`;
         }).join("");
         document.querySelectorAll("[data-sleep-heatmap-range]").forEach((button) => { const active = Number(button.dataset.sleepHeatmapRange) === sleepHeatmapRange; button.classList.toggle("active", active); button.setAttribute("aria-pressed", String(active)); });
       }
