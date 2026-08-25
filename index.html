@@ -992,6 +992,7 @@
     .axis-block[data-category="社交"] { border-left-color: #9a6f91; background: #f5eef4; }
     .axis-block[data-category="娱乐"] { border-left-color: #b09245; background: #f7f3e7; }
     .axis-block[data-category="休息"] { border-left-color: #6f8290; background: #eef2f4; }
+    .axis-block[data-category="阅读"] { border-left-color: #6d7f9d; background: #eef1f7; }
 
     .axis-block strong {
       display: block;
@@ -1052,6 +1053,7 @@
     .category-bar-row[data-category="社交"] .category-bar-fill { background: #9a6f91; }
     .category-bar-row[data-category="娱乐"] .category-bar-fill { background: #b09245; }
     .category-bar-row[data-category="休息"] .category-bar-fill { background: #6f8290; }
+    .category-bar-row[data-category="阅读"] .category-bar-fill { background: #6d7f9d; }
 
     .category-bar-time {
       color: #7d6f72;
@@ -5329,6 +5331,7 @@
     html[data-appearance-theme] .axis-block[data-category="社交"] { border-left-color: #98718f; background: color-mix(in srgb, #98718f 12%, var(--theme-surface)); }
     html[data-appearance-theme] .axis-block[data-category="娱乐"] { border-left-color: #a68a45; background: color-mix(in srgb, #a68a45 12%, var(--theme-surface)); }
     html[data-appearance-theme] .axis-block[data-category="休息"] { border-left-color: #6e8492; background: color-mix(in srgb, #6e8492 12%, var(--theme-surface)); }
+    html[data-appearance-theme] .axis-block[data-category="阅读"] { border-left-color: #6d7f9d; background: color-mix(in srgb, #6d7f9d 12%, var(--theme-surface)); }
 
     html[data-appearance-theme] .axis-block span,
     html[data-appearance-theme] .block-category {
@@ -5353,6 +5356,7 @@
     html[data-appearance-theme] .category-bar-row[data-category="社交"] .category-bar-fill { background: color-mix(in srgb, var(--theme-accent) 36%, var(--theme-contrast)); }
     html[data-appearance-theme] .category-bar-row[data-category="娱乐"] .category-bar-fill { background: color-mix(in srgb, var(--theme-accent) 84%, var(--theme-contrast)); }
     html[data-appearance-theme] .category-bar-row[data-category="休息"] .category-bar-fill { background: color-mix(in srgb, var(--theme-accent) 26%, var(--theme-contrast)); }
+    html[data-appearance-theme] .category-bar-row[data-category="阅读"] .category-bar-fill { background: color-mix(in srgb, var(--theme-accent) 48%, var(--theme-contrast)); }
 
     html[data-appearance-theme] .category-bar-track {
       background: var(--theme-surface-2);
@@ -5693,6 +5697,8 @@
     .today-action-group { display:flex; align-items:center; justify-content:space-between; gap:.5rem; border:1px solid var(--line); border-radius:calc(var(--radius) - 4px); background:var(--surface); color:var(--ink); padding:.7rem .8rem; text-align:left; cursor:pointer; }
     .today-action-group:hover { border-color:var(--theme-accent); }
     .hydration-actions { display:flex; flex-wrap:wrap; align-items:center; gap:.45rem; margin:.8rem 0; }
+    .hydration-target-row { display:flex; flex-wrap:wrap; align-items:center; gap:.45rem; margin:.75rem 0; color:var(--muted); font-size:.82rem; }
+    .hydration-target-row input { width:7rem; min-width:0; }
     .hydration-actions input { width:8rem; min-width:0; }
     .hydration-trend { display:grid; grid-template-columns:repeat(14,minmax(.5rem,1fr)); align-items:end; gap:.3rem; min-height:4rem; }
     .hydration-trend.empty { display:block; min-height:0; }
@@ -6358,7 +6364,8 @@
                 <div id="sleepHeatmap" class="sleep-heatmap" aria-live="polite"></div>
               </section>
               <section class="hydration-card" aria-labelledby="hydrationTitle">
-                <header><div><h3 id="hydrationTitle">今日饮水</h3><p class="muted">一键记录，不需要额外填写。</p></div><strong id="hydrationSummary">0 / 2000 ml</strong></header>
+                <header><div><h3 id="hydrationTitle">今日饮水</h3><p class="muted">目标可以按自己的需要调整。</p></div><strong id="hydrationSummary">0 / 2000 ml</strong></header>
+                <div class="hydration-target-row"><label for="hydrationTarget">今日目标（ml）</label><input id="hydrationTarget" type="number" min="250" max="9999" step="50" inputmode="numeric"><button class="btn secondary small" type="button" data-action="hydration-target">保存目标</button></div>
                 <div class="hydration-actions"><button class="btn secondary small" type="button" data-hydration-delta="250">+250</button><button class="btn secondary small" type="button" data-hydration-delta="500">+500</button><button class="btn secondary small" type="button" data-hydration-delta="750">+750</button><button class="btn danger small" type="button" data-hydration-delta="-250">−250</button><input id="hydrationAmount" type="number" min="0" max="9999" step="50" inputmode="numeric" placeholder="自定义 ml" aria-label="自定义饮水量"><button class="btn secondary small" id="hydrationCustomBtn" data-action="hydration-custom" type="button">加入</button></div>
                 <div id="hydrationTrend" class="hydration-trend" aria-live="polite"></div>
               </section>
@@ -6725,7 +6732,7 @@
   <script>
     (() => {
       const AREAS = ["工作", "健康", "家庭", "财务", "成长", "社交", "生活"];
-      const TIME_CATEGORIES = ["工作", "学习", "生活", "健康", "社交", "娱乐", "休息"];
+      const TIME_CATEGORIES = ["工作", "学习", "生活", "健康", "社交", "娱乐", "休息", "阅读"];
       const STORAGE_KEY = "life-workbench-state-v2";
       const SYNC_META_KEY = "life-workbench-sync-meta-v1";
       const SUPABASE_URL = "https://fqisquljcylklapvctys.supabase.co";
@@ -9288,10 +9295,16 @@
         state.hydration[date] = { amount: Math.max(0, Math.min(9999, current.amount + (Number(delta) || 0))), target: current.target, updatedAt: new Date().toISOString() };
         saveState(); renderHydration(); renderTodayActionOverview(); showToast("饮水记录已更新");
       }
+      function saveHydrationTarget(date = activeDate) {
+        const current = hydrationEntryFor(date);
+        const target = Math.max(250, Math.min(9999, Number($("#hydrationTarget").value) || current.target));
+        state.hydration[date] = { amount: current.amount, target, updatedAt: new Date().toISOString() };
+        saveState(); renderHydration(); renderTodayActionOverview(); showToast(`饮水目标已调整为 ${target} ml`);
+      }
       function renderHydration() {
         const summary = $("#hydrationSummary"); const trend = $("#hydrationTrend");
         if (!summary || !trend) return;
-        const current = hydrationEntryFor(); summary.textContent = `${current.amount} / ${current.target} ml`;
+        const current = hydrationEntryFor(); summary.textContent = `${current.amount} / ${current.target} ml`; $("#hydrationTarget").value = current.target;
         const entries = Array.from({ length: 14 }, (_, index) => { const date = shiftDateKey(activeDate, index - 13); return { date, ...hydrationEntryFor(date) }; });
         const hasData = entries.some((item) => item.amount > 0);
         trend.classList.toggle("empty", !hasData);
@@ -10483,6 +10496,7 @@
         }
         const { action, id } = target.dataset;
         if (action === "hydration-custom") { const amount = Number($("#hydrationAmount").value); if (amount > 0) saveHydrationDelta(amount); $("#hydrationAmount").value = ""; return; }
+        if (action === "hydration-target") { saveHydrationTarget(); return; }
         if (action === "open-overview-view") { setView(target.dataset.viewTarget || "today", true); return; }
         if (action === "mobile-view") { setView(target.dataset.viewTarget || "today", true); return; }
         if (action === "mobile-more") {
