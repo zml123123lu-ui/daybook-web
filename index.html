@@ -10255,7 +10255,9 @@
         if (event.target.id === "wellbeingForm") {
           event.preventDefault();
           const form = new FormData(event.target);
-          const date = String(form.get("date") || todayKey());
+          const date = String($("#wellbeingDate").value || form.get("date") || activeDate || todayKey());
+          activeDate = date;
+          $("#wellbeingDate").value = date;
           state.wellbeing[date] = {
             mood: Number(form.get("mood")) || 3,
             energy: Number(form.get("energy")) || 3,
@@ -10270,6 +10272,7 @@
             socialNote: String(form.get("socialNote") || "").trim(),
             updatedAt: new Date().toISOString()
           };
+          saveState();
           render();
           showToast(`${date} 的身心状态已保存`);
         }
