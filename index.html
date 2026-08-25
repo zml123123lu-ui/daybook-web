@@ -7468,8 +7468,11 @@
           } else {
             const existing = await syncClient.fetchState();
             if (existing) {
-              applyCloudRow(existing);
-              return;
+              state = normalizeState(syncApi.mergeCloudStates(state, existing.state));
+              syncRevision = existing.revision;
+              lastSavedState = JSON.stringify(state);
+              localStorage.setItem(STORAGE_KEY, lastSavedState);
+              row = await syncClient.updateState(state, syncRevision);
             } else {
               row = await syncClient.createState(state);
             }
