@@ -5898,6 +5898,7 @@
                 <input class="sr-only" id="backupFile" type="file" accept=".json,application/json">
                 <label class="btn secondary small" for="backupFile">导入备份</label>
                 <button class="btn secondary small" id="exportBtn" type="button">导出备份</button>
+                <button class="btn secondary small" id="exportDailyAnalysisBtn" type="button">导出今日分析</button>
                 <button class="btn danger small" id="clearBtn" type="button">清空数据</button>
               </div>
             </details>
@@ -7943,6 +7944,48 @@
         link.remove();
         URL.revokeObjectURL(url);
         showToast("这封信已导出");
+      }
+
+      function buildDailyAnalysisPackage(date = activeDate) {
+        const key = /^\d{4}-\d{2}-\d{2}$/.test(String(date || "")) ? String(date) : todayKey();
+        const hydration = hydrationEntryFor(key);
+        const wellbeing = state.wellbeing[key] || null;
+        const meal = state.mealRecords[key] || null;
+        return {
+          schemaVersion: 1,
+          type: "daily-analysis-package",
+          date: key,
+          exportedAt: new Date().toISOString(),
+          scope: "仅包含选定日期及当前购物冷静室快照，不包含账号、同步配置或其他日期的完整历史。",
+          tasks: tasksForDate(key).map((task) => ({ id: task.id, title: task.title, area: task.area || "生活", completed: taskDoneOnDate(task, key), repeat: task.repeat || "none" })),
+          timeBlocks: state.timeBlocks.filter((block) => (block.date || todayKey()) === key).map((block) => ({ id: block.id, title: block.title, start: block.start, end: block.end, category: block.category })),
+          habits: state.habits.map((habit) => ({ id: habit.id, title: habit.title, area: habit.area || "生活", completed: Boolean(habit.completions?.[key]) })),
+          maintenance: state.maintenance.map((item) => ({ id: item.id, title: item.title, progress: maintenancePeriodProgress(item, key) })),
+          wellbeing,
+          hydration,
+          meal,
+          financeRecords: state.financeRecords.filter((record) => record.date === key),
+          strengths: state.strengths.filter((entry) => entry.date === key),
+          gratitude: state.gratitude[key] || null,
+          dailySummaries: state.dailySummaries[key] || [],
+          aiSummary: state.aiSummaries[key] || null,
+          thoughts: state.thoughts.filter((thought) => thought.date === key && (thought.title || thought.body)).map((thought) => ({ id: thought.id, title: thought.title, body: thought.body, template: thought.template })),
+          shoppingItems: state.shoppingItems.filter((item) => item.decision !== "archived").map((item) => ({ id: item.id, title: item.title, price: item.price, need: item.need, reason: item.reason, priceFit: item.priceFit, frequency: item.frequency, scenario: item.scenario, budgetImpact: item.budgetImpact, existing: item.existing, startedAt: item.startedAt, decision: item.decision }))
+        };
+      }
+
+      function exportDailyAnalysis() {
+        const payload = buildDailyAnalysisPackage(activeDate);
+        const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = `daily-analysis-${payload.date}.json`;
+        document.body.append(link);
+        link.click();
+        link.remove();
+        URL.revokeObjectURL(url);
+        showToast(`已导出 ${payload.date} 的分析包`);
       }
 
       function render() {
