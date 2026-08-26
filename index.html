@@ -7183,6 +7183,7 @@
       let syncDirty = false;
       let syncApplying = false;
       let syncTimer = 0;
+      let unsavedDraft = false;
       let timelineHeightObserver = null;
       const colorSchemeQuery = window.matchMedia("(prefers-color-scheme: dark)");
 
@@ -7423,6 +7424,9 @@
       }
 
       function applyCloudRow(row) {
+        if (unsavedDraft) {
+          return;
+        }
         const localAppearance = state.appearance;
         syncApplying = true;
         try {
@@ -7522,6 +7526,7 @@
 
       async function synchronizeNow() {
         if (!syncClient?.getSession()) return false;
+        if (unsavedDraft) return false;
         setSyncStatus("同步中", "syncing");
         try {
           const cloudRow = await syncClient.fetchState();
@@ -10189,6 +10194,13 @@
         showToast("工作台备份已恢复");
       }
 
+      document.addEventListener("input", (event) => {
+        if (event.target.closest("form") && !event.target.closest("#globalSearchDialog")) unsavedDraft = true;
+      });
+      document.addEventListener("change", (event) => {
+        if (event.target.closest("form") && !event.target.closest("#globalSearchDialog")) unsavedDraft = true;
+      });
+
       document.addEventListener("submit", (event) => {
         if (event.target.id === "planForm") {
           event.preventDefault();
@@ -10199,6 +10211,7 @@
           })) {
             event.target.reset();
             syncTaskDateField();
+            unsavedDraft = false;
             showToast("计划已加入");
           }
         }
@@ -10213,6 +10226,7 @@
           state.financeRecords.unshift(record);
           event.target.reset();
           $("#financeEntryDate").value = todayKey();
+          unsavedDraft = false;
           render();
           showToast(`${record.type === "income" ? "收入" : "支出"}已记入`);
         }
@@ -10240,6 +10254,7 @@
           }));
           event.target.reset();
           $("#maintenanceLogDate").value = anchorDate;
+          unsavedDraft = false;
           render();
           showToast("生活维护事项已加入");
         }
@@ -10255,6 +10270,7 @@
           if (!item.title || !item.reason) { showToast("请写下物品和购买理由"); return; }
           state.shoppingItems.unshift(item);
           event.target.reset();
+          unsavedDraft = false;
           render();
           showToast("已开始 3 天冷静期");
         }
@@ -10279,6 +10295,7 @@
             socialNote: String(form.get("socialNote") || "").trim(),
             updatedAt: new Date().toISOString()
           };
+          unsavedDraft = false;
           saveState();
           render();
           showToast(`${date} 的身心状态已保存`);
@@ -10292,6 +10309,7 @@
             return;
           }
           saveMealRecord(values);
+          unsavedDraft = false;
           render();
           showToast(`${values.date} 的餐饮记录已保存`);
         }
