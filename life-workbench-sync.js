@@ -26,10 +26,83 @@
 
   function hasMeaningfulState(state) {
     if (!isPlainObject(state)) return false;
-    const arrayKeys = ["tasks", "timeBlocks", "habits", "goals", "financeRecords"];
-    const recordKeys = ["notes", "dailySummaries", "aiSummaries", "periodSummaries", "wellbeing", "gratitude"];
+    const arrayKeys = ["tasks", "timeBlocks", "habits", "maintenance", "goals", "visions", "financeRecords", "strengths", "readingBooks", "mediaItems", "thoughts"];
+    const recordKeys = ["notes", "dailySummaries", "aiSummaries", "periodSummaries", "wellbeing", "hydration", "mealRecords", "gratitude"];
     return arrayKeys.some((key) => Array.isArray(state[key]) && state[key].length > 0)
       || recordKeys.some((key) => isPlainObject(state[key]) && Object.keys(state[key]).length > 0);
+  }
+
+  function stateForCloud(state) {
+    if (!isPlainObject(state)) return {};
+    const cloudState = { ...state };
+    delete cloudState.appearance;
+    return cloudState;
+  }
+
+  function recordTime(record) {
+    const value = record && typeof record === "object" ? (record.updatedAt || record.createdAt) : "";
+    const time = Date.parse(String(value || ""));
+    return Number.isFinite(time) ? time : 0;
+  }
+
+  function mergeRecords(localRecord, cloudRecord) {
+    if (!localRecord) return cloudRecord;
+    if (!cloudRecord) return localRecord;
+    return recordTime(localRecord) > recordTime(cloudRecord) ? localRecord : cloudRecord;
+  }
+
+  function mergeTombstones(localTombstones, cloudTombstones) {
+    const local = isPlainObject(localTombstones) ? localTombstones : {};
+    const cloud = isPlainObject(cloudTombstones) ? cloudTombstones : {};
+    return Object.fromEntries([...new Set([...Object.keys(cloud), ...Object.keys(local)])].map((type) => {
+      const localRecords = isPlainObject(local[type]) ? local[type] : {};
+      const cloudRecords = isPlainObject(cloud[type]) ? cloud[type] : {};
+      const ids = [...new Set([...Object.keys(cloudRecords), ...Object.keys(localRecords)])];
+      return [type, Object.fromEntries(ids.map((id) => [id, recordTime({ updatedAt: localRecords[id] }) > recordTime({ updatedAt: cloudRecords[id] }) ? localRecords[id] : cloudRecords[id]]))];
+    }));
+  }
+
+  function mergeRecordArrays(localItems, cloudItems, tombstones = {}) {
+    const localById = new Map((Array.isArray(localItems) ? localItems : [])
+      .filter((item) => isPlainObject(item) && (item.id != null || item.key != null))
+      .map((item) => [String(item.id ?? item.key), item]));
+    const cloudById = new Map((Array.isArray(cloudItems) ? cloudItems : [])
+      .filter((item) => isPlainObject(item) && (item.id != null || item.key != null))
+      .map((item) => [String(item.id ?? item.key), item]));
+    const ids = [...new Set([...cloudById.keys(), ...localById.keys()])];
+    return ids
+      .map((id) => mergeRecords(localById.get(id), cloudById.get(id)))
+      .filter((item) => {
+        const recordId = String(item.id ?? item.key);
+        const deletedAt = tombstones[recordId];
+        return !deletedAt || recordTime({ updatedAt: deletedAt }) < recordTime(item);
+      });
+  }
+
+  function mergeKeyedRecords(localRecords, cloudRecords) {
+    const local = isPlainObject(localRecords) ? localRecords : {};
+    const cloud = isPlainObject(cloudRecords) ? cloudRecords : {};
+    return Object.fromEntries([...new Set([...Object.keys(cloud), ...Object.keys(local)])]
+      .map((key) => [key, mergeRecords(local[key], cloud[key])]));
+  }
+
+  function mergeCloudStates(localState, cloudState) {
+    const local = isPlainObject(localState) ? localState : {};
+    const cloud = isPlainObject(cloudState) ? cloudState : {};
+    const merged = { ...cloud, ...local };
+    const arrayKeys = ["tasks", "timeBlocks", "habits", "maintenance", "goals", "visions", "financeRecords", "strengths", "readingBooks", "mediaItems", "thoughts"];
+    const keyedKeys = ["notes", "dailySummaries", "aiSummaries", "periodSummaries", "wellbeing", "hydration", "mealRecords", "gratitude"];
+    const tombstones = mergeTombstones(local.deletedRecords, cloud.deletedRecords);
+    arrayKeys.forEach((key) => {
+      if (key in local || key in cloud) merged[key] = mergeRecordArrays(local[key], cloud[key], tombstones[key]);
+    });
+    if (Object.keys(tombstones).length) merged.deletedRecords = tombstones;
+    keyedKeys.forEach((key) => {
+      if (key in local || key in cloud) merged[key] = mergeKeyedRecords(local[key], cloud[key]);
+    });
+    // Appearance is intentionally device-local and never sent to the cloud.
+    if (local.appearance) merged.appearance = local.appearance;
+    return merged;
   }
 
   function stableStringify(value) {
@@ -46,12 +119,7 @@
 
   function decideInitialSync({ localState, cloudRow, syncMeta, userId }) {
     if (!cloudRow) return "create-cloud";
-    if (stableStringify(localState) === stableStringify(cloudRow.state)) return "use-cloud";
-    if (!hasMeaningfulState(localState)) return "use-cloud";
-    const sharesBaseRevision = isPlainObject(syncMeta)
-      && syncMeta.userId === userId
-      && syncMeta.revision === cloudRow.revision;
-    return sharesBaseRevision ? "push-local" : "conflict";
+    return "use-cloud";
   }
 
   function validateCloudRow(row) {
@@ -72,14 +140,69 @@
     };
   }
 
-  function createSyncClient({ projectUrl, publishableKey, fetchImpl = globalThis.fetch }) {
+  const SESSION_STORAGE_KEY = "life-workbench-auth-v1";
+
+  function getStorage(storage) {
+    if (storage) return storage;
+    try {
+      return globalThis.localStorage || null;
+    } catch {
+      return null;
+    }
+  }
+
+  function createSyncClient({ projectUrl, publishableKey, fetchImpl = globalThis.fetch, storage = null }) {
     const baseUrl = String(projectUrl || "").replace(/\/+$/, "");
     const apiKey = String(publishableKey || "").trim();
+    const sessionStorage = getStorage(storage);
     if (!/^https:\/\/[^/]+\.supabase\.co$/.test(baseUrl)) throw new Error("Supabase 项目地址不正确");
     if (!apiKey.startsWith("sb_publishable_")) throw new Error("Supabase 公开连接钥匙不正确");
     if (typeof fetchImpl !== "function") throw new Error("当前浏览器不支持云端同步");
 
     let session = null;
+
+    function persistSession() {
+      if (!sessionStorage || !session) return;
+      try {
+        sessionStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(session));
+      } catch {
+        // Storage may be blocked in private browsing; memory-only sync still works.
+      }
+    }
+
+    function clearPersistedSession() {
+      if (!sessionStorage) return;
+      try {
+        sessionStorage.removeItem(SESSION_STORAGE_KEY);
+      } catch {
+        // Ignore cleanup failures; the in-memory session is still cleared.
+      }
+    }
+
+    function restoreSession() {
+      if (!sessionStorage) return null;
+      try {
+        const parsed = JSON.parse(sessionStorage.getItem(SESSION_STORAGE_KEY) || "null");
+        if (!isPlainObject(parsed)
+          || typeof parsed.accessToken !== "string"
+          || typeof parsed.refreshToken !== "string"
+          || !Number.isFinite(parsed.expiresAt)
+          || !isPlainObject(parsed.user)
+          || typeof parsed.user.id !== "string") return null;
+        return {
+          accessToken: parsed.accessToken,
+          refreshToken: parsed.refreshToken,
+          expiresAt: parsed.expiresAt,
+          user: {
+            id: parsed.user.id,
+            email: typeof parsed.user.email === "string" ? parsed.user.email : ""
+          }
+        };
+      } catch {
+        clearPersistedSession();
+        return null;
+      }
+    }
 
     async function readJson(response) {
       const text = await response.text();
@@ -126,6 +249,7 @@
           email: typeof body.user.email === "string" ? body.user.email : ""
         }
       };
+      persistSession();
       return { ...session.user };
     }
 
@@ -199,7 +323,7 @@
       const response = await authenticatedFetch(`${baseUrl}/rest/v1/workbench_state`, {
         method: "POST",
         headers: { Prefer: "return=representation" },
-        body: JSON.stringify({ user_id: session.user.id, state, revision: 1, updated_at: new Date().toISOString() })
+        body: JSON.stringify({ user_id: session.user.id, state: stateForCloud(state), revision: 1, updated_at: new Date().toISOString() })
       });
       const rows = await readJson(response);
       if (!Array.isArray(rows) || rows.length !== 1) throw new SyncRequestError("无法创建云端数据");
@@ -217,7 +341,7 @@
       const response = await authenticatedFetch(`${baseUrl}/rest/v1/workbench_state?${query}`, {
         method: "PATCH",
         headers: { Prefer: "return=representation" },
-        body: JSON.stringify({ state, revision: revision + 1, updated_at: new Date().toISOString() })
+        body: JSON.stringify({ state: stateForCloud(state), revision: revision + 1, updated_at: new Date().toISOString() })
       });
       const rows = await readJson(response);
       if (!Array.isArray(rows)) throw new SyncRequestError("云端数据格式不正确");
@@ -225,12 +349,15 @@
       return validateCloudRow(rows[0]);
     }
 
+    session = restoreSession();
+
     function getSession() {
       return session ? { user: { ...session.user } } : null;
     }
 
     function signOut() {
       session = null;
+      clearPersistedSession();
     }
 
     return { createState, fetchState, getSession, signIn, signOut, signUp, updateState };
@@ -242,6 +369,8 @@
     createSyncClient,
     decideInitialSync,
     hasMeaningfulState,
+    mergeCloudStates,
+    stateForCloud,
     stableStringify,
     validateCloudRow
   };
