@@ -267,7 +267,7 @@
     main {
       padding: 2rem clamp(1.25rem, 3vw, 3.25rem);
       min-width: 0;
-      max-width: 1680px;
+      max-width: none;
     }
 
     .topbar {
@@ -5132,9 +5132,16 @@
     .shopping-card-actions { justify-content:flex-start; }
     .shopping-empty { padding:1.5rem 0; }
     .media-form { display:grid; grid-template-columns:minmax(0,1.4fr) repeat(4,minmax(0,.7fr)) auto; gap:.65rem; align-items:end; }
-    .media-lists { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:1rem; margin-top:1rem; }
+    .media-type-tabs { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:.2rem; margin:0 0 1rem; padding:.3rem; border:1px solid var(--line); border-radius:2rem; background:var(--surface-2); }
+    .media-type-tab { min-height:3rem; display:flex; align-items:center; justify-content:center; gap:.45rem; border:1px solid transparent; background:transparent; color:var(--muted); border-radius:1.5rem; padding:.55rem .8rem; cursor:pointer; font:inherit; font-weight:700; }
+    .media-tab-icon { width:1.05rem; height:1.05rem; flex:0 0 auto; fill:none; stroke:currentColor; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; }
+    .media-type-tab[aria-selected="true"] { background:var(--surface); border-color:color-mix(in srgb, var(--accent) 42%, var(--line)); color:var(--accent); box-shadow:0 1px 2px rgba(32,35,35,.06); }
+    .media-lists { display:block; margin-top:1rem; }
+    .media-type-section { min-width:0; border-top:2px solid var(--line); padding-top:.8rem; }
+    .media-type-section h3 { margin:0 0 .65rem; font-size:1.05rem; }
+    .media-status-lists { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:.75rem; }
+    .media-list-section h4 { margin:0 0 .45rem; font-size:.86rem; color:var(--muted); }
     .media-list-section { min-width:0; }
-    .media-list-section h3 { margin:0 0 .6rem; font-size:1rem; }
     .media-list { display:grid; gap:.6rem; }
     .media-card { border:1px solid var(--line); border-radius:var(--radius); background:var(--surface); padding:.8rem; display:grid; gap:.55rem; }
     .media-card-head, .media-card-meta, .media-card-actions { display:flex; align-items:center; justify-content:space-between; gap:.6rem; flex-wrap:wrap; }
@@ -5144,7 +5151,7 @@
     .media-progress input { width:4.5rem; min-height:2rem; padding:.3rem .45rem; }
     .media-card-actions { justify-content:flex-start; }
     @media (max-width: 820px) { .shopping-form { grid-template-columns:1fr; } .shopping-form .field-wide { grid-column:auto; } .shopping-card-fields { grid-template-columns:1fr 1fr; } }
-    @media (max-width: 820px) { .media-form { grid-template-columns:1fr 1fr; } .media-form .field:first-child { grid-column:1 / -1; } .media-form button { grid-column:1 / -1; } .media-lists { grid-template-columns:1fr; } }
+    @media (max-width: 820px) { .media-form { grid-template-columns:1fr 1fr; } .media-form .field:first-child { grid-column:1 / -1; } .media-form button { grid-column:1 / -1; } .media-status-lists { grid-template-columns:1fr; } }
 
     html[data-appearance-theme] .sidebar .nav a.active .nav-icon {
       border: 1px solid color-mix(in srgb, var(--theme-contrast) 58%, transparent);
@@ -6480,6 +6487,12 @@
               <span class="pill status-note" id="mediaCount">0 个正在看</span>
             </header>
             <div class="panel-body">
+              <div class="media-type-tabs" role="tablist" aria-label="影视类型">
+                <button class="media-type-tab" type="button" role="tab" data-media-type="movie" aria-selected="true" aria-controls="mediaTypeMovie"><svg class="media-tab-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M7 5v14M17 5v14M3 9h4M17 9h4M3 15h4M17 15h4"/></svg><span>电影</span></button>
+                <button class="media-type-tab" type="button" role="tab" data-media-type="series" aria-selected="false" aria-controls="mediaTypeSeries"><svg class="media-tab-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="14" rx="2"/><path d="M8 21h8M12 18v3"/></svg><span>电视剧</span></button>
+                <button class="media-type-tab" type="button" role="tab" data-media-type="anime" aria-selected="false" aria-controls="mediaTypeAnime"><svg class="media-tab-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 1.5 5.5L19 10l-5.5 1.5L12 17l-1.5-5.5L5 10l5.5-1.5Z"/><path d="m19 16 .7 2.3L22 19l-2.3.7L19 22l-.7-2.3L16 19l2.3-.7Z"/></svg><span>动漫</span></button>
+                <button class="media-type-tab" type="button" role="tab" data-media-type="variety" aria-selected="false" aria-controls="mediaTypeVariety"><svg class="media-tab-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3a4 4 0 0 0-4 4v5a4 4 0 0 0 8 0V7a4 4 0 0 0-4-4Z"/><path d="M5 11v1a7 7 0 0 0 14 0v-1M12 19v3M8 22h8"/></svg><span>综艺</span></button>
+              </div>
               <form class="media-form" id="mediaForm">
                 <div class="field"><label for="mediaTitle">名称</label><input id="mediaTitle" name="title" autocomplete="off" required placeholder="电影、剧集、动漫或综艺名称"></div>
                 <div class="field"><label for="mediaType">类型</label><select id="mediaType" name="type"><option value="movie">电影</option><option value="series">电视剧</option><option value="anime">动漫</option><option value="variety">综艺</option></select></div>
@@ -6488,10 +6501,13 @@
                 <div class="field"><label for="mediaNote">备注</label><input id="mediaNote" name="note" autocomplete="off" placeholder="平台、更新时间等"></div>
                 <button class="btn" type="submit">加入清单</button>
               </form>
-              <div class="media-lists">
-                <section class="media-list-section" aria-labelledby="mediaWatchingTitle"><h3 id="mediaWatchingTitle">想看 / 正在看</h3><div class="media-list" id="mediaWatchingList" role="list"></div></section>
-                <section class="media-list-section" aria-labelledby="mediaCompletedTitle"><h3 id="mediaCompletedTitle">已看完</h3><div class="media-list" id="mediaCompletedList" role="list"></div></section>
+              <div class="media-lists" id="mediaWatchingList">
+                <section class="media-type-section" id="mediaTypeMovie" data-media-section="movie" aria-labelledby="mediaMovieTitle"><h3 id="mediaMovieTitle">电影</h3><div class="media-status-lists"><section class="media-list-section"><h4>待看 / 正在看</h4><div class="media-list" id="mediaWatchingMovieList" role="list"></div></section><section class="media-list-section"><h4>已看完</h4><div class="media-list" id="mediaCompletedMovieList" role="list"></div></section></div></section>
+                <section class="media-type-section" id="mediaTypeSeries" data-media-section="series" aria-labelledby="mediaSeriesTitle" hidden><h3 id="mediaSeriesTitle">电视剧</h3><div class="media-status-lists"><section class="media-list-section"><h4>待看 / 正在看</h4><div class="media-list" id="mediaWatchingSeriesList" role="list"></div></section><section class="media-list-section"><h4>已看完</h4><div class="media-list" id="mediaCompletedSeriesList" role="list"></div></section></div></section>
+                <section class="media-type-section" id="mediaTypeAnime" data-media-section="anime" aria-labelledby="mediaAnimeTitle" hidden><h3 id="mediaAnimeTitle">动漫</h3><div class="media-status-lists"><section class="media-list-section"><h4>待看 / 正在看</h4><div class="media-list" id="mediaWatchingAnimeList" role="list"></div></section><section class="media-list-section"><h4>已看完</h4><div class="media-list" id="mediaCompletedAnimeList" role="list"></div></section></div></section>
+                <section class="media-type-section" id="mediaTypeVariety" data-media-section="variety" aria-labelledby="mediaVarietyTitle" hidden><h3 id="mediaVarietyTitle">综艺</h3><div class="media-status-lists"><section class="media-list-section"><h4>待看 / 正在看</h4><div class="media-list" id="mediaWatchingVarietyList" role="list"></div></section><section class="media-list-section"><h4>已看完</h4><div class="media-list" id="mediaCompletedVarietyList" role="list"></div></section></div></section>
               </div>
+              <div id="mediaCompletedList" hidden></div>
             </div>
           </section>
 
@@ -7226,6 +7242,7 @@
       let habitPeriod = "week";
       let strengthPeriod = "all";
       let readingPeriod = "month";
+      let mediaViewType = "movie";
       let readingAnchor = todayKey().slice(0, 7);
       let visionFilter = "all";
       let habitChartAnchor = new Date();
@@ -7899,8 +7916,20 @@
         const watching = items.filter((item) => !item.completed && !item.archived);
         const completed = items.filter((item) => item.completed || item.archived).sort((a, b) => String(b.completedAt || b.updatedAt).localeCompare(String(a.completedAt || a.updatedAt)));
         $("#mediaCount").textContent = `${watching.length} 个正在看 · ${completed.length} 个已看完`;
-        $("#mediaWatchingList").innerHTML = watching.length ? watching.map((item) => mediaCard(item)).join("") : '<div class="empty" role="status">还没有想看或正在看的内容。</div>';
-        $("#mediaCompletedList").innerHTML = completed.length ? completed.map((item) => mediaCard(item, true)).join("") : '<div class="empty" role="status">看完的内容会归档到这里。</div>';
+        const groups = ["movie", "series", "anime", "variety"];
+        groups.forEach((type) => {
+          const key = type[0].toUpperCase() + type.slice(1);
+          const watchingList = watching.filter((item) => item.type === type);
+          const completedList = completed.filter((item) => item.type === type);
+          $(`#mediaWatching${key}List`).innerHTML = watchingList.length ? watchingList.map((item) => mediaCard(item)).join("") : '<div class="empty" role="status">暂无待看内容</div>';
+          $(`#mediaCompleted${key}List`).innerHTML = completedList.length ? completedList.map((item) => mediaCard(item, true)).join("") : '<div class="empty" role="status">暂无已看内容</div>';
+        });
+        document.querySelectorAll("[data-media-section]").forEach((section) => {
+          section.hidden = section.dataset.mediaSection !== mediaViewType;
+        });
+        document.querySelectorAll("[data-media-type]").forEach((tab) => {
+          tab.setAttribute("aria-selected", String(tab.dataset.mediaType === mediaViewType));
+        });
       }
 
       function globalSearchEntries(query = "") {
@@ -10590,7 +10619,7 @@
           return;
         }
         // const target = event.target.closest("[data-action], [data-filter], [data-period], [data-habit-period], [data-finance-scope], [data-strength-period], [data-reading-period]");
-        const target = event.target.closest("[data-action], [data-filter], [data-period], [data-habit-period], [data-finance-scope], [data-strength-period], [data-reading-period], [data-hydration-delta], [data-wellbeing-range], [data-sleep-heatmap-range]");
+        const target = event.target.closest("[data-action], [data-filter], [data-period], [data-habit-period], [data-finance-scope], [data-strength-period], [data-reading-period], [data-media-type], [data-hydration-delta], [data-wellbeing-range], [data-sleep-heatmap-range]");
         if (!target) return;
         if (target.dataset.hydrationDelta) { saveHydrationDelta(Number(target.dataset.hydrationDelta)); return; }
         if (target.dataset.wellbeingRange) { wellbeingRange = Number(target.dataset.wellbeingRange) || 7; renderWellbeingTrend(); return; }
@@ -10598,6 +10627,11 @@
         if (target.dataset.readingPeriod) {
           readingPeriod = target.dataset.readingPeriod;
           renderReading();
+          return;
+        }
+        if (target.dataset.mediaType) {
+          mediaViewType = target.dataset.mediaType;
+          renderMedia();
           return;
         }
         if (target.dataset.strengthPeriod) {
