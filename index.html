@@ -8168,7 +8168,9 @@
         renderVisions();
         renderLowEnergyNotice();
         renderFinance();
-        renderWellbeing();
+        // Keep an in-progress wellbeing form intact while other views rerender.
+        // The explicit wellbeing date change handler still calls renderWellbeing().
+        if (!unsavedDraft) renderWellbeing();
         renderMealRecord();
         renderStrengths();
         renderReading();
@@ -10423,6 +10425,7 @@
           state.strengths.push(entry);
           event.target.reset();
           $("#strengthDate").value = activeDate;
+          unsavedDraft = false;
           render();
           showToast("这条优点证据已保存");
         }
@@ -10450,6 +10453,7 @@
           event.target.reset();
           $("#readingStartDate").value = activeDate;
           $("#readingEndDate").value = activeDate;
+          unsavedDraft = false;
           render();
           showToast("这本书已记录");
         }
@@ -10568,6 +10572,7 @@
               goal.status = goal.status || "active";
             }
           }
+          unsavedDraft = false;
           closeEditor();
           render();
           showToast("已保存");
