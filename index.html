@@ -9956,15 +9956,6 @@
         $("#financeCarryMonthlyBudget").textContent = currency.format(carryBudget * daysInMonth);
         $("#financeCarryMonthlySpent").textContent = currency.format(monthlyPlan.spent);
         $("#financeCarryMonthlyRemaining").textContent = currency.format(carryBudget * daysInMonth - monthlyPlan.spent);
-        $("#financePlanSaving").textContent = currency.format(dailyPlan.saving);
-        $("#financePlanLimit").textContent = currency.format(dailyPlan.limit);
-        $("#financePlanSpent").textContent = currency.format(dailyPlan.spent);
-        $("#financePlanRemaining").textContent = currency.format(dailyPlan.remaining);
-        $("#financePlanBudget").textContent = currency.format(monthlyPlan.budget);
-        $("#financePlanMonthlySpent").textContent = currency.format(monthlyPlan.spent);
-        $("#financePlanMonthlyRemaining").textContent = currency.format(monthlyPlan.remaining);
-        $("#financePlanCategories").innerHTML = monthlyPlan.categories.map((item) => `<div class="finance-budget-item"><span>${escapeHtml(item.name)}</span><strong>${currency.format(item.spent)} / ${currency.format(item.amount)}</strong><small>剩余 ${currency.format(item.remaining)}</small></div>`).join("");
-        renderFinanceWeeklyInsight();
         $("#financeImportStatus").textContent = state.lastImport
           ? `${state.lastImport.file} · 新增 ${state.lastImport.added} · 覆盖 ${state.lastImport.overwritten}`
           : "尚未导入";
