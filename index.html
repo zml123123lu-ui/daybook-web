@@ -3121,6 +3121,77 @@
       grid-template-columns: repeat(3, minmax(0, 1fr));
     }
 
+    .finance-carry-card {
+      display: grid;
+      gap: 0.85rem;
+      margin-bottom: 1rem;
+      padding: 1rem 1.1rem;
+      border: 1px solid color-mix(in srgb, var(--berry) 26%, var(--line));
+      border-left: 4px solid var(--berry);
+      border-radius: var(--radius);
+      background: color-mix(in srgb, var(--berry-soft) 55%, var(--surface));
+    }
+
+    .finance-carry-heading {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+    }
+
+    .finance-carry-heading h3 {
+      margin: 0;
+      font-family: "Songti SC", "STSong", serif;
+      font-size: 1.08rem;
+    }
+
+    .finance-carry-heading label {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      color: var(--muted);
+      font-size: 0.82rem;
+      white-space: nowrap;
+    }
+
+    #financeCarryBudget {
+      width: 5.25rem;
+      padding: 0.42rem 0.55rem;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: var(--surface);
+      color: var(--ink);
+      font-weight: 700;
+      text-align: right;
+    }
+
+    .finance-carry-card .finance-plan-daily,
+    .finance-carry-card .finance-plan-monthly {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 0;
+    }
+
+    .finance-carry-card .finance-plan-stat {
+      padding: 0.2rem 1rem 0.2rem 0;
+      border: 0;
+      border-right: 1px solid color-mix(in srgb, var(--berry) 18%, transparent);
+      border-radius: 0;
+      background: transparent;
+    }
+
+    .finance-carry-card .finance-plan-stat:not(:first-child) {
+      padding-left: 1rem;
+    }
+
+    .finance-carry-card .finance-plan-stat:last-child {
+      border-right: 0;
+    }
+
+    .finance-carry-card .finance-plan-monthly {
+      padding-top: 0.75rem;
+      border-top: 1px solid color-mix(in srgb, var(--berry) 18%, transparent);
+    }
+
     .finance-budget-list {
       display: grid;
       grid-template-columns: repeat(5, minmax(0, 1fr));
@@ -4216,6 +4287,27 @@
 
       .finance-entry-form {
         grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .finance-carry-heading {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .finance-carry-card .finance-plan-daily,
+      .finance-carry-card .finance-plan-monthly {
+        grid-template-columns: 1fr;
+        gap: 0.7rem;
+      }
+
+      .finance-carry-card .finance-plan-stat,
+      .finance-carry-card .finance-plan-stat:not(:first-child) {
+        padding: 0;
+        border-right: 0;
+      }
+
+      .finance-carry-card .finance-plan-monthly {
+        padding-top: 0.7rem;
       }
 
       .finance-entry-form .field-note {
@@ -6298,27 +6390,23 @@
                 </form>
                 <datalist id="financeCategories"><option value="餐饮"><option value="交通"><option value="购物"><option value="居住"><option value="医疗健康"><option value="娱乐"><option value="学习"><option value="工资"><option value="其他"></datalist>
               </section>
-              <section class="finance-plan-card" id="financePlanCard" aria-labelledby="financePlanTitle">
-                <div class="finance-plan-heading">
-                  <h3 id="financePlanTitle">我的财务计划</h3>
-                  <div class="finance-plan-heading-actions">
-                    <p class="muted">每天到账 ¥100，先存 ¥40，今天可花 ¥60。</p>
-                    <button class="btn secondary small" id="financePlanEditButton" type="button">编辑计划</button>
-                  </div>
+              <section class="finance-carry-card" aria-labelledby="financeCarryTitle">
+                <div class="finance-carry-heading">
+                  <h3 id="financeCarryTitle">每日 40 元顺延</h3>
+                  <label for="financeCarryBudget">每天 ¥
+                    <input id="financeCarryBudget" type="number" min="0" step="0.01" value="40" aria-label="每日花费额度">
+                  </label>
                 </div>
-                <div class="finance-plan-daily" aria-label="今日财务计划">
-                  <article class="finance-plan-stat"><span>今日应存</span><strong id="financePlanSaving">¥40</strong></article>
-                  <article class="finance-plan-stat"><span>今日可花</span><strong id="financePlanLimit">¥60</strong></article>
-                  <article class="finance-plan-stat"><span>今日已花</span><strong id="financePlanSpent">¥0</strong></article>
-                  <article class="finance-plan-stat"><span>今日剩余</span><strong id="financePlanRemaining">¥60</strong></article>
+                <div class="finance-plan-daily" aria-label="每日花费顺延统计">
+                  <article class="finance-plan-stat"><span>今日可用（含顺延）</span><strong id="financeCarryAvailable">¥40</strong></article>
+                  <article class="finance-plan-stat"><span>今日已花</span><strong id="financeCarrySpent">¥0</strong></article>
+                  <article class="finance-plan-stat"><span>今日结余</span><strong id="financeCarryRemaining">¥40</strong></article>
                 </div>
-                <div class="finance-plan-monthly" aria-label="本月财务计划">
-                  <article class="finance-plan-stat"><span>本月预算</span><strong id="financePlanBudget">¥1,500</strong></article>
-                  <article class="finance-plan-stat"><span>本月已花</span><strong id="financePlanMonthlySpent">¥0</strong></article>
-                  <article class="finance-plan-stat"><span>本月还可花</span><strong id="financePlanMonthlyRemaining">¥1,500</strong></article>
+                <div class="finance-plan-monthly" aria-label="本月花费统计">
+                  <article class="finance-plan-stat"><span>本月额度</span><strong id="financeCarryMonthlyBudget">¥1,240</strong></article>
+                  <article class="finance-plan-stat"><span>本月已花</span><strong id="financeCarryMonthlySpent">¥0</strong></article>
+                  <article class="finance-plan-stat"><span>本月结余</span><strong id="financeCarryMonthlyRemaining">¥1,240</strong></article>
                 </div>
-                <div class="finance-budget-list" id="financePlanCategories" aria-label="本月分类预算"></div>
-                <div class="decision-insight" id="financeWeeklyInsight" aria-live="polite"></div>
               </section>
               <div class="finance-overview">
                 <article class="finance-stat"><span>本月支出</span><strong id="financeExpense">¥0</strong></article>
@@ -9608,6 +9696,7 @@
         const value = source && typeof source === "object" ? source : {};
         const budgets = Array.isArray(value.monthlyBudgets) ? value.monthlyBudgets : defaults.monthlyBudgets;
         return {
+          dailyBudget: Number.isFinite(Number(value.dailyBudget)) ? Math.max(0, Number(value.dailyBudget)) : 40,
           dailyIncome: Number.isFinite(Number(value.dailyIncome)) ? Number(value.dailyIncome) : defaults.dailyIncome,
           dailySaving: Number.isFinite(Number(value.dailySaving)) ? Number(value.dailySaving) : defaults.dailySaving,
           dailySpendingLimit: Number.isFinite(Number(value.dailySpendingLimit)) ? Number(value.dailySpendingLimit) : defaults.dailySpendingLimit,
@@ -9647,6 +9736,22 @@
           spent,
           remaining: (Number(plan.dailySpendingLimit) || 0) - spent
         };
+      }
+
+      function financeCarrySnapshot(records, date, dailyBudget) {
+        const budget = Math.max(0, Number(dailyBudget) || 0);
+        const month = String(date).slice(0, 7);
+        const day = Number(String(date).slice(8, 10)) || 1;
+        let carry = 0;
+        let available = budget;
+        let spent = 0;
+        for (let index = 1; index <= day; index += 1) {
+          const key = `${month}-${String(index).padStart(2, "0")}`;
+          spent = records.filter((record) => record.type === "expense" && String(record.date) === key).reduce((sum, record) => sum + (Number(record.amount) || 0), 0);
+          available = budget + carry;
+          carry = available - spent;
+        }
+        return { available, spent, remaining: carry };
       }
 
       function financeMonthlyBudgetSnapshot(records, month, plan) {
@@ -9841,6 +9946,16 @@
         state.financePlan = plan;
         const dailyPlan = financeDailySnapshot(state.financeRecords, todayKey(), plan);
         const monthlyPlan = financeMonthlyBudgetSnapshot(state.financeRecords, todayKey().slice(0, 7), plan);
+        const carryBudget = Number.isFinite(Number(plan.dailyBudget)) ? Math.max(0, Number(plan.dailyBudget)) : 40;
+        const carry = financeCarrySnapshot(state.financeRecords, todayKey(), carryBudget);
+        const daysInMonth = new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0).getDate();
+        $("#financeCarryBudget").value = carryBudget;
+        $("#financeCarryAvailable").textContent = currency.format(carry.available);
+        $("#financeCarrySpent").textContent = currency.format(carry.spent);
+        $("#financeCarryRemaining").textContent = currency.format(carry.remaining);
+        $("#financeCarryMonthlyBudget").textContent = currency.format(carryBudget * daysInMonth);
+        $("#financeCarryMonthlySpent").textContent = currency.format(monthlyPlan.spent);
+        $("#financeCarryMonthlyRemaining").textContent = currency.format(carryBudget * daysInMonth - monthlyPlan.spent);
         $("#financePlanSaving").textContent = currency.format(dailyPlan.saving);
         $("#financePlanLimit").textContent = currency.format(dailyPlan.limit);
         $("#financePlanSpent").textContent = currency.format(dailyPlan.spent);
@@ -9878,7 +9993,7 @@
 
       function closeFinancePlanDialog() {
         $("#financePlanDialog").close();
-        $("#financePlanEditButton").focus();
+        $("#financePlanEditButton")?.focus();
       }
 
       function saveFinancePlan(form) {
@@ -11089,7 +11204,15 @@
       $("#financeRecordsDialog").addEventListener("click", (event) => {
         if (event.target === $("#financeRecordsDialog")) closeFinanceRecords();
       });
-      $("#financePlanEditButton").addEventListener("click", openFinancePlanDialog);
+      $("#financePlanEditButton")?.addEventListener("click", openFinancePlanDialog);
+      $("#financeCarryBudget").addEventListener("change", (event) => {
+        const amount = Number(event.target.value);
+        if (!Number.isFinite(amount) || amount < 0) return;
+        state.financePlan = { ...normalizeFinancePlan(state.financePlan), dailyBudget: amount };
+        saveState();
+        renderFinance();
+        showToast("每日额度已更新");
+      });
       $("#financePlanCloseBtn").addEventListener("click", closeFinancePlanDialog);
       $("#financePlanCancelBtn").addEventListener("click", closeFinancePlanDialog);
       $("#financePlanDialog").addEventListener("click", (event) => {
