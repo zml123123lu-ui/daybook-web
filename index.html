@@ -3121,75 +3121,53 @@
       grid-template-columns: repeat(3, minmax(0, 1fr));
     }
 
-    .finance-carry-card {
+    .finance-monthly-plan-card {
       display: grid;
       gap: 0.85rem;
       margin-bottom: 1rem;
-      padding: 1rem 1.1rem;
+      padding: 1rem;
       border: 1px solid color-mix(in srgb, var(--berry) 26%, var(--line));
       border-left: 4px solid var(--berry);
       border-radius: var(--radius);
       background: color-mix(in srgb, var(--berry-soft) 55%, var(--surface));
     }
 
-    .finance-carry-heading {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 1rem;
+    .finance-funding-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 0.55rem;
     }
 
-    .finance-carry-heading h3 {
-      margin: 0;
+    .finance-funding-stat {
+      min-width: 0;
+      padding: 0.72rem;
+      border: 1px solid color-mix(in srgb, var(--berry) 18%, var(--line));
+      border-radius: 6px;
+      background: color-mix(in srgb, var(--surface) 88%, transparent);
+    }
+
+    .finance-funding-stat span {
+      display: block;
+      color: var(--muted);
+      font-size: 0.76rem;
+    }
+
+    .finance-funding-stat strong {
+      display: block;
+      margin-top: 0.25rem;
       font-family: "Songti SC", "STSong", serif;
       font-size: 1.08rem;
     }
 
-    .finance-carry-heading label {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.35rem;
-      color: var(--muted);
-      font-size: 0.82rem;
-      white-space: nowrap;
+    .finance-funding-stat.free,
+    .finance-funding-stat.remaining {
+      border-color: color-mix(in srgb, var(--berry) 34%, var(--line));
+      background: color-mix(in srgb, var(--berry-soft) 38%, var(--surface));
     }
 
-    #financeCarryBudget {
-      width: 5.25rem;
-      padding: 0.42rem 0.55rem;
-      border: 1px solid var(--line);
-      border-radius: 6px;
-      background: var(--surface);
-      color: var(--ink);
-      font-weight: 700;
-      text-align: right;
-    }
-
-    .finance-carry-card .finance-plan-daily,
-    .finance-carry-card .finance-plan-monthly {
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 0;
-    }
-
-    .finance-carry-card .finance-plan-stat {
-      padding: 0.2rem 1rem 0.2rem 0;
-      border: 0;
-      border-right: 1px solid color-mix(in srgb, var(--berry) 18%, transparent);
-      border-radius: 0;
-      background: transparent;
-    }
-
-    .finance-carry-card .finance-plan-stat:not(:first-child) {
-      padding-left: 1rem;
-    }
-
-    .finance-carry-card .finance-plan-stat:last-child {
-      border-right: 0;
-    }
-
-    .finance-carry-card .finance-plan-monthly {
-      padding-top: 0.75rem;
-      border-top: 1px solid color-mix(in srgb, var(--berry) 18%, transparent);
+    .finance-funding-stat.free strong,
+    .finance-funding-stat.remaining strong {
+      color: var(--berry);
     }
 
     .finance-budget-list {
@@ -4289,25 +4267,8 @@
         grid-template-columns: repeat(2, minmax(0, 1fr));
       }
 
-      .finance-carry-heading {
-        align-items: flex-start;
-        flex-direction: column;
-      }
-
-      .finance-carry-card .finance-plan-daily,
-      .finance-carry-card .finance-plan-monthly {
-        grid-template-columns: 1fr;
-        gap: 0.7rem;
-      }
-
-      .finance-carry-card .finance-plan-stat,
-      .finance-carry-card .finance-plan-stat:not(:first-child) {
-        padding: 0;
-        border-right: 0;
-      }
-
-      .finance-carry-card .finance-plan-monthly {
-        padding-top: 0.7rem;
+      .finance-funding-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
       }
 
       .finance-entry-form .field-note {
@@ -6390,22 +6351,19 @@
                 </form>
                 <datalist id="financeCategories"><option value="餐饮"><option value="交通"><option value="购物"><option value="居住"><option value="医疗健康"><option value="娱乐"><option value="学习"><option value="工资"><option value="其他"></datalist>
               </section>
-              <section class="finance-carry-card" aria-labelledby="financeCarryTitle">
-                <div class="finance-carry-heading">
-                  <h3 id="financeCarryTitle">每日 40 元顺延</h3>
-                  <label for="financeCarryBudget">每天 ¥
-                    <input id="financeCarryBudget" type="number" min="0" step="0.01" value="40" aria-label="每日花费额度">
-                  </label>
+              <section class="finance-monthly-plan-card" aria-labelledby="financeMonthlyPlanTitle">
+                <div class="finance-plan-heading">
+                  <div><h3 id="financeMonthlyPlanTitle">本月资金安排</h3><p class="muted">收入先安排存钱、还款和计划，再从自由资金里花。</p></div>
+                  <button class="btn secondary small" id="financePlanEditButton" type="button">编辑安排</button>
                 </div>
-                <div class="finance-plan-daily" aria-label="每日花费顺延统计">
-                  <article class="finance-plan-stat"><span>今日可用（含顺延）</span><strong id="financeCarryAvailable">¥40</strong></article>
-                  <article class="finance-plan-stat"><span>今日已花</span><strong id="financeCarrySpent">¥0</strong></article>
-                  <article class="finance-plan-stat"><span>今日结余</span><strong id="financeCarryRemaining">¥40</strong></article>
-                </div>
-                <div class="finance-plan-monthly" aria-label="本月花费统计">
-                  <article class="finance-plan-stat"><span>本月额度</span><strong id="financeCarryMonthlyBudget">¥1,240</strong></article>
-                  <article class="finance-plan-stat"><span>本月已花</span><strong id="financeCarryMonthlySpent">¥0</strong></article>
-                  <article class="finance-plan-stat"><span>本月结余</span><strong id="financeCarryMonthlyRemaining">¥1,240</strong></article>
+                <div class="finance-funding-grid" aria-label="本月资金安排统计">
+                  <article class="finance-funding-stat income"><span>本月收入</span><strong id="financePlanIncome">¥0</strong></article>
+                  <article class="finance-funding-stat free"><span>自由资金</span><strong id="financePlanFree">¥0</strong></article>
+                  <article class="finance-funding-stat"><span>本月存钱</span><strong id="financePlanSaving">¥0</strong></article>
+                  <article class="finance-funding-stat"><span>本月还款</span><strong id="financePlanRepayment">¥0</strong></article>
+                  <article class="finance-funding-stat"><span id="financePlanGoalLabel">事项预留</span><strong id="financePlanGoal">¥0</strong></article>
+                  <article class="finance-funding-stat"><span>自由资金已用</span><strong id="financePlanSpent">¥0</strong></article>
+                  <article class="finance-funding-stat remaining"><span>本月还可使用</span><strong id="financePlanRemaining">¥0</strong></article>
                 </div>
               </section>
               <div class="finance-overview">
@@ -6803,26 +6761,19 @@
     <form id="financePlanForm">
       <header class="dialog-header">
         <div>
-          <h2 id="financePlanDialogTitle">编辑财务计划</h2>
-          <p class="muted">这里改的是预算规则，不会修改已经记录的账单。</p>
+          <h2 id="financePlanDialogTitle">编辑本月资金安排</h2>
+          <p class="muted">这里安排每月固定资金，不会修改已经记录的账单。</p>
         </div>
         <button class="icon-close" id="financePlanCloseBtn" type="button" aria-label="关闭财务计划编辑">×</button>
       </header>
       <div class="dialog-fields">
         <div class="finance-plan-edit-grid">
-          <div class="field"><label for="financePlanDailyIncome">每天到账</label><input id="financePlanDailyIncome" name="dailyIncome" type="number" min="0" step="1"></div>
-          <div class="field"><label for="financePlanDailySaving">每天应存</label><input id="financePlanDailySaving" name="dailySaving" type="number" min="0" step="1"></div>
-          <div class="field"><label for="financePlanDailyLimit">每天可花</label><input id="financePlanDailyLimit" name="dailySpendingLimit" type="number" min="0" step="1"></div>
-          <div class="field"><label for="financePlanIncomeDays">每月发薪天数</label><input id="financePlanIncomeDays" name="monthlyIncomeDays" type="number" min="1" max="31" step="1"></div>
+          <div class="field"><label for="financePlanMonthlyIncome">每月收入</label><input id="financePlanMonthlyIncome" name="monthlyIncome" type="number" min="0" step="1" required></div>
+          <div class="field"><label for="financePlanMonthlySaving">每月存钱</label><input id="financePlanMonthlySaving" name="monthlySaving" type="number" min="0" step="1" required></div>
+          <div class="field"><label for="financePlanMonthlyRepayment">每月还款</label><input id="financePlanMonthlyRepayment" name="monthlyRepayment" type="number" min="0" step="1" required></div>
+          <div class="field"><label for="financePlanGoalName">要做的事（可选）</label><input id="financePlanGoalName" name="goalName" maxlength="24" autocomplete="off" placeholder="例如：旅行"></div>
+          <div class="field"><label for="financePlanGoalAmount">每月预留</label><input id="financePlanGoalAmount" name="goalAmount" type="number" min="0" step="1" required></div>
         </div>
-        <fieldset class="finance-plan-budget-fields">
-          <legend>每月分类额度</legend>
-          <div class="field"><label for="financePlanBudget0">吃喝</label><input id="financePlanBudget0" name="budget-0" type="number" min="0" step="1"></div>
-          <div class="field"><label for="financePlanBudget1">购物 + 日用 + 快递</label><input id="financePlanBudget1" name="budget-1" type="number" min="0" step="1"></div>
-          <div class="field"><label for="financePlanBudget2">交通 + 健康</label><input id="financePlanBudget2" name="budget-2" type="number" min="0" step="1"></div>
-          <div class="field"><label for="financePlanBudget3">会员 + 话费 + 其他</label><input id="financePlanBudget3" name="budget-3" type="number" min="0" step="1"></div>
-          <div class="field"><label for="financePlanBudget4">缓冲</label><input id="financePlanBudget4" name="budget-4" type="number" min="0" step="1"></div>
-        </fieldset>
       </div>
       <footer class="dialog-footer">
         <button class="btn secondary" id="financePlanCancelBtn" type="button">取消</button>
@@ -7054,17 +7005,11 @@
           visions: [],
           financeRecords: [],
           financePlan: {
-            dailyIncome: 100,
-            dailySaving: 40,
-            dailySpendingLimit: 60,
-            monthlyIncomeDays: 25,
-            monthlyBudgets: [
-              { name: "吃喝", amount: 500 },
-              { name: "购物 + 日用 + 快递", amount: 450 },
-              { name: "交通 + 健康", amount: 350 },
-              { name: "会员 + 话费 + 其他", amount: 100 },
-              { name: "缓冲", amount: 100 }
-            ]
+            monthlyIncome: 2500,
+            monthlySaving: 1000,
+            monthlyRepayment: 0,
+            goalName: "",
+            goalAmount: 0
           },
           notes: {},
           dailySummaries: {},
@@ -9677,35 +9622,38 @@
 
       function financePlanDefaults() {
         return {
-          dailyIncome: 100,
-          dailySaving: 40,
-          dailySpendingLimit: 60,
-          monthlyIncomeDays: 25,
-          monthlyBudgets: [
-            { name: "吃喝", amount: 500 },
-            { name: "购物 + 日用 + 快递", amount: 450 },
-            { name: "交通 + 健康", amount: 350 },
-            { name: "会员 + 话费 + 其他", amount: 100 },
-            { name: "缓冲", amount: 100 }
-          ]
+          monthlyIncome: 2500,
+          monthlySaving: 1000,
+          monthlyRepayment: 0,
+          goalName: "",
+          goalAmount: 0
         };
       }
 
       function normalizeFinancePlan(source) {
         const defaults = financePlanDefaults();
         const value = source && typeof source === "object" ? source : {};
-        const budgets = Array.isArray(value.monthlyBudgets) ? value.monthlyBudgets : defaults.monthlyBudgets;
+        const legacyIncome = Number(value.dailyIncome) * Number(value.monthlyIncomeDays);
+        const legacySaving = Number(value.dailySaving) * Number(value.monthlyIncomeDays);
         return {
-          dailyBudget: Number.isFinite(Number(value.dailyBudget)) ? Math.max(0, Number(value.dailyBudget)) : 40,
-          dailyIncome: Number.isFinite(Number(value.dailyIncome)) ? Number(value.dailyIncome) : defaults.dailyIncome,
-          dailySaving: Number.isFinite(Number(value.dailySaving)) ? Number(value.dailySaving) : defaults.dailySaving,
-          dailySpendingLimit: Number.isFinite(Number(value.dailySpendingLimit)) ? Number(value.dailySpendingLimit) : defaults.dailySpendingLimit,
-          monthlyIncomeDays: Number.isFinite(Number(value.monthlyIncomeDays)) ? Number(value.monthlyIncomeDays) : defaults.monthlyIncomeDays,
-          monthlyBudgets: budgets.map((item, index) => ({
-            name: String(item?.name || defaults.monthlyBudgets[index]?.name || "未分类").replace("会员 + 花费 + 其他", "会员 + 话费 + 其他"),
-            amount: Math.max(0, Number(item?.amount) || defaults.monthlyBudgets[index]?.amount || 0)
-          }))
+          monthlyIncome: Math.max(0, Number.isFinite(Number(value.monthlyIncome)) ? Number(value.monthlyIncome) : (Number.isFinite(legacyIncome) && legacyIncome > 0 ? legacyIncome : defaults.monthlyIncome)),
+          monthlySaving: Math.max(0, Number.isFinite(Number(value.monthlySaving)) ? Number(value.monthlySaving) : (Number.isFinite(legacySaving) && legacySaving >= 0 ? legacySaving : defaults.monthlySaving)),
+          monthlyRepayment: Math.max(0, Number(value.monthlyRepayment) || 0),
+          goalName: String(value.goalName || "").trim().slice(0, 24),
+          goalAmount: Math.max(0, Number(value.goalAmount) || 0)
         };
+      }
+
+      function financeMonthlyFundingSnapshot(records, month, plan) {
+        const spent = records
+          .filter((record) => record.type === "expense" && String(record.date).slice(0, 7) === String(month))
+          .reduce((sum, record) => sum + (Number(record.amount) || 0), 0);
+        const income = Number(plan.monthlyIncome) || 0;
+        const saving = Number(plan.monthlySaving) || 0;
+        const repayment = Number(plan.monthlyRepayment) || 0;
+        const goal = Number(plan.goalAmount) || 0;
+        const free = income - saving - repayment - goal;
+        return { income, saving, repayment, goal, free, spent, remaining: free - spent };
       }
 
       function financeBudgetCategory(category, plan) {
@@ -9944,18 +9892,15 @@
         $("#financeCount").textContent = String(state.financeRecords.length);
         const plan = normalizeFinancePlan(state.financePlan);
         state.financePlan = plan;
-        const dailyPlan = financeDailySnapshot(state.financeRecords, todayKey(), plan);
-        const monthlyPlan = financeMonthlyBudgetSnapshot(state.financeRecords, todayKey().slice(0, 7), plan);
-        const carryBudget = Number.isFinite(Number(plan.dailyBudget)) ? Math.max(0, Number(plan.dailyBudget)) : 40;
-        const carry = financeCarrySnapshot(state.financeRecords, todayKey(), carryBudget);
-        const daysInMonth = new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0).getDate();
-        $("#financeCarryBudget").value = carryBudget;
-        $("#financeCarryAvailable").textContent = currency.format(carry.available);
-        $("#financeCarrySpent").textContent = currency.format(carry.spent);
-        $("#financeCarryRemaining").textContent = currency.format(carry.remaining);
-        $("#financeCarryMonthlyBudget").textContent = currency.format(carryBudget * daysInMonth);
-        $("#financeCarryMonthlySpent").textContent = currency.format(monthlyPlan.spent);
-        $("#financeCarryMonthlyRemaining").textContent = currency.format(carryBudget * daysInMonth - monthlyPlan.spent);
+        const funding = financeMonthlyFundingSnapshot(state.financeRecords, todayKey().slice(0, 7), plan);
+        $("#financePlanIncome").textContent = currency.format(funding.income);
+        $("#financePlanSaving").textContent = currency.format(funding.saving);
+        $("#financePlanRepayment").textContent = currency.format(funding.repayment);
+        $("#financePlanGoalLabel").textContent = plan.goalName ? `${plan.goalName}预留` : "事项预留";
+        $("#financePlanGoal").textContent = currency.format(funding.goal);
+        $("#financePlanFree").textContent = currency.format(funding.free);
+        $("#financePlanSpent").textContent = currency.format(funding.spent);
+        $("#financePlanRemaining").textContent = currency.format(funding.remaining);
         $("#financeImportStatus").textContent = state.lastImport
           ? `${state.lastImport.file} · 新增 ${state.lastImport.added} · 覆盖 ${state.lastImport.overwritten}`
           : "尚未导入";
@@ -9970,16 +9915,13 @@
 
       function openFinancePlanDialog() {
         const plan = normalizeFinancePlan(state.financePlan);
-        $("#financePlanDailyIncome").value = plan.dailyIncome;
-        $("#financePlanDailySaving").value = plan.dailySaving;
-        $("#financePlanDailyLimit").value = plan.dailySpendingLimit;
-        $("#financePlanIncomeDays").value = plan.monthlyIncomeDays;
-        plan.monthlyBudgets.forEach((item, index) => {
-          const input = $(`#financePlanBudget${index}`);
-          if (input) input.value = item.amount;
-        });
+        $("#financePlanMonthlyIncome").value = plan.monthlyIncome;
+        $("#financePlanMonthlySaving").value = plan.monthlySaving;
+        $("#financePlanMonthlyRepayment").value = plan.monthlyRepayment;
+        $("#financePlanGoalName").value = plan.goalName;
+        $("#financePlanGoalAmount").value = plan.goalAmount;
         $("#financePlanDialog").showModal();
-        $("#financePlanDailyIncome").focus();
+        $("#financePlanMonthlyIncome").focus();
       }
 
       function closeFinancePlanDialog() {
@@ -9989,16 +9931,12 @@
 
       function saveFinancePlan(form) {
         const values = Object.fromEntries(new FormData(form));
-        const defaults = financePlanDefaults();
         state.financePlan = normalizeFinancePlan({
-          dailyIncome: values.dailyIncome,
-          dailySaving: values.dailySaving,
-          dailySpendingLimit: values.dailySpendingLimit,
-          monthlyIncomeDays: values.monthlyIncomeDays,
-          monthlyBudgets: defaults.monthlyBudgets.map((item, index) => ({
-            name: item.name,
-            amount: values[`budget-${index}`]
-          }))
+          monthlyIncome: values.monthlyIncome,
+          monthlySaving: values.monthlySaving,
+          monthlyRepayment: values.monthlyRepayment,
+          goalName: values.goalName,
+          goalAmount: values.goalAmount
         });
         saveState();
         renderFinance();
@@ -11196,14 +11134,6 @@
         if (event.target === $("#financeRecordsDialog")) closeFinanceRecords();
       });
       $("#financePlanEditButton")?.addEventListener("click", openFinancePlanDialog);
-      $("#financeCarryBudget").addEventListener("change", (event) => {
-        const amount = Number(event.target.value);
-        if (!Number.isFinite(amount) || amount < 0) return;
-        state.financePlan = { ...normalizeFinancePlan(state.financePlan), dailyBudget: amount };
-        saveState();
-        renderFinance();
-        showToast("每日额度已更新");
-      });
       $("#financePlanCloseBtn").addEventListener("click", closeFinancePlanDialog);
       $("#financePlanCancelBtn").addEventListener("click", closeFinancePlanDialog);
       $("#financePlanDialog").addEventListener("click", (event) => {
