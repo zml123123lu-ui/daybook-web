@@ -58,11 +58,19 @@ test("published workbench provides a media watchlist with progress and archived 
   assert.match(html, /data-view="media"[^>]*aria-label="影视清单"/);
   assert.match(html, /id="media" data-panel="media"/);
   assert.match(html, /id="mediaForm"/);
+  assert.match(html, /role="tablist"[^>]*aria-label="影视类型"/);
+  for (const type of ["movie", "series", "anime", "variety"]) {
+    assert.match(html, new RegExp(`data-media-type="${type}"`));
+  }
   assert.match(html, /name="type"[\s\S]*电影[\s\S]*电视剧[\s\S]*动漫[\s\S]*综艺/);
   assert.match(html, /name="season"/);
   assert.match(html, /name="episode"/);
   assert.match(html, /id="mediaWatchingList"/);
   assert.match(html, /id="mediaCompletedList"/);
+  for (const type of ["movie", "series", "anime", "variety"]) {
+    assert.match(html, new RegExp(`id="mediaWatching${type[0].toUpperCase()}${type.slice(1)}List"`));
+    assert.match(html, new RegExp(`id="mediaCompleted${type[0].toUpperCase()}${type.slice(1)}List"`));
+  }
   assert.match(html, /data-action="media-complete"/);
   assert.match(html, /mediaItems: \[\]/);
   assert.match(html, /mediaItems: Array\.isArray\(source\.mediaItems\)/);
@@ -150,17 +158,6 @@ test("published workbench exports a date-scoped analysis package without cloud c
   assert.match(html, /state\.thoughts\.filter\(\(thought\) => thought\.date === key/);
   const builder = html.match(/function buildDailyAnalysisPackage\([\s\S]*?(?=\n      function exportDailyAnalysis)/)?.[0] || "";
   assert.doesNotMatch(builder, /SUPABASE|PASSWORD|TOKEN|SYNC_META_KEY/);
-});
-
-test("published workbench provides a dated one-line self-summary across review surfaces", () => {
-  const html = read("outputs/index.html");
-  assert.match(html, /id="dailySelfSummaryTimeline"/);
-  assert.match(html, /id="dailySelfSummary"/);
-  assert.match(html, /dailySelfSummaries: \{\}/);
-  assert.match(html, /function renderDailySelfSummary\(/);
-  assert.match(html, /state\.dailySelfSummaries\[activeDate\]/);
-  assert.match(html, /每日一句自我总结/);
-  assert.match(html, /dailySelfSummary:/);
 });
 
 test("published workbench records sleep quality and social connection with wellbeing data", () => {
@@ -274,7 +271,8 @@ test("published workbench gives filters and gratitude controls accurate accessib
   assert.match(html, /aria-label="支出统计范围"/);
   assert.match(html, /aria-label="复盘周期"/);
   assert.match(html, /setAttribute\("aria-pressed", String\(active\)\)/);
-  assert.doesNotMatch(html, /role="tablist"|role="tab"|aria-selected=/);
+  assert.match(html, /role="tablist"[^>]*aria-label="影视类型"/);
+  assert.match(html, /role="tab"[^>]*data-media-type=/);
 });
 
 function blockEditorMarkup(html) {
@@ -364,15 +362,14 @@ function financeRowNormalizerFrom(html) {
 function financePlanHelpersFrom(html) {
   const match = html.match(/function financePlanDefaults[\s\S]*?(?=\n      function renderFinance\()/);
   assert.ok(match, "finance plan helpers should exist");
-  return new Function(`${match[0]}; return { financePlanDefaults, financeDailySnapshot, financeMonthlyBudgetSnapshot, financeBudgetCategory, financeBudgetCategoryForRecord };`)();
+  return new Function(`${match[0]}; return { financePlanDefaults, normalizeFinancePlan, financeMonthlyFundingSnapshot };`)();
 }
 
 function decisionSupportHelpersFrom(html) {
   const lowEnergy = html.match(/function lowEnergyTrend[\s\S]*?(?=\n      function renderLowEnergyNotice)/);
-  const finance = html.match(/function financeWeeklyInsight[\s\S]*?(?=\n      function renderFinanceWeeklyInsight)/);
   const meals = html.match(/function mealCompletenessInsight[\s\S]*?(?=\n      function renderMealCompletenessInsight)/);
-  assert.ok(lowEnergy && finance && meals, "decision-support helpers should exist");
-  return new Function(`${lowEnergy[0]} ${finance[0]} ${meals[0]}; return { lowEnergyTrend, financeWeeklyInsight, mealCompletenessInsight };`)();
+  assert.ok(lowEnergy && meals, "decision-support helpers should exist");
+  return new Function(`${lowEnergy[0]} ${meals[0]}; return { lowEnergyTrend, mealCompletenessInsight };`)();
 }
 
 function maintenanceHelpersFrom(html) {
@@ -493,24 +490,12 @@ for (const file of files) {
 
   test(`${file} adds lightweight decision support without new navigation pages`, () => {
     const html = read(file);
-    const { lowEnergyTrend, financeWeeklyInsight, mealCompletenessInsight } = decisionSupportHelpersFrom(html);
+    const { lowEnergyTrend, mealCompletenessInsight } = decisionSupportHelpersFrom(html);
     assert.deepEqual(lowEnergyTrend({
       "2026-08-18": { energy: 2 },
       "2026-08-19": { energy: 1 }
     }, "2026-08-19"), { days: 2, average: 1.5 });
     assert.equal(lowEnergyTrend({ "2026-08-19": { energy: 2 } }, "2026-08-19"), null);
-
-    const finance = financeWeeklyInsight([
-      { type: "expense", date: "2026-08-17", amount: 20, name: "咖啡", category: "餐饮" },
-      { type: "expense", date: "2026-08-18", amount: 20, name: "咖啡", category: "餐饮" },
-      { type: "expense", date: "2026-08-19", amount: 100, name: "外套", category: "购物" },
-      { type: "expense", date: "2026-08-10", amount: 20, name: "咖啡", category: "餐饮" }
-    ], "2026-08-19", { dailySpendingLimit: 60 });
-    assert.equal(finance.spent, 140);
-    assert.equal(finance.limit, 420);
-    assert.equal(finance.topCategory, "购物");
-    assert.deepEqual(finance.repeatedNames, ["咖啡"]);
-    assert.equal(finance.largestOneTime.name, "外套");
 
     const meals = mealCompletenessInsight({
       "2026-08-18": { breakfast: "鸡蛋", lunch: "面", dinner: "" },
@@ -522,7 +507,7 @@ for (const file of files) {
     assert.equal(meals.completeness, 19);
 
     assert.match(html, /id="lowEnergyNotice"/);
-    assert.match(html, /id="financeWeeklyInsight"/);
+    assert.doesNotMatch(html, /id="financeWeeklyInsight"/);
     assert.match(html, /id="mealCompletenessInsight"/);
     assert.doesNotMatch(html, /data-view="patterns"|data-view="decisions"/);
   });
@@ -638,7 +623,8 @@ for (const file of files) {
       name: "午餐",
       date: "2026-08-09",
       note: "和朋友一起",
-      source: "手动记账"
+      source: "手动记账",
+      updatedAt: record.updatedAt
     });
     assert.equal(manualFinanceRecord({ type: "income", amount: "", category: "工资", name: "工资" }), null);
   });
@@ -755,50 +741,71 @@ for (const file of files) {
     assert.equal(recategorized.key, record.key);
   });
 
-  test(`${file} calculates the daily and monthly finance plan`, () => {
+  test(`${file} calculates the monthly funding plan`, () => {
     const html = read(file);
-    const { financePlanDefaults, financeDailySnapshot, financeMonthlyBudgetSnapshot, financeBudgetCategory, financeBudgetCategoryForRecord } = financePlanHelpersFrom(html);
+    const { financePlanDefaults, normalizeFinancePlan, financeMonthlyFundingSnapshot } = financePlanHelpersFrom(html);
     const plan = financePlanDefaults();
-    assert.ok(plan.monthlyBudgets.some((item) => item.name === "会员 + 话费 + 其他"));
-    assert.ok(!plan.monthlyBudgets.some((item) => item.name === "会员 + 花费 + 其他"));
-    assert.equal(plan.dailyIncome, 100);
-    assert.equal(plan.dailySaving, 40);
-    assert.equal(plan.dailySpendingLimit, 60);
-    assert.equal(plan.monthlyBudgets.reduce((sum, item) => sum + item.amount, 0), 1500);
-    const daily = financeDailySnapshot([
-      { type: "expense", amount: 20, date: "2026-08-12", category: "餐饮" },
-      { type: "expense", amount: 15, date: "2026-08-12", category: "交通" },
-      { type: "expense", amount: 100, date: "2026-08-11", category: "餐饮" }
-    ], "2026-08-12", plan);
-    assert.equal(daily.spent, 35);
-    assert.equal(daily.remaining, 25);
-    assert.equal(daily.saving, 40);
-    assert.equal(financeBudgetCategory("餐饮", plan).name, "吃喝");
-    assert.equal(financeBudgetCategory("购物", plan).name, "购物 + 日用 + 快递");
-    assert.equal(financeBudgetCategoryForRecord({ category: "其他", ledger: "购物账本" }, plan).name, "购物 + 日用 + 快递");
-    ["日用", "日用品", "生活日用", "物流", "运费", "寄件", "配送"].forEach((category) => {
-      assert.equal(financeBudgetCategory(category, plan).name, "购物 + 日用 + 快递");
-    });
-    const monthly = financeMonthlyBudgetSnapshot([
+    assert.equal(plan.monthlyIncome, 2500);
+    assert.equal(plan.monthlySaving, 1000);
+    const monthly = financeMonthlyFundingSnapshot([
       { type: "expense", amount: 120, date: "2026-08-02", category: "餐饮" },
       { type: "expense", amount: 80, date: "2026-07-31", category: "餐饮" },
       { type: "income", amount: 100, date: "2026-08-03", category: "工资" }
     ], "2026-08", plan);
     assert.equal(monthly.spent, 120);
+    assert.equal(monthly.free, 1500);
     assert.equal(monthly.remaining, 1380);
-    assert.equal(monthly.categories.find((item) => item.name === "吃喝").spent, 120);
+    const migrated = normalizeFinancePlan({ dailyIncome: 100, dailySaving: 40, monthlyIncomeDays: 25 });
+    assert.equal(migrated.monthlyIncome, 2500);
+    assert.equal(migrated.monthlySaving, 1000);
+  });
+
+  test(`${file} stores finance plans by month and supports copying them forward`, () => {
+    const html = read(file);
+    assert.match(html, /financePlans:\s*\{\}/);
+    assert.match(html, /function financePlanForMonth\(/);
+    assert.match(html, /function copyFinancePlanToNextMonth\(/);
+    assert.match(html, /id="financePlanMonthLabel"/);
+    assert.match(html, /data-action="finance-plan-prev"/);
+    assert.match(html, /data-action="finance-plan-next"/);
+    assert.match(html, /id="financePlanCopyNextButton"/);
+  });
+
+  test(`${file} distinguishes expected and actual income and marks overspending`, () => {
+    const html = read(file);
+    assert.match(html, />预计收入</);
+    assert.match(html, />实际收入</);
+    assert.match(html, /id="financePlanStatus"/);
+    assert.match(html, /classList\.toggle\("over", funding\.remaining < 0\)/);
+  });
+
+  test(`${file} lets a finance record be edited, deleted, and exported by month`, () => {
+    const html = read(file);
+    assert.match(html, /id="financeRecordEditDialog"/);
+    assert.match(html, /data-action="edit-finance-record"/);
+    assert.match(html, /data-action="delete-finance-record"/);
+    assert.match(html, /function exportFinanceMonth\(/);
+    assert.match(html, /id="financeExportMonthButton"/);
+  });
+
+  test(`${file} keeps shopping and thoughts optional and removes the daily one-line summary`, () => {
+    const html = read(file);
+    assert.match(html, /id="moduleSettingsDialog"/);
+    assert.match(html, /name="shopping"/);
+    assert.match(html, /name="thoughts"/);
+    assert.match(html, /function applyModuleVisibility\(/);
+    assert.doesNotMatch(html, /id="dailySelfSummary"/);
+    assert.doesNotMatch(html, /state\.dailySelfSummaries|dailySelfSummaries:\s*\{/);
   });
 
   test(`${file} renders the finance plan without seed bills`, () => {
     const html = read(file);
     const moneySection = html.match(/<section class="panel view-panel" id="money"[\s\S]*?<section class="panel view-panel" id="health"/)?.[0] || "";
-    assert.match(html, /financePlan:/);
-    assert.match(html, /id="financePlanCard"/);
-    assert.match(moneySection, /今日应存/);
-    assert.match(moneySection, /今日剩余/);
-    assert.match(moneySection, /本月预算/);
-    assert.match(html, /function financeDailySnapshot\(/);
-    assert.match(html, /function financeMonthlyBudgetSnapshot\(/);
+    assert.match(html, /financePlans:/);
+    assert.match(moneySection, /月度资金安排/);
+    assert.match(moneySection, /自由资金/);
+    assert.match(moneySection, /本月还可使用/);
+    assert.match(html, /function financeMonthlyFundingSnapshot\(/);
     assert.match(html, /financeRecords:\s*\[\]/);
   });
 
@@ -810,8 +817,8 @@ for (const file of files) {
     assert.match(moneySection, /id="financePlanEditButton"/);
     assert.match(html, /id="financePlanDialog"/);
     assert.match(html, /id="financePlanForm"/);
-    assert.match(html, /id="financePlanDailyIncome"/);
-    assert.match(html, /name="budget-0"/);
+    assert.match(html, /id="financePlanMonthlyIncome"/);
+    assert.match(html, /id="financePlanGoalAmount"/);
     assert.match(html, /function renderFinanceRecordsInto\(/);
     assert.match(html, /renderFinanceRecordsInto\(\$\("#financeRecordList"\)/);
     assert.match(html, /#financeRecordsDialog \{[\s\S]*?position:\s*fixed;[\s\S]*?inset:\s*0;[\s\S]*?width:\s*min\(46rem, calc\(100vw - 2rem\)\);[\s\S]*?height:\s*min\(80dvh, 42rem\);[\s\S]*?margin:\s*auto;[\s\S]*?border-radius:\s*var\(--radius\);/);
@@ -819,11 +826,10 @@ for (const file of files) {
     assert.match(html, /#financeRecordsDialog\[open\] \{[\s\S]*?display:\s*grid;/);
   });
 
-  test(`${file} keeps finance editor fields inside a narrow dialog and its budget legend horizontal`, () => {
+  test(`${file} keeps finance editor fields inside a narrow dialog`, () => {
     const html = read(file);
     assert.match(html, /@media \(max-width: 560px\) \{[\s\S]*?\.finance-entry-form \.field-note \{[\s\S]*?grid-column:\s*1\s*\/\s*-1;/);
-    assert.match(html, /\.finance-plan-budget-fields \{[\s\S]*?display:\s*block;/);
-    assert.match(html, /\.finance-plan-budget-fields legend \{[\s\S]*?white-space:\s*nowrap;/);
+    assert.match(html, /#financePlanDialog \{[\s\S]*?width:\s*min\(42rem, calc\(100vw - 2rem\)\);/);
   });
 
   test(`${file} uses shrinkable desktop finance form columns`, () => {
