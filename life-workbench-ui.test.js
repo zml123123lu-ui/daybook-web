@@ -717,6 +717,33 @@ for (const file of files) {
     assert.equal(record.date, "2026-08-12");
   });
 
+  test(`${file} defaults imported expenses to free funds and names blank rows by category`, () => {
+    const html = read(file);
+    const normalizeFinanceRow = financeRowNormalizerFrom(html);
+    const record = normalizeFinanceRow({
+      "交易日期": "2026-09-05",
+      "支出金额": "12.50",
+      "分类": "餐饮",
+      "名称": ""
+    }, "账单.csv");
+    assert.equal(record.name, "餐饮");
+    assert.equal(record.allocation, "free");
+  });
+
+  test(`${file} provides a separate month switcher for bill records`, () => {
+    const html = read(file);
+    assert.match(html, /id="financeRecordsMonthPrev"/);
+    assert.match(html, /id="financeRecordsMonthNext"/);
+    assert.match(html, /id="financeRecordsMonthLabel"/);
+    assert.match(html, /function financeRecordsForList\(records, sourceFilter, month/);
+    assert.match(html, /String\(record\.date\)\.slice\(0, 7\) === month/);
+  });
+
+  test(`${file} keeps finance actions readable on mobile`, () => {
+    const html = read(file);
+    assert.match(html, /#money \.finance-heading-actions \.btn \{[\s\S]*?font-size:\s*0\.95rem;[\s\S]*?min-height:\s*2\.8rem;/);
+  });
+
   test(`${file} prefers a detailed category and keeps the imported ledger`, () => {
     const normalizeFinanceRow = financeRowNormalizerFrom(read(file));
     const record = normalizeFinanceRow({

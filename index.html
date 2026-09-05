@@ -3045,6 +3045,11 @@
       flex-wrap: wrap;
     }
 
+    #money .finance-heading-actions .btn {
+      font-size: 0.95rem;
+      min-height: 2.8rem;
+    }
+
     .finance-entry-card {
       display: grid;
       gap: 0.75rem;
@@ -4376,6 +4381,17 @@
 
       .finance-record-filter {
         grid-template-columns: auto minmax(0, 1fr);
+      }
+
+      #money .finance-heading-actions {
+        width: 100%;
+        justify-content: stretch;
+      }
+
+      #money .finance-heading-actions .btn {
+        flex: 1 1 0;
+        min-width: 0;
+        padding-inline: 0.7rem;
       }
 
       #money .panel-header {
@@ -6802,6 +6818,11 @@
             <option value="manual">手动录入</option>
             <option value="import">导入账单</option>
           </select>
+        </div>
+        <div class="finance-month-nav" aria-label="切换账单月份">
+          <button class="btn secondary small" id="financeRecordsMonthPrev" type="button" aria-label="上一个账单月份">‹</button>
+          <strong id="financeRecordsMonthLabel"></strong>
+          <button class="btn secondary small" id="financeRecordsMonthNext" type="button" aria-label="下一个账单月份">›</button>
         </div>
         <div class="finance-record-list" id="financeRecordList" role="list"></div>
       </section>
@@ -9818,14 +9839,15 @@
           .sort((a, b) => b.amount - a.amount || a.category.localeCompare(b.category, "zh-CN"));
       }
 
-      function financeRecordsForList(records, sourceFilter) {
+      function financeRecordsForList(records, sourceFilter, month = "") {
         return records
-          .filter((record) => sourceFilter === "all" || (sourceFilter === "manual" ? record.source === "手动记账" : record.source !== "手动记账"))
+          .filter((record) => (!month || String(record.date).slice(0, 7) === month)
+            && (sourceFilter === "all" || (sourceFilter === "manual" ? record.source === "手动记账" : record.source !== "手动记账")))
           .sort((first, second) => String(second.date).localeCompare(String(first.date)));
       }
 
       function renderFinanceRecordsInto(list, countNode = null, sourceFilter = financeRecordSourceFilter) {
-        const records = financeRecordsForList(state.financeRecords, sourceFilter);
+        const records = financeRecordsForList(state.financeRecords, sourceFilter, financeChartMonth);
         if (countNode) countNode.textContent = records.length ? `共 ${records.length} 笔记录` : "还没有账单记录";
         if (!records.length) {
           list.innerHTML = '<div class="empty" role="status">在上方手动记一笔，或导入账单后，这里会按日期显示。</div>';
@@ -9854,6 +9876,7 @@
 
       function renderFinanceRecords() {
         $("#financeRecordSourceFilter").value = financeRecordSourceFilter;
+        $("#financeRecordsMonthLabel").textContent = `${Number(financeChartMonth.slice(0, 4))} 年 ${Number(financeChartMonth.slice(5, 7))} 月`;
         renderFinanceRecordsInto($("#financeRecordList"), $("#financeRecordCount"));
       }
 
@@ -10357,8 +10380,8 @@
 
         const rawDate = pick(row, ["交易时间", "交易日期", "发生时间", "记账日期", "日期", "时间", "date"]);
         const date = normalizeDate(rawDate);
-        const name = String(pick(row, ["名称", "项目", "商品说明", "商品", "商户", "交易对方", "交易对象", "账单备注", "备注", "说明", "name", "merchant"])).trim();
         const category = String(pick(row, ["二级分类", "账目分类", "分类", "类别", "category", "一级分类"])).trim() || "未分类";
+        const name = String(pick(row, ["名称", "项目", "商品说明", "商品", "商户", "交易对方", "交易对象", "账单备注", "备注", "说明", "name", "merchant"])).trim() || category;
         const ledger = String(pick(row, ["账本", "账簿", "所属账本", "账户", "ledger", "book"])).trim();
         const externalId = String(pick(row, ["记录id", "账单id", "流水号", "订单号", "交易号", "id", "transactionid"])).trim();
         const amount = Math.abs(parsedAmount);
@@ -10375,6 +10398,7 @@
           ledger,
           amount,
           type,
+          allocation: type === "income" ? "income" : "free",
           source: sourceName,
           updatedAt: new Date().toISOString()
         };
@@ -11274,6 +11298,14 @@
       });
       $("#financeRecordSourceFilter").addEventListener("change", (event) => {
         financeRecordSourceFilter = event.target.value;
+        renderFinanceRecords();
+      });
+      $("#financeRecordsMonthPrev").addEventListener("click", () => {
+        financeChartMonth = shiftMonthKey(financeChartMonth, -1);
+        renderFinanceRecords();
+      });
+      $("#financeRecordsMonthNext").addEventListener("click", () => {
+        financeChartMonth = shiftMonthKey(financeChartMonth, 1);
         renderFinanceRecords();
       });
       $("#financeExportMonthButton").addEventListener("click", exportFinanceMonth);
