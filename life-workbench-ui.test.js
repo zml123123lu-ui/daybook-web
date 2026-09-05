@@ -821,6 +821,38 @@ for (const file of files) {
     assert.doesNotMatch(html, /state\.dailySelfSummaries|dailySelfSummaries:\s*\{/);
   });
 
+  test(`${file} does not reveal inactive optional views during a rerender`, () => {
+    const html = read(file);
+    const source = html.match(/function applyModuleVisibility\(\) \{[\s\S]*?\n      \}/)?.[0];
+    assert.ok(source);
+    const nodes = {
+      shopping: [
+        { hidden: false, classList: { contains: () => false } },
+        { hidden: true, classList: { contains: (name) => name === "view-panel" } }
+      ],
+      thoughts: [
+        { hidden: false, classList: { contains: () => false } },
+        { hidden: true, classList: { contains: (name) => name === "view-panel" } }
+      ]
+    };
+    const document = {
+      querySelectorAll: (selector) => nodes[selector.match(/data-module="([^"]+)/)[1]],
+      querySelector: () => null
+    };
+    const state = { moduleVisibility: { shopping: true, thoughts: true } };
+    const applyModuleVisibility = new Function("state", "document", "$", `${source}; return applyModuleVisibility;`)(
+      state,
+      document,
+      () => null
+    );
+    applyModuleVisibility();
+    assert.deepEqual(nodes.shopping.map((node) => node.hidden), [false, true]);
+    assert.deepEqual(nodes.thoughts.map((node) => node.hidden), [false, true]);
+    state.moduleVisibility.shopping = false;
+    applyModuleVisibility();
+    assert.deepEqual(nodes.shopping.map((node) => node.hidden), [true, true]);
+  });
+
   test(`${file} renders the finance plan without seed bills`, () => {
     const html = read(file);
     const moneySection = html.match(/<section class="panel view-panel" id="money"[\s\S]*?<section class="panel view-panel" id="health"/)?.[0] || "";

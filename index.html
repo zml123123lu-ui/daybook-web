@@ -7898,7 +7898,10 @@
       function applyModuleVisibility() {
         ["shopping", "thoughts"].forEach((module) => {
           const visible = state.moduleVisibility?.[module] !== false;
-          document.querySelectorAll(`[data-module="${module}"]`).forEach((node) => { node.hidden = !visible; });
+          document.querySelectorAll(`[data-module="${module}"]`).forEach((node) => {
+            if (!node.classList.contains("view-panel")) node.hidden = !visible;
+            else if (!visible) node.hidden = true;
+          });
           const input = document.querySelector(`#moduleSettingsForm [name="${module}"]`);
           if (input) input.checked = visible;
         });
