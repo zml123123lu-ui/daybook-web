@@ -342,7 +342,7 @@ function financeRecordsForListFrom(html) {
 }
 
 function manualFinanceRecordFrom(html) {
-  const match = html.match(/function manualFinanceRecord[\s\S]*?(?=\n      async function importFinance\()/);
+  const match = html.match(/function normalizeFinanceAllocation[\s\S]*?function manualFinanceRecord[\s\S]*?(?=\n      async function importFinance\()/);
   assert.ok(match, "manual finance helper should exist");
   return new Function(`function uid() { return "generated-id"; } function todayKey() { return "2026-08-09"; } ${match[0]}; return manualFinanceRecord;`)();
 }
@@ -623,6 +623,7 @@ for (const file of files) {
       name: "午餐",
       date: "2026-08-09",
       note: "和朋友一起",
+      allocation: "unclassified",
       source: "手动记账",
       updatedAt: record.updatedAt
     });
@@ -752,9 +753,10 @@ for (const file of files) {
       { type: "expense", amount: 80, date: "2026-07-31", category: "餐饮" },
       { type: "income", amount: 100, date: "2026-08-03", category: "工资" }
     ], "2026-08", plan);
-    assert.equal(monthly.spent, 120);
+    assert.equal(monthly.spent, 0);
+    assert.equal(monthly.unclassifiedSpent, 120);
     assert.equal(monthly.free, 1500);
-    assert.equal(monthly.remaining, 1380);
+    assert.equal(monthly.remaining, 1500);
     const migrated = normalizeFinancePlan({ dailyIncome: 100, dailySaving: 40, monthlyIncomeDays: 25 });
     assert.equal(migrated.monthlyIncome, 2500);
     assert.equal(migrated.monthlySaving, 1000);
@@ -777,6 +779,27 @@ for (const file of files) {
     assert.match(html, />实际收入</);
     assert.match(html, /id="financePlanStatus"/);
     assert.match(html, /classList\.toggle\("over", funding\.remaining < 0\)/);
+  });
+
+  test(`${file} separates imported spending by funding purpose`, () => {
+    const html = read(file);
+    const match = html.match(/function normalizeFinanceAllocation[\s\S]*?(?=\n      function financeMonthlyFundingSnapshot)/);
+    assert.ok(match);
+    const helpers = html.match(/function normalizeFinanceAllocation[\s\S]*?(?=\n      function financePlanForMonth)/);
+    const funding = html.match(/function financeMonthlyFundingSnapshot[\s\S]*?(?=\n      function monthKeyFromDate)/);
+    assert.ok(helpers && funding);
+    const { normalizeFinanceAllocation, financeMonthlyFundingSnapshot } = new Function(`${helpers[0]} ${funding[0]}; return { normalizeFinanceAllocation, financeMonthlyFundingSnapshot };`)();
+    assert.equal(normalizeFinanceAllocation(undefined, "expense"), "unclassified");
+    const result = financeMonthlyFundingSnapshot([
+      { type: "expense", amount: 30, date: "2026-09-02", allocation: "free" },
+      { type: "expense", amount: 80, date: "2026-09-03", allocation: "repayment" },
+      { type: "expense", amount: 50, date: "2026-09-04", allocation: "essential" },
+      { type: "expense", amount: 20, date: "2026-09-05" }
+    ], "2026-09", { monthlyIncome: 2500, monthlySaving: 1000, monthlyRepayment: 200, goalAmount: 100 });
+    assert.deepEqual({ spent: result.spent, repaymentSpent: result.repaymentSpent, essentialSpent: result.essentialSpent, unclassifiedSpent: result.unclassifiedSpent, remaining: result.remaining }, { spent: 30, repaymentSpent: 80, essentialSpent: 50, unclassifiedSpent: 20, remaining: 1170 });
+    assert.match(html, /id="financeEntryAllocation"/);
+    assert.match(html, /data-action="set-finance-allocation"/);
+    assert.match(html, /id="financePlanUnclassifiedSpent"/);
   });
 
   test(`${file} lets a finance record be edited, deleted, and exported by month`, () => {

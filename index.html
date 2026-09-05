@@ -3181,6 +3181,11 @@
       line-height: 1.5;
     }
 
+    .finance-funding-stat.pending {
+      border-color: var(--gold);
+      background: var(--gold-2);
+    }
+
     .finance-budget-list {
       display: grid;
       grid-template-columns: repeat(5, minmax(0, 1fr));
@@ -6372,6 +6377,10 @@
                     <label for="financeEntryName">内容</label>
                     <input id="financeEntryName" name="name" required autocomplete="off" placeholder="午餐">
                   </div>
+                  <div class="field">
+                    <label for="financeEntryAllocation">资金用途</label>
+                    <select id="financeEntryAllocation" name="allocation"><option value="unclassified">待分类</option><option value="free">自由资金</option><option value="repayment">还款</option><option value="essential">必要事项</option></select>
+                  </div>
                   <button class="btn" type="submit">记一笔</button>
                   <div class="field field-date">
                     <label for="financeEntryDate">日期</label>
@@ -6405,6 +6414,9 @@
                   <article class="finance-funding-stat"><span>本月还款</span><strong id="financePlanRepayment">¥0</strong></article>
                   <article class="finance-funding-stat"><span id="financePlanGoalLabel">事项预留</span><strong id="financePlanGoal">¥0</strong></article>
                   <article class="finance-funding-stat"><span>自由资金已用</span><strong id="financePlanSpent">¥0</strong></article>
+                  <article class="finance-funding-stat"><span>还款支出</span><strong id="financePlanRepaymentSpent">¥0</strong></article>
+                  <article class="finance-funding-stat"><span>必要事项支出</span><strong id="financePlanEssentialSpent">¥0</strong></article>
+                  <article class="finance-funding-stat pending"><span>待分类支出</span><strong id="financePlanUnclassifiedSpent">¥0</strong></article>
                   <article class="finance-funding-stat remaining"><span>本月还可使用</span><strong id="financePlanRemaining">¥0</strong></article>
                 </div>
                 <p class="finance-plan-status" id="financePlanStatus" role="status"></p>
@@ -6813,6 +6825,7 @@
         <div class="field"><label for="financeRecordEditCategory">分类</label><input id="financeRecordEditCategory" name="category" list="financeCategories" required></div>
         <div class="field"><label for="financeRecordEditName">内容</label><input id="financeRecordEditName" name="name" required></div>
         <div class="field"><label for="financeRecordEditDate">日期</label><input id="financeRecordEditDate" name="date" type="date" required></div>
+        <div class="field"><label for="financeRecordEditAllocation">资金用途</label><select id="financeRecordEditAllocation" name="allocation"><option value="unclassified">待分类</option><option value="free">自由资金</option><option value="repayment">还款</option><option value="essential">必要事项</option></select></div>
         <div class="field"><label for="financeRecordEditNote">备注（可选）</label><input id="financeRecordEditNote" name="note"></div>
       </div>
       <footer class="dialog-footer">
@@ -7294,7 +7307,7 @@
           shoppingItems: Array.isArray(source.shoppingItems) ? source.shoppingItems.map(normalizeShoppingItem).filter((item) => item.title) : [],
           goals: Array.isArray(source.goals) ? source.goals.map(normalizeGoal) : [],
           visions: Array.isArray(source.visions) ? source.visions.map(normalizeVision).filter((item) => item.title) : [],
-          financeRecords: Array.isArray(source.financeRecords) ? source.financeRecords : [],
+          financeRecords: Array.isArray(source.financeRecords) ? source.financeRecords.map((record) => ({ ...record, allocation: normalizeFinanceAllocation(record?.allocation, record?.type) })) : [],
           financePlans: normalizeFinancePlans(source.financePlans, legacyFinancePlan),
           notes: source.notes && typeof source.notes === "object" ? source.notes : {},
           dailySummaries: source.dailySummaries && typeof source.dailySummaries === "object" ? source.dailySummaries : {},
@@ -9737,6 +9750,11 @@
         };
       }
 
+      function normalizeFinanceAllocation(value, type = "expense") {
+        if (type === "income") return "income";
+        return ["free", "repayment", "essential", "unclassified"].includes(value) ? value : "unclassified";
+      }
+
       function normalizeFinancePlans(source, legacyPlan) {
         const plans = source && typeof source === "object" && !Array.isArray(source) ? source : {};
         const normalized = Object.fromEntries(Object.entries(plans)
@@ -9753,9 +9771,9 @@
       }
 
       function financeMonthlyFundingSnapshot(records, month, plan) {
-        const spent = records
-          .filter((record) => record.type === "expense" && String(record.date).slice(0, 7) === String(month))
-          .reduce((sum, record) => sum + (Number(record.amount) || 0), 0);
+        const monthExpenses = records.filter((record) => record.type === "expense" && String(record.date).slice(0, 7) === String(month));
+        const allocationSpent = (allocation) => monthExpenses.filter((record) => normalizeFinanceAllocation(record.allocation, record.type) === allocation).reduce((sum, record) => sum + (Number(record.amount) || 0), 0);
+        const spent = allocationSpent("free");
         const income = Number(plan.monthlyIncome) || 0;
         const saving = Number(plan.monthlySaving) || 0;
         const repayment = Number(plan.monthlyRepayment) || 0;
@@ -9764,7 +9782,7 @@
         const actualIncome = records
           .filter((record) => record.type === "income" && String(record.date).slice(0, 7) === String(month))
           .reduce((sum, record) => sum + (Number(record.amount) || 0), 0);
-        return { income, actualIncome, saving, repayment, goal, free, spent, remaining: free - spent };
+        return { income, actualIncome, saving, repayment, goal, free, spent, repaymentSpent: allocationSpent("repayment"), essentialSpent: allocationSpent("essential"), unclassifiedSpent: allocationSpent("unclassified"), remaining: free - spent };
       }
 
       function monthKeyFromDate(date) {
@@ -9826,7 +9844,8 @@
           const divider = date === previousDate ? "" : `<div class="finance-record-day-divider"><time datetime="${escapeHtml(record.date || "")}">${escapeHtml(dateLabel)}</time><span class="finance-record-day-count">${dailyCounts.get(date)} 笔</span></div>`;
           previousDate = date;
           const key = escapeHtml(String(record.key || record.id || ""));
-          return `${divider}<article class="finance-record-row" role="listitem"><div class="finance-record-copy"><strong>${escapeHtml(record.name || "未命名")}</strong><span class="finance-record-meta">${escapeHtml(record.category || "未分类")} · ${source}</span></div><div class="finance-record-side"><span class="finance-record-amount${income ? " income" : ""}">${income ? "+" : "-"}${currency.format(Number(record.amount) || 0)}</span><div class="finance-record-actions"><button class="btn ghost small" type="button" data-action="edit-finance-record" data-id="${key}">编辑</button><button class="btn ghost small" type="button" data-action="delete-finance-record" data-id="${key}">删除</button></div></div></article>`;
+          const allocation = normalizeFinanceAllocation(record.allocation, record.type);
+          return `${divider}<article class="finance-record-row" role="listitem"><div class="finance-record-copy"><strong>${escapeHtml(record.name || "未命名")}</strong><span class="finance-record-meta">${escapeHtml(record.category || "未分类")} · ${source}</span></div><div class="finance-record-side"><span class="finance-record-amount${income ? " income" : ""}">${income ? "+" : "-"}${currency.format(Number(record.amount) || 0)}</span><select class="finance-record-allocation" aria-label="${escapeHtml(record.name || "账单")}资金用途" data-action="set-finance-allocation" data-id="${key}" ${income ? "disabled" : ""}><option value="unclassified" ${allocation === "unclassified" ? "selected" : ""}>待分类</option><option value="free" ${allocation === "free" ? "selected" : ""}>自由资金</option><option value="repayment" ${allocation === "repayment" ? "selected" : ""}>还款</option><option value="essential" ${allocation === "essential" ? "selected" : ""}>必要事项</option></select><div class="finance-record-actions"><button class="btn ghost small" type="button" data-action="edit-finance-record" data-id="${key}">编辑</button><button class="btn ghost small" type="button" data-action="delete-finance-record" data-id="${key}">删除</button></div></div></article>`;
         }).join("");
       }
 
@@ -9908,6 +9927,9 @@
         $("#financePlanGoal").textContent = currency.format(funding.goal);
         $("#financePlanFree").textContent = currency.format(funding.free);
         $("#financePlanSpent").textContent = currency.format(funding.spent);
+        $("#financePlanRepaymentSpent").textContent = currency.format(funding.repaymentSpent);
+        $("#financePlanEssentialSpent").textContent = currency.format(funding.essentialSpent);
+        $("#financePlanUnclassifiedSpent").textContent = currency.format(funding.unclassifiedSpent);
         $("#financePlanRemaining").textContent = currency.format(funding.remaining);
         const remainingCard = $("#financePlanRemaining").closest(".finance-funding-stat");
         remainingCard.classList.toggle("over", funding.remaining < 0);
@@ -9916,7 +9938,9 @@
           ? `固定安排已超过预计收入 ${currency.format(Math.abs(funding.free))}。`
           : funding.remaining < 0
             ? `自由资金已超支 ${currency.format(Math.abs(funding.remaining))}。`
-            : `自由资金还可使用 ${currency.format(funding.remaining)}。`;
+            : funding.unclassifiedSpent > 0
+              ? `自由资金还可使用 ${currency.format(funding.remaining)}；还有 ${currency.format(funding.unclassifiedSpent)} 待分类。`
+              : `自由资金还可使用 ${currency.format(funding.remaining)}。`;
         $("#financeImportStatus").textContent = state.lastImport
           ? `${state.lastImport.file} · 新增 ${state.lastImport.added} · 覆盖 ${state.lastImport.overwritten}`
           : "尚未导入";
@@ -9982,6 +10006,7 @@
         $("#financeRecordEditName").value = record.name || "";
         $("#financeRecordEditDate").value = record.date || todayKey();
         $("#financeRecordEditNote").value = record.note || "";
+        $("#financeRecordEditAllocation").value = normalizeFinanceAllocation(record.allocation, record.type);
         $("#financeRecordEditDialog").showModal();
         $("#financeRecordEditAmount").focus();
       }
@@ -10368,6 +10393,7 @@
           name,
           date,
           note: String(input?.note || "").trim(),
+          allocation: normalizeFinanceAllocation(input?.allocation, input?.type),
           source: "手动记账",
           updatedAt: new Date().toISOString()
         };
@@ -10474,6 +10500,7 @@
             name: String(values.name).trim(),
             date: String(values.date),
             note: String(values.note || "").trim(),
+            allocation: normalizeFinanceAllocation(values.allocation, values.type),
             updatedAt: new Date().toISOString()
           });
           saveState();
@@ -11120,6 +11147,18 @@
           return;
         }
         render();
+      });
+
+      document.addEventListener("change", (event) => {
+        const target = event.target.closest?.('[data-action="set-finance-allocation"]');
+        if (!target) return;
+        const record = state.financeRecords.find((item) => String(item.key ?? item.id) === String(target.dataset.id));
+        if (!record) return;
+        record.allocation = normalizeFinanceAllocation(target.value, record.type);
+        record.updatedAt = new Date().toISOString();
+        saveState();
+        render();
+        showToast("资金用途已更新");
       });
 
       $("#addHabitBtn").addEventListener("click", () => openEditor("habit"));
